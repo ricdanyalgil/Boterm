@@ -1,4 +1,6 @@
-# Boterm 0.3.1 — local build 18, 2026-11-13
+# Boterm 0.3.1 — local build 19, 2026-11-13
+
+- Build 19: Mosaic beside Split shows the active project's open terminals in a grid that adapts to the available width and height. Selecting a terminal preserves the grid; toggling Mosaic off returns to the selected terminal. Small windows scroll when needed to keep terminal rows usable.
 
 - Build 18: bind Claude's per-session MCP JSON to `--mcp-config=` so initial role prompts cannot be interpreted as configuration file paths. Preserve client options, authentication and permissions; Gemini continues to use its interactive prompt option.
 

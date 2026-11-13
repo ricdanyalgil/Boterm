@@ -30,6 +30,13 @@ function resizeHandle(label, orientation, adjust) {
 }
 function updateSplitLayout(count) {
   const grid = document.getElementById('terminal');
+  if (mosaic) {
+    const balanced = Math.ceil(Math.sqrt(count * grid.clientWidth / Math.max(1, grid.clientHeight) / 1.8));
+    const columns = Math.max(1, Math.min(count, balanced, Math.floor(grid.clientWidth / 320)));
+    grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+    grid.style.gridTemplateRows = `repeat(${Math.max(1, Math.ceil(count / columns))}, minmax(80px, 1fr))`;
+    return;
+  }
   const columns = matchMedia('(max-width: 750px)').matches ? 1 : 2;
   const rows = Math.ceil(count / columns);
   if (splitRows.length !== rows) splitRows = Array(rows).fill(1);

@@ -1,7 +1,7 @@
 'use strict';
 const sessions = new Map(), workspaces = new Map();
 const workspaceDirectories = new Map();
-let activeID, activeWorkspace, split = false;
+let activeID, activeWorkspace, split = false, mosaic = false;
 let nextSessionColor = 0, nextProjectNumber = 2;
 const privateWorkspace = crypto.randomUUID();
 const sessionColors = ['#82aaff', '#c3e88d', '#ffcb6b', '#c792ea', '#89ddff', '#f78c6c', '#f071a2', '#80cbc4'];
@@ -69,8 +69,11 @@ function activateSession(id, focus = true) {
   renderNavigation(); fitVisible(); if (focus) term.focus();
 }
 function fitVisible() {
-  const visible = [...sessions.values()].filter(s => s.workspace === activeWorkspace && (split || s.id === activeID));
-  document.getElementById('terminal').classList.toggle('split', split);
+  const visible = [...sessions.values()].filter(s => s.workspace === activeWorkspace && (split || mosaic || s.id === activeID));
+  document.getElementById('terminal').classList.toggle('split', split || mosaic);
+  document.getElementById('terminal').classList.toggle('mosaic', mosaic);
+  document.getElementById('split').setAttribute('aria-pressed', String(split));
+  document.getElementById('mosaic').setAttribute('aria-pressed', String(mosaic));
   for (const s of sessions.values()) {
     s.host.hidden = !visible.includes(s);
     s.host.classList.toggle('active', s.id === activeID);
@@ -172,11 +175,12 @@ function renderMessages() {
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('launch-agent').onclick = () => { const kind = document.getElementById('agent-kind').value; createSession({codex: 'Codex', claude: 'Claude', gemini: 'Gemini', opencode: 'OpenCode'}[kind], activeWorkspace, kind); };
   document.getElementById('new-session').onclick = () => createSession(`Terminal ${sessions.size + 1}`);
-  document.getElementById('split').onclick = event => {
-    split = !split; event.currentTarget.setAttribute('aria-pressed', String(split));
+  document.getElementById('split').onclick = () => {
+    split = !split; mosaic = false;
     if (split && [...sessions.values()].filter(s => s.workspace === activeWorkspace).length === 1) createSession('Terminal 2');
     fitVisible();
   };
+  document.getElementById('mosaic').onclick = () => { mosaic = !mosaic; split = false; fitVisible(); };
   document.getElementById('copy-text').onclick = () => window.voz.copy();
   document.getElementById('paste-text').onclick = () => send({type: 'paste'});
   document.getElementById('rename-session').onclick = () => send({type: 'rename', session: activeID});

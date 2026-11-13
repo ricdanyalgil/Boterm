@@ -17,7 +17,7 @@
   <div class="section-label">TERMINAIS</div>
   <div id="sessions"></div>
   <button id="new-session" type="button">＋ Terminal</button>
-  <button id="split" type="button" aria-pressed="false">◫ Dividir</button>
+  <div class="terminal-layout-actions"><button id="split" type="button" aria-pressed="false">Dividir</button><button id="mosaic" type="button" aria-pressed="false" title="Mostrar todos os terminais do projeto em mosaico">Mosaico</button></div>
 </aside>
 <div id="stage">
 <div id="terminal-actions"><span id="session-label"></span><div id="session-controls"><details id="action-menu"><summary title="Ações do terminal" aria-label="Ações do terminal">⋯</summary><div class="action-items"><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="gemini">✦ Gemini</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></details></div></div>
@@ -49,7 +49,7 @@
 </details>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações">×</button></form>
 <h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/VozTTY">GitHub · código-fonte do Boterm</a></p>
-<p>Versão 0.3.1 · build 18</p>
+<p>Versão 0.3.1 · build 19</p>
 <p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
 <dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
 <dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>

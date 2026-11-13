@@ -8,6 +8,8 @@ See [the agent guide](../docs/AGENT_GUIDE.md) for `boterm list/read/message/inbo
 
 ⌘T adds a terminal. The top bar adds projects, the sidebar switches sessions, and Dividir displays sessions together (stacked in narrow windows). Renomear names a terminal; × closes it after confirmation. New Window remains ⌘N.
 
+Mosaico, beside Dividir, arranges all open terminals in the active project using as many columns as the available space allows. Click a pane to work in it, or click Mosaico again to return to the active terminal. Layout changes preserve processes and drafts. Small windows scroll vertically when needed.
+
 Copy/paste works through buttons, native Edit menu, ⌘C/⌘V and Ctrl+C/Ctrl+V. Ctrl+C without selection still interrupts a process. Dictation and dropped files never append Enter. The active VS Code theme is read from the user's local settings and installed extension on launch; third-party themes are not redistributed. CLI ANSI output is preserved. Default-colour links, paths/files and shell variables receive accents in the normal buffer; full-screen programs retain their own styling. Without an installed theme, the renderer uses the VS Code dark terminal palette.
 
 ## Build and open

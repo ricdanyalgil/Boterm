@@ -215,3 +215,11 @@ Os arquivos contêm a saída ainda disponível no buffer e as mensagens retidas 
 - Instalado em `/Applications/Boterm.app`, build 18; assinatura e teste dos quatro launchers repetidos no bundle instalado, ambos aprovados. Build anterior preservado em `work/development-check/Boterm-before-build18.app`; sessões existentes mantidas.
 
 Sem ciclo autônomo completo com modelos, teste físico de microfone, push ou publicação nesta validação.
+
+## Boterm — mosaico dos terminais, 0.3.1 / build 19 (2026-11-13)
+
+- Botão Mosaico ao lado de Dividir: grade automática com todos os terminais do projeto ativo, colunas calculadas a partir do espaço disponível e seleção preservada ao voltar para uma única sessão. Não cria terminais nem reinicia processos. Altura mínima de 80 px por linha; janelas pequenas permitem rolagem vertical.
+- Harness nativo com `VOZ_TEST_MODE=customize` e `VOZ_TEST_UI_SCRIPT=test/terminal-mosaic.js`: oito terminais, isolamento entre projetos, uma/duas/três colunas, troca de terminal sem desfazer a grade, transição com Dividir, estados acessíveis dos botões e preservação das instâncias aprovados. Quatro tamanhos (620×380, 800×600, 1440×900, 1120×720) aprovados; captura do mosaico inspecionada. Uma execução não concluiu a inicialização; repetida em cópia nova do bundle sem compilação concorrente, passou.
+- `npm test`: 27 testes aprovados. Build 19 assinado com Developer ID, instalado em `/Applications/Boterm.app` e verificado com `codesign --verify --deep --strict`. Build 18 preservado em `work/development-check/Boterm-before-build19.app`; sessões existentes mantidas.
+
+Sem novo teste físico de microfone, ciclo completo com modelos reais, push ou publicação.
