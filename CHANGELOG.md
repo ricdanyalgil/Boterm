@@ -1,4 +1,6 @@
-# Boterm 0.3.1 — local build 21, 2026-11-13
+# Boterm 0.3.1 — local build 22, 2026-11-13
+
+- Build 22: match the native title bar to the dark workspace header and use only Boterm as the window title. Project paths no longer replace the title; the version remains in Settings → About.
 
 - Build 21: show shared conversation history inside both participating terminal panes, colored by speaker. Keep the bottom area for sending messages, without a duplicate transcript. Broadcasts stay within their project; messages remain plain text and never become terminal input.
 - Pulse the session's existing color dot and show an attention label for recognized confirmation, selection, login and input prompts. Clear it when the prompt/composer changes or the process ends. Reduced motion uses a static indicator; permissions are never answered automatically.

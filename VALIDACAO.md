@@ -256,3 +256,10 @@ Sem novo teste de microfone nem ciclo completo de desenvolvimento com sete model
 - Instalado em `/Applications/Boterm.app`, build 21; assinatura e regressão dos cinco launchers aprovadas no bundle instalado. Build 20 preservado em `work/development-check/Boterm-before-build21.app`. Nova instância aberta, sem encerrar as instâncias e sessões anteriores do usuário.
 
 Limites: sem novo teste físico de microfone ou leitor de tela; medição móvel em iframe headless, não em aparelho físico. O projeto descartável preserva uma nota documental antiga de Integrações, sinalizada nas evidências da equipe; não afeta o comportamento testado. Nenhum deploy do projeto descartável.
+
+## Barra superior — 0.3.1 / build 22 (2026-11-13)
+
+- Título nativo fixo Boterm, sem pasta, separador ou versão. Removida também a atualização do título ao abrir um diretório; histórico de projetos mantido. Versão 0.3.1 e build 22 disponíveis em Configurações/Sobre.
+- Barra de título transparente sobre o fundo #090b10, igual ao cabeçalho de projetos. Mantidos controles nativos e aparência escura existente.
+- Build Swift 6 concluído e assinatura Developer ID verificada no bundle de produção e em `/Applications/Boterm.app`. Build 21 preservado em `work/development-check/Boterm-before-build22.app`; nova instância aberta sem encerrar as anteriores.
+- Inspeção visual não concluída: o serviço de controle da interface retornou `Sky Computer Use native pipe startup failed`, inclusive após reiniciar sua sessão. Não foram repetidos testes funcionais ou de microfone para esta alteração de título/aparência.

@@ -63,13 +63,13 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         web = DropWebView(frame: .zero, configuration: config)
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1120, height: 720), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         super.init()
-        window.title = directory.map { URL(fileURLWithPath: $0).lastPathComponent + " — Boterm 0.3.1" } ?? "Boterm 0.3.1"
+        window.title = "Boterm"
         window.minSize = NSSize(width: 620, height: 380)
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.appearance = NSAppearance(named: .darkAqua)
-        window.backgroundColor = NSColor(srgbRed: 15/255, green: 17/255, blue: 26/255, alpha: 1)
-        window.titlebarAppearsTransparent = false
+        window.backgroundColor = NSColor(srgbRed: 9/255, green: 11/255, blue: 16/255, alpha: 1)
+        window.titlebarAppearsTransparent = true
         window.titleVisibility = .visible
         web.underPageBackgroundColor = window.backgroundColor
         web.navigationDelegate = self
@@ -277,7 +277,6 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
                 if let columns = body["columns"] as? Int, let rows = body["rows"] as? Int { session.resize(columns: columns, rows: rows) }
                 if body["directory"] as? String != nil || initialDirectory != nil {
                     ProjectHistory.remember(cwd)
-                    window.title = URL(fileURLWithPath: cwd).lastPathComponent + " — Boterm 0.3.1"
                 }
                 voiceState(dictation.state)
                 if !rootLoaded { rootLoaded = true; didLoad?() }
