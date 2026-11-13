@@ -7,7 +7,9 @@
 - Bundled native `boterm` CLI for workspace-scoped session inspection and communication over a private Unix socket.
 - Bind control requests to kernel-reported process ancestry to reject forged session identities.
 - Copy/paste buttons, native menu and Mac/Control shortcuts; Ctrl+C without selection keeps interrupt behavior.
-- Import the installed VS Code theme at launch; preserve original ANSI colors and remove prompt/token overlays.
+- Import the installed VS Code theme at launch; preserve original ANSI colors and accent default-colour URLs, paths and shell variables.
+- Stable session colour dots; draggable session order; adjustable sidebar, split rows/columns and team area, with keyboard controls.
+- Rename project tabs with the pencil; new projects appear before + and the final Private Project tab.
 - Dictation stays pinned to its original session and never submits a prompt.
 - No restart persistence or automatic model activation; peers must check their inbox.
 
@@ -86,3 +88,14 @@ This release includes two separate downloads: **VozTTY Terminal 0.2.0** and the 
 - Maintainer confirmed short voice use in Codex, Claude Code and Antigravity in the native terminal.
 - Long controlled acoustic and CLI insertion checks are documented in the README.
 - Apple Silicon/macOS 26+ only. Packages are ad hoc signed, not notarized. This remains a preview.
+
+### Native build 14
+
+- Compact hover/click session actions, contextual project pencils and quiet top-bar icons.
+- Settings/About with author credit and project information; seven-role development preset with per-role Codex/Claude/Gemini selection and working directory.
+- Command/status/diff terminal accents, preserving ANSI; refined black-and-mint macOS icon.
+
+### Native build 15
+
+- Correct About credit to Ricardo Danyalgil Junior; add open source/MIT notice and GitHub link.
+- Keep icon exports pointed at the new professional source.

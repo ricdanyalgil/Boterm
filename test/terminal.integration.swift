@@ -57,6 +57,28 @@ extension TerminalWindow {
             if let path = env["VOZ_TEST_SCREEN"] { try before.write(toFile: path, atomically: true, encoding: .utf8) }
             result["frontendReady"] = true
             result["childPID"] = shell.pid
+            if mode == "customize", let fixture = env["VOZ_TEST_UI_SCRIPT"] {
+                let script = try String(contentsOfFile: fixture, encoding: .utf8)
+                result["checks"] = try await web.callAsyncJavaScript(script, arguments: [:], in: nil, contentWorld: .page)
+                var sizes: [[String: Any]] = []
+                for size in [NSSize(width: 620, height: 380), NSSize(width: 800, height: 600), NSSize(width: 1440, height: 900), NSSize(width: 1120, height: 720)] {
+                    window.setContentSize(size)
+                    try await Task.sleep(for: .milliseconds(100))
+                    js("window.voz.fit()")
+                    try await testUntil("Customized workspace overflows") {
+                        try await self.web.evaluateJavaScript("document.body.scrollWidth <= innerWidth && [...sessions.values()].filter(s => !s.host.hidden).every(s => { const box = s.host.querySelector('.terminal-content').getBoundingClientRect(); const screen = s.term.element.querySelector('.xterm-screen').getBoundingClientRect(); return screen.right <= box.right + 1 && screen.bottom <= box.bottom + 1; })") as? Bool == true
+                    }
+                    sizes.append(["width": size.width, "height": size.height, "fits": true])
+                }
+                result["sizes"] = sizes
+                if let path = env["VOZ_TEST_SNAPSHOT"] {
+                    try await Task.sleep(for: .milliseconds(300))
+                    let image = try await web.takeSnapshot(configuration: nil)
+                    guard let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { throw VoiceTestError.message("Snapshot failed") }
+                    try png.write(to: URL(fileURLWithPath: path))
+                }
+                result["passed"] = true; save(); closeForTest(); return
+            }
             if mode == "agent-launch" {
                 try await web.evaluateJavaScript("document.getElementById('agent-kind').value = 'codex'; document.getElementById('launch-agent').click();")
                 try await testUntil("Agent launcher did not start Codex", seconds: 30) {

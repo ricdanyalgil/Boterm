@@ -6,9 +6,18 @@ const TOKENS = [
   // Absolute, home and relative paths, including Terminal-style escaped spaces ("My\ File.pdf").
   ['path', /(?<![\w/])(?:~|\.{1,2})?\/(?:\\ |[^\s"'`<>()|])*(?:\\ |[^\s"'`<>()|.,;:!?])/gu],
   // Relative paths such as test/drop-paths.test.js are recognised by their file extension.
-  ['file', /(?<![\w/.-])[\p{L}\p{N}_-][\p{L}\p{N}_./-]*\.(?:pdf|docx?|xlsx?|pptx?|csv|txt|md|json|ya?ml|png|jpe?g|gif|svg|mp4|mov|opus|m4a|mp3|wav|zip|py|js|ts|tsx|swift|html|css|sh)\b/giu],
+  ['file', /(?<![\w/.-])[\p{L}\p{N}_-][\p{L}\p{N}_./-]*\.(?:pdf|docx?|xlsx?|pptx?|csv|txt|md|json|ya?ml|png|jpe?g|gif|svg|mp4|mov|opus|m4a|mp3|wav|zip|py|js|ts|tsx|swift|html|css|sh|kt|kts|java|go|rs|sql|toml|xml|properties)\b/giu],
+  ['command', /(?<=^(?:[$%❯›>] )?)(?:git|rg|cd|ls|cat|node|npm|npx|pnpm|yarn|python3?|swift|xcrun|cargo|go|gradle|docker|curl)\b|\b(?:Ran|Read|Search|Edited|Explored)\b/gu],
+  ['error', /\b(?:ERROR|FAILED|FAIL|FAILURE|Error|Failed|Exception)\b|\bExited \(status [1-9]\d*\)/gu],
+  ['success', /\b(?:PASSED|PASS|SUCCESS|Success|Passed|OK)\b/gu],
+  ['warning', /\b(?:WARNING|WARN|Warning|Working|Pending)\b/gu],
+  ['variable', /\$[A-Za-z_][A-Za-z0-9_]*|\$\{[A-Za-z_][A-Za-z0-9_]*\}|(?<![\w])[A-Za-z_][A-Za-z0-9_]*(?==)/gu],
 ];
 function textTokens(text) {
+  if (/^(?:\+{3} |--- |\+(?!\+| Show)|-(?!-| )|\s*\d+ [+-])/.test(text)) {
+    const sign = text.match(/^(?:\s*\d+ )?([+-])/)[1];
+    return [{kind: sign === '+' ? 'added' : 'removed', start: 0, end: text.length}];
+  }
   const found = [];
   for (const [kind, pattern] of TOKENS) {
     for (const match of text.matchAll(pattern)) {

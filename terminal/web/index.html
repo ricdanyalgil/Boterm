@@ -9,17 +9,18 @@
 <link rel="stylesheet" href="terminal.css">
 </head>
 <body>
-<nav id="workspaces" aria-label="Projetos"></nav>
+<header id="project-bar"><nav id="workspaces" aria-label="Projetos"></nav><div id="project-tools">
+<button id="development-preset" type="button" title="Preset de desenvolvimento" aria-label="Preset de desenvolvimento">⌘</button>
+<button id="settings" type="button" title="Configurações" aria-label="Configurações">⚙</button></div></header>
 <div id="workspace-body">
 <aside id="sidebar" aria-label="Sessões da equipe">
   <div class="section-label">TERMINAIS</div>
   <div id="sessions"></div>
   <button id="new-session" type="button">＋ Terminal</button>
   <button id="split" type="button" aria-pressed="false">◫ Dividir</button>
-  <p class="sidebar-hint">Sessões deste projeto compartilham mensagens e saída com a equipe.</p>
 </aside>
 <div id="stage">
-<div id="terminal-actions"><span id="session-label"></span><div><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="gemini">✦ Gemini</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></div>
+<div id="terminal-actions"><span id="session-label"></span><div id="session-controls"><details id="action-menu"><summary title="Ações do terminal" aria-label="Ações do terminal">⋯</summary><div class="action-items"><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="gemini">✦ Gemini</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></details></div></div>
 <main id="terminal" aria-label="Sessões de terminal"></main>
 <section id="voice-panel" aria-label="Voice dictation" hidden>
   <div class="voice-info">
@@ -46,5 +47,18 @@
 <div id="team-log" role="log" aria-label="Mensagens da equipe" aria-live="polite"></div>
 <form id="team-form"><select id="recipient" aria-label="Destinatário"></select><input id="team-text" aria-label="Mensagem" placeholder="Mensagem para a equipe…" maxlength="16000" required><button type="submit">Enviar</button></form>
 </details>
-<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="workspace.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
+<dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações">×</button></form>
+<h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/VozTTY">GitHub · código-fonte do Boterm</a></p>
+<p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
+<dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
+<dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>
+<dt>Sessões</dt><dd>Projetos, nomes e mensagens duram nesta janela. Fechar o app encerra os terminais; não há restauração após reiniciar.</dd>
+<dt>Cores</dt><dd>Tema do VS Code, cores ANSI dos programas e realce de comandos, arquivos, links, diferenças e estados no texto sem cor.</dd>
+<dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
+<dialog id="development-dialog" aria-labelledby="development-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar preset">×</button></form>
+<h2 id="development-title">Desenvolvimento</h2><p>Uma equipe para planejar, implementar, testar e revisar o software.</p>
+<form id="development-form"><label>Pasta do software<input id="development-directory" required placeholder="/Users/…/meu-software" autocomplete="off"></label>
+<label>Objetivo<input id="development-objective" maxlength="2000" placeholder="Você também pode explicar ao orquestrador depois."></label>
+<div id="development-roles"></div><p id="development-error" role="alert"></p><button type="submit" class="primary-action">Criar equipe</button></form></dialog>
+<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="text-tokens.js"></script><script src="terminal-accents.js"></script><script src="layout.js"></script><script src="workspace.js"></script><script src="development.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
 </html>

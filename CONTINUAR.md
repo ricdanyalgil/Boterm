@@ -96,3 +96,21 @@ Native app renamed to Boterm with project tabs, session sidebar, splits, clipboa
 ### Commit verification follow-up
 
 Maintainer requested a GitHub commit/push and a real agent review in another terminal. A separate read-only Codex exchanged MCP messages and identified a caller-identity issue; control requests now verify kernel peer ancestry. Real-socket impersonation rejection, valid MCP traffic, env-filtered identity discovery, native workspace integration and 23 JS tests passed. See VALIDACAO.md. Concurrent interface edits are preserved outside this commit's isolated source snapshot. No binary release or replacement of the running installation is part of this request.
+
+## Boterm 0.3.0 build 13 — personalização, 2026-11-13
+
+Bolinha estável por sessão no topo/lateral; paleta ANSI completa de fallback; realce de links, caminhos/arquivos e variáveis apenas em células sem ANSI. Lateral, splits e equipe redimensionáveis por grips (mouse ou setas); cabeçalhos/entradas arrastáveis dentro do projeto (Option-Up/Down também). Projetos renomeáveis pelo lápis, Enter salva/Escape cancela; + antes de Private Project, novos projetos à esquerda do +. Private Project só inicia shell ao abrir. Sem restauração entre janelas/reinícios.
+
+25 testes JS e harnesses nativos customize/layout passaram, incluindo quatro splits em 620–1440 px e preservação do buffer alternativo/ANSI. Captura local revisada. Drag/drop validado por eventos no WebKit, sem reensaio físico do gesto. Nenhuma publicação remota.
+
+## Boterm 0.3.0 build 14 — controles compactos e preset
+
+Menu ⋯ expansível por hover/click/teclado para as ações da sessão; lápis de projeto somente em hover/foco; + permanente. Topo discreto em cinza com cor na interação. Removida a frase da lateral; ⚙ abre Sobre com crédito solicitado, privacidade, equipe e limites de persistência. Novo ícone preto/menta >_ em assets/boterm/icon-professional.png e terminal/Boterm.icns.
+
+⌘ abre preset com pasta absoluta, objetivo opcional e provedor por função (Codex/Claude/Gemini). Seis especialistas iniciam antes do Orquestrador, com prompts por argumento e pasta validada. Guia orienta plano de tarefas, propriedade de arquivos, distribuição, loop de testes/revisão e evidências. Coordenação depende do modelo e das permissões do CLI, sem scheduler persistente; mensagens sozinhas não ativam um modelo parado. Não declarar execução autônoma ponta a ponta validada.
+
+Build 14 assinado e instalado em /Applications/Boterm.app, com nova instância aberta e processos anteriores preservados. 27 testes JS, unidade nativa, customize, development e workspace passaram. Instâncias antigas continuam com a interface carregada até serem fechadas pelo usuário. Sem push/release remoto.
+
+## Boterm 0.3.0 build 15 — crédito e GitHub
+
+Sobre corrigido para Ricardo Danyalgil Junior, com aviso open source/licença MIT e link do repositório aberto no navegador padrão. Exportador de ícone usa icon-professional.png para não restaurar o conceito antigo. Registro de LaunchServices e Dock atualizados sem encerrar os terminais; o ícone resolvido pelo macOS foi inspecionado e contém o novo >_ menta.

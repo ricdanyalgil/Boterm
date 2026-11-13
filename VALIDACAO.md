@@ -165,3 +165,24 @@ The native layout harness passed at 620×380, 800×600, 1120×720 and 1440×900,
 A real read-only Codex reviewer was launched in a separate Boterm terminal and exchanged request/report messages through MCP. Its review found that control requests trusted client-provided session IDs. Requests now require the kernel-reported peer process to descend from the claimed session's shell. The real-socket regression rejects a forged identity while preserving valid MCP messages/inbox, filtered-environment ancestry discovery and actual Codex configuration parsing. The control test now creates a fresh terminal so a previous draft cannot contaminate its shell command.
 
 The 23 JavaScript tests, native unit checks and workspace integration passed. Layout passed at 620–1440 px; the native agent selector launched the installed Codex. The source snapshot prepared for the commit is isolated from concurrent interface edits. Diagnostics and agent transcripts remain under ignored work/. No new physical microphone test, Claude/Gemini/OpenCode conversation, installed-app replacement or binary release is included. Message history remains an intentionally bounded shared window history (200 messages across its projects), not a durable queue or an OS security sandbox.
+
+## Boterm — personalização local, build 13 (2026-11-13)
+
+- 25 testes JavaScript passaram, incluindo variáveis, posições Unicode, preservação de ANSI e limpeza de decorações.
+- Harness nativo `customize`: cores estáveis, lateral redimensionável, altura/largura dos splits, altura da equipe, eventos de drag/drop, reordenação sem recriar o terminal, renomeação de projeto (Enter/Escape/vazio e atualização de fundo), + antes de Private Project e normal/alternate buffer. Quatro terminais divididos cabem em 620×380, 800×600, 1440×900 e 1120×720.
+- Harness nativo `layout`: cinco tamanhos entre 620 e 1440 px, sem overflow da grade, e ciclo visual dos controles de ditado preservado.
+- Captura WKWebView revisada localmente em `work/customize-check/preview.png`. Eventos de drag/drop são automatizados; o gesto físico de arrastar com o mouse não foi repetido. Nenhum modelo foi acionado e nenhum microfone foi aberto nesta validação.
+- Nomes/layout não são restaurados ao reabrir a janela. As alturas são compartilhadas por linha e larguras por coluna; o realce extra usa o buffer normal e deixa as cores dos aplicativos de tela cheia intactas.
+
+## Build 14 — 2026-11-13
+
+- 27 testes JS aprovados, incluindo funções do preset e realce de comandos, Kotlin/configurações, estados e diffs.
+- Harness nativo `terminal-development.js`: hover/Escape do menu, lápis por foco, Sobre/crédito, sete funções, rejeição de pasta inexistente, sete processos de teste com diretório e prompts corretos; Gemini com --prompt-interactive. Metacaracteres no objetivo permanecem literais e não executam comandos. Executáveis de teste substituem provedores somente no bundle temporário.
+- Regressão `terminal-customize.js` aprovada: redimensionamento, reordenação, renomeação, isolamento do buffer alternativo e preservação de instâncias. Ambos os harnesses cabem em 620, 800, 1120 e 1440 px.
+- Captura estável revisada em work/development-check/preview.png; ícone conferido a 64 px e exportado em dez representações ICNS. Sem conversa nova com modelos reais, teste de login dos provedores ou ciclo completo autônomo. Sem novo teste físico de microfone.
+- Unidade nativa e harness workspace aprovados: PTY real, resize, sem Enter no paste/ditado, origem do ditado, clipboard, socket, mensagens, leitura de pares, separação de projetos e estado após saída. Build 14 assinado com Developer ID e instalado em /Applications/Boterm.app; bundle anterior preservado em work/development-check/Boterm-before-build14.app, sem encerrar as sessões existentes.
+- Verificação final inclui bloqueio de criação duplicada enquanto a equipe está ativa. O harness aguarda o layout nativo da janela antes de medir o terminal após resize; resultado final passou nas quatro dimensões. Bundle final instalado com essa proteção.
+
+## Build 15 — crédito e ícone no sistema
+
+Sobre validado no harness nativo com o crédito Ricardo Danyalgil Junior, aviso open source/MIT e URL do GitHub. Link abre apenas o repositório autorizado no navegador padrão após clique. Build assinado e instalado em /Applications/Boterm.app. Exportação ICNS regenerada pelo script e comparada ao ícone instalado. Registro do macOS/Dock atualizado; o ícone retornado por NSWorkspace foi inspecionado e contém o novo símbolo >_ menta. Sessões antigas preservadas; sua imagem em execução pode persistir até serem reabertas. Abertura real do navegador pelo link não foi automatizada.

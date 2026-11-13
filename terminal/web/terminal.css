@@ -83,3 +83,78 @@ button.selected { background: #232a3f; color: #c3e88d; }
 @media (max-width: 750px) { #terminal-actions { flex-wrap: wrap; gap: 0; } #terminal-actions > div { flex-wrap: wrap; } #session-label { display: none; } }
 
 #sessions .session-task { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #89ddff; }
+
+/* Session identity stays fixed while switching, renaming and rearranging. */
+.session-entry::before, .pane-title::before, #session-label::before {
+  content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px;
+  border-radius: 50%; background: var(--session-color); vertical-align: middle;
+}
+#terminal.split .terminal-pane.active { border-color: var(--session-color); }
+.pane-title { display: block; cursor: grab; min-height: 24px; box-sizing: border-box; }
+.pane-title:active { cursor: grabbing; }
+.pane-title:focus-visible { outline: 2px solid var(--session-color); outline-offset: -2px; }
+.project-tab { display: flex; align-items: center; flex: none; }
+.project-tab > button + button { padding: 6px; color: #a6acc3; }
+.project-tab input { width: 150px; padding: 6px; background: #1e1e1e; border: 1px solid #82aaff; border-radius: 4px; }
+.terminal-pane, #team { position: relative; }
+.resize-handle { flex: none; position: relative; touch-action: none; z-index: 4; }
+.resize-vertical { width: 6px; cursor: col-resize; }
+.resize-horizontal { height: 6px; cursor: row-resize; }
+.resize-handle:hover, .resize-handle:focus-visible { background: #82aaff; outline: none; }
+#sidebar { border-right: 0; }
+#workspace-body > .resize-handle { background-color: #292d3e; }
+#workspace-body > .resize-handle:hover, #workspace-body > .resize-handle:focus-visible { background-color: #82aaff; }
+.terminal-pane > .resize-handle { display: none; position: absolute; }
+#terminal.split .terminal-pane > .resize-handle { display: block; }
+.terminal-pane > .resize-vertical { right: 0; top: 0; bottom: 6px; }
+.terminal-pane > .resize-horizontal { bottom: 0; left: 0; right: 6px; }
+#team:not([open]) > .resize-handle { display: none; }
+.drop-target { outline: 2px dashed var(--session-color, #82aaff); outline-offset: -3px; }
+@media (max-width: 750px) { #terminal.split .terminal-pane > .resize-vertical { display: none; } }
+
+.resize-handle[hidden] { display: none !important; }
+
+.resize-handle::after { content: ''; position: absolute; border-radius: 2px; background: #59627b; pointer-events: none; }
+.resize-vertical::after { width: 2px; height: 28px; left: 2px; top: calc(50% - 14px); }
+.resize-horizontal::after { height: 2px; width: 36px; top: 2px; left: calc(50% - 18px); }
+
+#sidebar { min-width: 110px; max-width: 50vw; }
+
+/* Quiet chrome; colour identifies the action only on interaction. */
+#project-bar { display: flex; flex: none; min-width: 0; background: #090b10; border-bottom: 1px solid #292d3e; }
+#workspaces { flex: 1; min-width: 0; border-bottom: 0; }
+#project-tools { display: flex; align-items: center; padding: 0 8px; gap: 2px; }
+#project-tools button { font-size: 18px; width: 34px; padding: 4px; }
+#project-bar button, #terminal-actions, #terminal-actions button, #agent-kind { color: #9499a6; }
+#project-bar button:hover, #project-bar button:focus-visible, #terminal-actions button:hover, #terminal-actions button:focus-visible { color: #82aaff; background: #202638; }
+#project-bar button.selected { color: #b9bec9; background: #1b1f2a; }
+#project-bar button.selected:hover, #project-bar button.selected:focus-visible { color: #c3e88d; }
+.project-edit { opacity: 0; }
+.project-tab:hover .project-edit, .project-tab:focus-within .project-edit { opacity: 1; }
+#session-label { color: #9499a6; }
+#session-controls { position: relative; }
+#action-menu { position: relative; }
+#action-menu > summary { list-style: none; cursor: pointer; font-size: 22px; line-height: 32px; width: 36px; text-align: center; border-radius: 4px; }
+#action-menu > summary::-webkit-details-marker { display: none; }
+#action-menu > summary:hover, #action-menu[open] > summary { color: #82aaff; background: #202638; }
+.action-items { position: absolute; z-index: 10; right: 0; top: 100%; display: flex; flex-direction: column; align-items: stretch; padding: 6px; min-width: 150px; background: #090b10; border: 1px solid #3b4664; border-radius: 6px; box-shadow: 0 8px 24px #0008; }
+#terminal-actions .action-items button { text-align: left; min-height: 32px; }
+#agent-kind { max-width: none; min-height: 32px; }
+#close-session:hover { color: #f07178 !important; }
+dialog { box-sizing: border-box; width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 24px); padding: 24px; color: #b9bec9; background: #0f111a; border: 1px solid #3b4664; border-radius: 10px; overflow: auto; }
+dialog::backdrop { background: #0009; }
+dialog h2 { margin: 0 28px 16px 0; color: #e5e5e5; font-size: 19px; }
+dialog p, dialog dd { line-height: 1.6; }
+dialog dt { color: #89ddff; margin-top: 16px; }
+dialog dd { margin: 4px 0 0; }
+.dialog-close { position: absolute; right: 12px; top: 12px; font-size: 20px; }
+#development-form > label { display: block; margin: 14px 0; }
+#development-form input, #development-form select { box-sizing: border-box; background: #090b10; color: #ccc; border: 1px solid #3b4664; border-radius: 4px; padding: 8px; }
+#development-form input { display: block; width: 100%; margin-top: 6px; }
+#development-roles label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0; }
+#development-error { color: #f07178; }
+.primary-action { background: #243551; color: #a9d2ff; width: 100%; }
+@media (hover: none) { .project-edit { opacity: 1; } }
+
+dialog a { color: #82aaff; text-underline-offset: 3px; }
+dialog a:focus-visible { outline: 2px solid #82aaff; outline-offset: 3px; }

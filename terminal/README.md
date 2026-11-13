@@ -8,7 +8,7 @@ See [the agent guide](../docs/AGENT_GUIDE.md) for `boterm list/read/message/inbo
 
 ⌘T adds a terminal. The top bar adds projects, the sidebar switches sessions, and Dividir displays sessions together (stacked in narrow windows). Renomear names a terminal; × closes it after confirmation. New Window remains ⌘N.
 
-Copy/paste works through buttons, native Edit menu, ⌘C/⌘V and Ctrl+C/Ctrl+V. Ctrl+C without selection still interrupts a process. Dictation and dropped files never append Enter. The active VS Code theme is read from the user's local settings and installed extension on launch; third-party themes are not redistributed. CLI ANSI output is preserved without prompt/token recoloring. Without an installed theme, the renderer uses a neutral dark fallback.
+Copy/paste works through buttons, native Edit menu, ⌘C/⌘V and Ctrl+C/Ctrl+V. Ctrl+C without selection still interrupts a process. Dictation and dropped files never append Enter. The active VS Code theme is read from the user's local settings and installed extension on launch; third-party themes are not redistributed. CLI ANSI output is preserved. Default-colour links, paths/files and shell variables receive accents in the normal buffer; full-screen programs retain their own styling. Without an installed theme, the renderer uses the VS Code dark terminal palette.
 
 ## Build and open
 
@@ -87,7 +87,7 @@ Read [the validation record](../VALIDACAO.md) before interpreting any test as co
 
 ## App icon
 
-The source concept is `assets/boterm/icon-concept.png`. Run `./terminal/build-icon.sh` to export `terminal/Boterm.icns`, then rebuild. Bundle identifier and helper identifiers remain stable to preserve existing settings and macOS permission identity.
+The icon source is `assets/boterm/icon-professional.png`. Run `./terminal/build-icon.sh` to export `terminal/Boterm.icns`, then rebuild. Bundle identifier and helper identifiers remain stable to preserve existing settings and macOS permission identity.
 
 ## Vocabulary checks
 
@@ -99,3 +99,21 @@ xcrun swiftc native/Vocabulary.swift test/vocabulary.unit.swift -o /tmp/voztty-v
 ```
 
 The shared helper loads the local vocabulary before recording. Both native and VS Code clients receive the corrected final event through the existing protocol. Vocabulary tests cover canonical spelling, explicit aliases, Unicode/word boundaries, longest matches, literal regex characters, single-pass replacement, empty files and invalid entries. The packaged `vocabulary.txt` starter must match the Swift defaults.
+
+### Adjustable workspace (local build 13)
+
+Each session has a stable coloured dot in the sidebar and pane heading. Drag a heading or sidebar entry onto another terminal to reorder it within the project; Option-Up/Down does the same from the keyboard. Drag the visible grips to resize the sidebar, split columns/rows, or team message area. Focus a grip and use arrow keys for keyboard resizing. Split panes share column widths and row heights.
+
+Click the pencil beside a project name to edit it; Enter saves, Escape cancels, and leaving the field saves a nonempty name. The + button creates a numbered project before the final Private Project tab. That tab starts its shell only when opened. Projects remain isolated by the existing workspace rules; the label does not add an OS sandbox. Names and layout last for the current window, with no restart restoration.
+
+`VOZ_TEST_MODE=customize VOZ_TEST_UI_SCRIPT=/absolute/path/test/terminal-customize.js` exercises these controls through the native integration harness and can write a screenshot with `VOZ_TEST_SNAPSHOT`.
+
+## Compact controls and development preset (build 14)
+
+The top-right ⋯ menu reveals session actions on mouse hover, click or keyboard activation; Escape closes it. Project pencils appear on hover/focus, while + remains visible. The top bar uses muted icons with colour on interaction. Settings (⚙) contains About, author credit, collaboration, privacy, colour and session-lifetime information.
+
+The ⌘ button opens the Development preset: choose an absolute software directory, an optional objective, and Codex/Claude/Gemini for each of seven roles. Creating the team launches six specialists, then the Orchestrator, in the chosen directory. Each receives its role prompt as an argument, never as interpolated shell code. Gemini uses `--prompt-interactive`. Existing sessions stay intact; a project with a live preset team rejects duplicate creation. There must be seven free session slots.
+
+The Orchestrator is instructed to maintain `BOTERM_PLAN.md`, assign file ownership, dispatch to ready peer CLI prompts and iterate through implementation, tests, integrations, UX/design, loop review and final evidence. This is model-driven coordination through the existing Boterm tools, not a background job scheduler. Login, trust and tool approvals can require user action. A message alone does not wake a stopped model; the coordinator must check readiness and explicitly submit the next task. Closing the app ends the team. Full autonomous completion across real provider accounts has not been validated.
+
+Terminal accents now include commands, Kotlin/Java/Go/Rust/config files, status words and recognizable diff rows. Only default-colour cells are decorated; ANSI colours, Unicode alignment and full-screen applications retain their own rendering.

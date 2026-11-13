@@ -205,6 +205,18 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.frameInfo.isMainFrame, let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
         switch type {
+        case "development":
+            guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
+                  let providers = body["providers"] as? [String], providers.count == 7,
+                  providers.allSatisfy({ ["codex", "claude", "gemini"].contains($0) }),
+                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 7 <= 32 else {
+                js("window.voz.developmentError('Configuração inválida ou limite de terminais atingido.')"); return
+            }
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: directory, isDirectory: &isDirectory), isDirectory.boolValue else {
+                js("window.voz.developmentError('A pasta do software não existe. Use um caminho absoluto válido.')"); return
+            }
+            js("window.voz.startDevelopment(\(Self.json(["directory": directory, "objective": objective, "providers": providers])))")
         case "ready":
             guard let id = body["session"] as? String, UUID(uuidString: id) != nil,
                   let workspace = body["workspace"] as? String, UUID(uuidString: workspace) != nil,
@@ -224,12 +236,14 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
             do {
                 let args = CommandLine.arguments
-                let cwd = FileManager.default.currentDirectoryPath
-                let environment = ["BOTERM_SOCKET": controlPath, "BOTERM_SESSION": id, "BOTERM_WORKSPACE": workspace,
+                let cwd = (body["directory"] as? String) ?? FileManager.default.currentDirectoryPath
+                let prompt = body["prompt"] as? String ?? ""
+                guard prompt.utf8.count <= 15000, !prompt.contains("\0") else { throw ControlError.invalid("Invalid agent prompt") }
+                let environment = ["BOTERM_INITIAL_PROMPT": prompt, "BOTERM_SOCKET": controlPath, "BOTERM_SESSION": id, "BOTERM_WORKSPACE": workspace,
                     "BOTERM_CLI": Bundle.main.resourceURL?.appendingPathComponent("bin/boterm").path ?? "",
                     "BOTERM_AGENT_GUIDE": Bundle.main.resourceURL?.appendingPathComponent("AGENT_GUIDE.md").path ?? ""]
                 if let agent = body["agent"] as? String, ["codex", "claude", "gemini", "opencode"].contains(agent) {
-                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
+                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent + (prompt.isEmpty ? "" : (agent == "gemini" ? " --prompt-interactive" : "") + " \"$BOTERM_INITIAL_PROMPT\"")], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
                 } else if initial, primary, let index = args.firstIndex(of: "--"), args.count > index + 1 {
                     try session.start(executable: args[index + 1], arguments: Array(args.dropFirst(index + 2)), directory: cwd, environment: environment)
                 } else {
@@ -264,6 +278,10 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
 
     func webView(_ view: WKWebView, decidePolicyFor action: WKNavigationAction) async -> WKNavigationActionPolicy {
         let url = action.request.url
+        if action.navigationType == .linkActivated, url?.absoluteString == "https://github.com/ricdanyalgil/VozTTY" {
+            NSWorkspace.shared.open(url!)
+            return .cancel
+        }
         let root = Bundle.main.resourceURL?.appendingPathComponent("web").standardizedFileURL.path ?? ""
         return url?.isFileURL == true && url!.standardizedFileURL.path.hasPrefix(root + "/") ? .allow : .cancel
     }

@@ -31,7 +31,7 @@ window.voz = {
   theme(colors) {
     const {name, ...palette} = colors;
     Object.assign(BOTERM_THEME, palette);
-    for (const s of sessions.values()) s.term.options.theme = {...BOTERM_THEME};
+    for (const s of sessions.values()) { s.term.options.theme = {...BOTERM_THEME}; s.accents.refresh(); }
     document.documentElement.style.setProperty('--terminal-bg', BOTERM_THEME.background);
     document.documentElement.style.setProperty('--terminal-fg', BOTERM_THEME.foreground);
   },
@@ -40,6 +40,8 @@ window.voz = {
     s.agent = name; s.agentState = state; renderNavigation();
   },
   create: createSession,
+  startDevelopment,
+  developmentError(message) { document.getElementById('development-error').textContent = message; },
   newWorkspace,
   activate: activateSession,
   remove: removeSession,
@@ -132,3 +134,5 @@ window.voz = {
 };
 new ResizeObserver(fitVisible).observe(document.getElementById('terminal'));
 newWorkspace('Projeto 1');
+workspaces.set(privateWorkspace, 'Private Project');
+renderNavigation();
