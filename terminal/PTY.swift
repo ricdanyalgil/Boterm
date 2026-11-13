@@ -9,11 +9,15 @@ final class ShellSession {
     var output: ((Data) -> Void)?
     var ended: (() -> Void)?
 
-    func start(executable: String, arguments: [String], directory: String) throws {
+    func start(executable: String, arguments: [String], directory: String, environment: [String: String] = [:]) throws {
         var env = ProcessInfo.processInfo.environment
         env["TERM"] = "xterm-256color"
         env["COLORTERM"] = "truecolor"
-        env["TERM_PROGRAM"] = "VozTTY"
+        env["TERM_PROGRAM"] = "Boterm"
+        env.merge(environment) { _, value in value }
+        if let resources = Bundle.main.resourceURL {
+            env["PATH"] = resources.appendingPathComponent("bin").path + ":" + (env["PATH"] ?? "/usr/bin:/bin")
+        }
         let args = ([executable] + arguments).map { strdup($0) }
         let vars = env.map { strdup("\($0.key)=\($0.value)") }
         let cwd = strdup(directory)

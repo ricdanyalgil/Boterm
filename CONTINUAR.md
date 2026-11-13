@@ -87,3 +87,12 @@ Multiple windows: `AppDelegate.terminals` replaces the single `terminal`; Shell 
 `applicationShouldTerminateAfterLastWindowClosed`. Windows cascade from the centred first one. Quit asks once when
 several sessions run. Verified: three windows via ⌘N, each with its own zsh and offset position; layout harness and
 native unit check. Not verified by hand: the Dock right-click menu and two windows dictating at the same time.
+
+
+## Boterm 0.3.0 — 2026-11-13
+
+Native app renamed to Boterm with project tabs, session sidebar, splits, clipboard buttons/Mac+Control shortcuts and installed VS Code theme import. Voice waveform preserved; completion is pinned to the origin session. Agent launcher identifies Codex/Claude/Gemini/OpenCode; symbols, process state and recent messages are visible. `boterm agent codex|claude` supplies per-session MCP integration; Gemini/OpenCode launch without automatic MCP config. See docs/AGENT_GUIDE.md and VALIDACAO.md. Two real Codex peers exchanged MCP messages. No remote GitHub rename, push or release. Existing VozTTY windows were preserved.
+
+### Commit verification follow-up
+
+Maintainer requested a GitHub commit/push and a real agent review in another terminal. A separate read-only Codex exchanged MCP messages and identified a caller-identity issue; control requests now verify kernel peer ancestry. Real-socket impersonation rejection, valid MCP traffic, env-filtered identity discovery, native workspace integration and 23 JS tests passed. See VALIDACAO.md. Concurrent interface edits are preserved outside this commit's isolated source snapshot. No binary release or replacement of the running installation is part of this request.

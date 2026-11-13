@@ -1,6 +1,6 @@
-# VozTTY — A sua voz no terminal
+# Boterm — Seus terminais. Uma equipe.
 
-**Fale o próximo prompt sem sair do terminal.** Projeto open source com licença MIT. [English](README.md) · [Releases](https://github.com/ricdanyalgil/VozTTY/releases)
+**Vários terminais, agentes colaborando e ditado local.** Projeto open source com licença MIT. [English](README.md) · [Releases](https://github.com/ricdanyalgil/VozTTY/releases)
 
 **Estado de publicação:** prévia pública autorizada pelo responsável. O terminal Mac e a extensão VS Code estão disponíveis nos [downloads da release v0.2.0](https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.2.1). Os pacotes ainda não têm notarização da Apple.
 
@@ -14,10 +14,18 @@ Com as ferramentas de desenvolvimento da Apple instaladas:
 
 ```sh
 ./terminal/build.sh
-open terminal/VozTTY.app
+open terminal/Boterm.app
 ```
 
-Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `gemini` dentro da shell; não estão incluídos na aplicação. Ainda não há tabs, divisões, restauro de sessões ou notarização. Fechar uma sessão ativa pede confirmação e descarta o texto não enviado.
+Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `gemini` dentro da shell; não estão incluídos na aplicação. A versão 0.3.0 oferece abas por projeto, terminais na lateral, divisão de sessões, mensagens entre agentes e copiar/colar por botões, ⌘C/⌘V e Ctrl+C/Ctrl+V. Ctrl+C sem seleção continua interrompendo comandos. O tema é lido do VS Code instalado e as cores ANSI dos programas são preservadas. Não há persistência de processos após fechar o app ou notarização. Fechar uma sessão ativa pede confirmação e descarta o texto não enviado.
+
+## Equipe de agentes
+
+Escolha Codex, Claude, Gemini ou OpenCode e clique **Iniciar**. A lateral mostra símbolo, nome, estado do processo e última mensagem enviada/recebida. Codex e Claude recebem integração MCP por sessão; os demais mantêm sua configuração própria. O efeito de gravação com a onda de voz, pausar/continuar e ditado local foi preservado.
+
+Execute `boterm list`, `boterm read ID`, `boterm message ID 'mensagem'` e `boterm inbox` nos terminais do mesmo projeto. O [guia dos agentes](docs/AGENT_GUIDE.md) explica a configuração. Os agentes precisam consultar suas mensagens; recebê-las não dispara um modelo automaticamente. `send` insere rascunho e `send --submit` é uma operação explícita de execução. A saída dos terminais do projeto é compartilhada com os colegas desse projeto; outros projetos ficam separados.
+
+O nome público do app nativo é Boterm. A extensão VS Code e o endereço do GitHub mantêm os identificadores VozTTY. Os downloads públicos existentes ainda são das versões VozTTY; 0.3.0 não foi publicado como release.
 
 ## Usar no VS Code
 

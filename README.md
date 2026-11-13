@@ -1,6 +1,10 @@
-<p align="center"><img src="assets/voztty-icon.png" width="96" alt="VozTTY terminal icon" /></p>
-<h1 align="center">VozTTY</h1>
-<p align="center"><strong>Speak your next prompt. Stay in your terminal.</strong><br />Local voice dictation for your Mac terminal and VS Code.<br />Speak freely. Review the text. Press Enter when you are ready.</p>
+<p align="center"><img src="assets/boterm/icon-concept.png" width="96" alt="Boterm terminal icon" /></p>
+<h1 align="center">Boterm</h1>
+<p align="center"><strong>Your terminals. One team.</strong><br />Native macOS terminal workspaces, agent messaging and local voice dictation.<br />Speak freely. Review the text. Press Enter when you are ready.</p>
+
+**Boterm 0.3.0 source:** project tabs, session sidebar, split terminals, visible agent messages, copy/paste buttons and ⌘C/⌘V or Ctrl+C/Ctrl+V (Ctrl+C interrupts when nothing is selected). Reads the active installed VS Code theme at launch and preserves CLI ANSI colors. Start Codex, Claude, Gemini or OpenCode from the selector; the sidebar shows symbols, process state and recent messages. Codex/Claude receive per-session MCP tools; agents can also coordinate through the bundled `boterm` CLI; see [the agent guide](docs/AGENT_GUIDE.md).
+
+The GitHub URL and VS Code extension retain the VozTTY identifiers. The release downloads below are the older VozTTY builds; Boterm 0.3.0 has not been published as a release. Older screenshots and clips document the previous interface.
 
 <p align="center">
   <a href="https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.2.9"><img src="https://img.shields.io/badge/public_preview-v0.2.9-orange?style=flat" alt="Public preview release" /></a>
@@ -163,7 +167,7 @@ npm test
 
 # Native terminal
 ./terminal/build.sh
-open terminal/VozTTY.app
+open terminal/Boterm.app
 
 # VS Code extension
 ./build-helper.sh

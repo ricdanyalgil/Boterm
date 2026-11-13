@@ -4,11 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'">
-<title>VozTTY Terminal</title>
+<title>Boterm</title>
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="terminal.css">
 </head>
 <body>
+<nav id="workspaces" aria-label="Projetos"></nav>
+<div id="workspace-body">
+<aside id="sidebar" aria-label="Sessões da equipe">
+  <div class="section-label">TERMINAIS</div>
+  <div id="sessions"></div>
+  <button id="new-session" type="button">＋ Terminal</button>
+  <button id="split" type="button" aria-pressed="false">◫ Dividir</button>
+  <p class="sidebar-hint">Sessões deste projeto compartilham mensagens e saída com a equipe.</p>
+</aside>
+<div id="stage">
+<div id="terminal-actions"><span id="session-label"></span><div><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="gemini">✦ Gemini</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></div>
+<main id="terminal" aria-label="Sessões de terminal"></main>
 <section id="voice-panel" aria-label="Voice dictation" hidden>
   <div class="voice-info">
     <div><strong id="voice-status" role="status">Preparing microphone…</strong><p id="voice-hint">Audio stays on your Mac.</p></div>
@@ -29,6 +41,10 @@
     <div class="voice-scale"><span>−20s · recent voice activity</span><span>Now</span></div>
   </div>
 </section>
-<main id="terminal" aria-label="Terminal session"></main>
-<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="prompt-rows.js"></script><script src="text-tokens.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
+</div></div>
+<details id="team"><summary>Equipe · mensagens entre agentes <span id="message-count">0</span></summary>
+<div id="team-log" role="log" aria-label="Mensagens da equipe" aria-live="polite"></div>
+<form id="team-form"><select id="recipient" aria-label="Destinatário"></select><input id="team-text" aria-label="Mensagem" placeholder="Mensagem para a equipe…" maxlength="16000" required><button type="submit">Enviar</button></form>
+</details>
+<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="workspace.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
 </html>

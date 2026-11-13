@@ -4,7 +4,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
 body { padding: 18px 24px; box-sizing: border-box; display: flex; flex-direction: column; }
 #terminal { width: 100%; flex: 1; min-height: 0; }
 #voice-panel[hidden] { display: none; }
-#voice-panel { flex: none; margin-bottom: 12px; padding: 0; border: 0; background: transparent; color: #98a7b5; font: 11px SFMono-Regular, Menlo, monospace; display: grid; grid-template-columns: auto minmax(80px, 1fr) auto; align-items: center; gap: 0 12px; }
+#voice-panel { flex: none; margin-top: 8px; padding: 0; border: 0; background: transparent; color: #98a7b5; font: 11px SFMono-Regular, Menlo, monospace; display: grid; grid-template-columns: auto minmax(80px, 1fr) auto; align-items: center; gap: 0 12px; }
 .voice-info, .voice-actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .voice-info { grid-column: 1; grid-row: 1; }
 #voice-status { display: block; max-width: 175px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 400; }
@@ -33,3 +33,53 @@ body { padding: 18px 24px; box-sizing: border-box; display: flex; flex-direction
 .xterm { height: 100%; }
 .xterm-viewport { scrollbar-color: #454545 #000000; }
 ::selection { background: #39658c; color: #ffffff; }
+/* Workspace chrome uses the same Ocean palette as the terminal. */
+:root { background: var(--terminal-bg, #1e1e1e); color: var(--terminal-fg, #cccccc); font: 12px -apple-system, BlinkMacSystemFont, sans-serif; }
+body { padding: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { border: 0; background: transparent; padding: 8px 12px; border-radius: 5px; cursor: pointer; min-height: 32px; }
+button:hover { background: #202638; color: #fff; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid #82aaff; outline-offset: -2px; }
+button.selected { background: #232a3f; color: #c3e88d; }
+#workspaces { flex: none; display: flex; gap: 3px; padding: 6px 12px; overflow-x: auto; background: #090b10; border-bottom: 1px solid #292d3e; }
+#workspaces button { white-space: nowrap; }
+#workspace-body { display: flex; flex: 1; min-height: 0; }
+#sidebar { width: 148px; flex: none; background: #090b10; padding: 16px 8px; box-sizing: border-box; overflow-y: auto; border-right: 1px solid #292d3e; }
+.section-label { padding: 0 10px 12px; color: #7b829a; font-size: 11px; letter-spacing: 1.2px; }
+#sessions { display: flex; flex-direction: column; gap: 4px; }
+#sessions button { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#new-session, #split { width: 100%; text-align: left; margin-top: 6px; }
+.sidebar-hint { font-size: 11px; line-height: 1.6; color: #7b829a; padding: 6px 10px; }
+#stage { display: flex; flex-direction: column; flex: 1; min-width: 0; padding: 0 12px 8px; }
+#terminal-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex: none; min-height: 44px; }
+#session-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c3e88d; }
+#terminal-actions > div { display: flex; flex-wrap: wrap; justify-content: flex-end; min-width: 0; gap: 2px; }
+#terminal-actions button { font-size: 11px; padding: 6px 8px; }
+#terminal { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 8px; }
+#terminal.split { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(80px, 1fr); overflow: auto; }
+.terminal-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid transparent; }
+#terminal.split .terminal-pane.active { border-color: #3b4664; }
+.terminal-pane[hidden] { display: none; }
+#team { flex: none; border-top: 1px solid #292d3e; background: #090b10; }
+#team summary { cursor: pointer; padding: 8px 14px; color: #a6acc3; }
+#message-count { color: #c3e88d; padding-left: 8px; }
+#team-log { height: 110px; overflow-y: auto; padding: 0 14px; user-select: text; }
+#team-log p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+#team-log strong { color: #89ddff; font-size: 11px; }
+#team-form { display: flex; gap: 8px; padding: 8px 12px; }
+#team-form input, #team-form select { min-width: 0; background: #0f111a; border: 1px solid #3b4664; border-radius: 4px; padding: 8px; }
+#team-text { flex: 1; }
+#recipient { max-width: 145px; }
+.xterm-viewport { scrollbar-color: #464b5d #0f111a; }
+@media (max-width: 750px) { #sidebar { width: 124px; } #stage { padding: 0 6px 6px; } .sidebar-hint { display: none; } #terminal.split { grid-template-columns: minmax(0, 1fr); } }
+
+.terminal-content { flex: 1; min-width: 0; min-height: 0; }
+.pane-title { display: none; flex: none; padding: 4px 8px; color: #7b829a; font-size: 11px; }
+#terminal.split .pane-title { display: block; }
+
+#agent-kind { border: 1px solid #3b4664; border-radius: 4px; background: #0f111a; color: #babed8; padding: 3px; max-width: 105px; font-size: 11px; }
+#sessions small { display: block; font-size: 11px; font-weight: 400; color: #7b829a; padding: 4px 0 0 18px; }
+#sessions small.agent-running { color: #c3e88d; }
+@media (max-width: 750px) { #terminal-actions { flex-wrap: wrap; gap: 0; } #terminal-actions > div { flex-wrap: wrap; } #session-label { display: none; } }
+
+#sessions .session-task { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #89ddff; }

@@ -1,3 +1,16 @@
+# Boterm 0.3.0 — local build, 2026-11-13
+
+- Renamed the native application to Boterm with the connected-terminal icon; GitHub URL, extension IDs and bundle identifier retained.
+- Project tabs, session sidebar, split terminals, rename/close actions, independent PTYs and visible team messages.
+- Agent launcher, symbols, process status and recent task messages; existing voice waveform preserved.
+- Per-session MCP integration for Codex/Claude, with no global client config edits.
+- Bundled native `boterm` CLI for workspace-scoped session inspection and communication over a private Unix socket.
+- Bind control requests to kernel-reported process ancestry to reject forged session identities.
+- Copy/paste buttons, native menu and Mac/Control shortcuts; Ctrl+C without selection keeps interrupt behavior.
+- Import the installed VS Code theme at launch; preserve original ANSI colors and remove prompt/token overlays.
+- Dictation stays pinned to its original session and never submits a prompt.
+- No restart persistence or automatic model activation; peers must check their inbox.
+
 # Changelog
 
 ## Public preview v0.2.9 — 2026-10-27

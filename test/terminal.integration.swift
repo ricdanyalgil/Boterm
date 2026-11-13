@@ -45,7 +45,7 @@ extension TerminalWindow {
         let env = ProcessInfo.processInfo.environment
         guard let destination = env["VOZ_TEST_RESULT"] else { return }
         let mode = env["VOZ_TEST_MODE"] ?? "inspect"
-        var result: [String: Any] = ["passed": false, "mode": mode, "terminal": "VozTTY native", "automaticEnter": false]
+        var result: [String: Any] = ["passed": false, "mode": mode, "terminal": "Boterm native", "automaticEnter": false]
         var inputs: [String] = []
         inputReceived = { inputs.append($0) }
         func save() { try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]).write(to: URL(fileURLWithPath: destination)) }
@@ -57,6 +57,117 @@ extension TerminalWindow {
             if let path = env["VOZ_TEST_SCREEN"] { try before.write(toFile: path, atomically: true, encoding: .utf8) }
             result["frontendReady"] = true
             result["childPID"] = shell.pid
+            if mode == "agent-launch" {
+                try await web.evaluateJavaScript("document.getElementById('agent-kind').value = 'codex'; document.getElementById('launch-agent').click();")
+                try await testUntil("Agent launcher did not start Codex", seconds: 30) {
+                    self.records.values.contains { $0.agent == "codex" && $0.state == "running" && $0.shell.pid > 0 }
+                }
+                let sidebar = try await web.evaluateJavaScript("document.getElementById('sessions').textContent") as? String ?? ""
+                guard sidebar.contains("Codex"), sidebar.contains("Em execução") else { throw VoiceTestError.message("Agent name/state badge missing") }
+                result["nativeAgentLaunch"] = true; result["visibleAgentIdentity"] = true; result["passed"] = true
+                save(); closeForTest(); return
+            }
+            if mode == "workspace" {
+                let original = activeSessionID
+                let originalPID = shell.pid
+                let second = try await web.evaluateJavaScript("window.voz.create('Reviewer')") as! String
+                try await testUntil("Second shell did not start") { self.records[second]?.shell.pid ?? 0 > 0 }
+                guard records[original]?.shell.pid == originalPID else { throw VoiceTestError.message("Switching sessions restarted the original process") }
+                let workspace = records[original]!.workspace
+                _ = try postMessage(from: original, to: second, text: "Review this task")
+                _ = try postMessage(from: second, to: original, text: "Review complete")
+                guard messages.count == 2 else { throw VoiceTestError.message("Peer messages missing") }
+                let other = try await web.evaluateJavaScript("window.voz.newWorkspace('Private project')") as! String
+                try await testUntil("Other project did not start") { self.records.values.contains { $0.workspace == other && $0.shell.pid > 0 } }
+                let privateID = records.first { $0.value.workspace == other }!.key
+                do { _ = try postMessage(from: original, to: privateID, text: "must fail"); throw VoiceTestError.message("Cross-project message allowed") }
+                catch is ControlError { }
+                try await web.evaluateJavaScript("window.voz.activate(\(Self.json(original)))")
+                let keys = try await web.evaluateJavaScript("terminalShortcut({type:'keydown',ctrlKey:true,code:'KeyC'}, false) === null && terminalShortcut({type:'keydown',ctrlKey:true,code:'KeyC'}, true) === 'copy'") as? Bool == true
+                guard keys else { throw VoiceTestError.message("Ctrl+C semantics changed") }
+                let themeOK = try await web.evaluateJavaScript("term.options.theme.background === '#0F111A' && term.options.theme.green === '#C3E88D' && typeof accents === 'undefined'") as? Bool == true
+                guard themeOK else { throw VoiceTestError.message("Ocean palette or ANSI preservation incorrect") }
+                let data = try JSONSerialization.data(withJSONObject: ["from":original,"workspace":workspace,"peerPID":originalPID,"command":"list"])
+                guard let app = NSApplication.shared.delegate as? AppDelegate else { throw VoiceTestError.message("Missing app delegate") }
+                let listed = try JSONSerialization.jsonObject(with: await app.controlRequest(data)) as! [String:Any]
+                guard (listed["result"] as? [[String:Any]])?.count == 2 else { throw VoiceTestError.message("Session list crossed workspace boundary") }
+                records[second]?.shell.write("\"$BOTERM_CLI\" message \(original) 'CLI peer request'\r")
+                try await testUntil("CLI socket roundtrip timed out") { self.messages.last?["text"] as? String == "CLI peer request" }
+                let submitRequest = try JSONSerialization.data(withJSONObject: ["from": original, "workspace": workspace, "peerPID": originalPID, "command": "send", "target": second, "text": "printf BOTERM_EXECUTED", "submit": true])
+                let submitted = try JSONSerialization.jsonObject(with: await app.controlRequest(submitRequest)) as! [String: Any]
+                guard submitted["error"] == nil else { throw VoiceTestError.message("Explicit submission failed") }
+                try await testUntil("Explicit Enter arrived before the pasted command") {
+                    let screen = try await self.web.evaluateJavaScript("window.voz.snapshot(\(Self.json(second)))") as? String ?? ""
+                    return screen.components(separatedBy: "\n").contains(where: { $0.hasPrefix("BOTERM_EXECUTED") })
+                }
+                let peerRead = try JSONSerialization.data(withJSONObject: ["from": original, "workspace": workspace, "peerPID": originalPID, "command": "read", "target": second])
+                let peerOutput = try JSONSerialization.jsonObject(with: await app.controlRequest(peerRead)) as! [String: Any]
+                guard (peerOutput["result"] as? String)?.contains("BOTERM_EXECUTED") == true else { throw VoiceTestError.message("Peer terminal output could not be read") }
+                result["peerOutputRead"] = true
+                let privateRead = try JSONSerialization.data(withJSONObject: ["from": original, "workspace": workspace, "peerPID": originalPID, "command": "read", "target": privateID])
+                let rejectedRead = try JSONSerialization.jsonObject(with: await app.controlRequest(privateRead)) as! [String: Any]
+                guard rejectedRead["error"] != nil else { throw VoiceTestError.message("Cross-workspace read allowed") }
+                inputs.removeAll()
+                // Verify the actual native clipboard while preserving every original pasteboard type.
+                let board = NSPasteboard.general
+                let preserved = board.pasteboardItems?.map { item in item.types.compactMap { type in item.data(forType: type).map { (type, $0) } } } ?? []
+                defer {
+                    board.clearContents()
+                    let items = preserved.map { values in let item = NSPasteboardItem(); for (type, data) in values { item.setData(data, forType: type) }; return item }
+                    board.writeObjects(items)
+                }
+                try await web.evaluateJavaScript("term.write('\\r\\nBOTERM_COPY_TEST', () => term.selectAll());")
+                try await Task.sleep(for: .milliseconds(200))
+                try await web.evaluateJavaScript("window.voz.copy()")
+                try await testUntil("Native copy did not reach clipboard") { board.string(forType: .string)?.contains("BOTERM_COPY_TEST") == true }
+                board.clearContents(); board.setString("BOTERM_DRAFT", forType: .string)
+                try await web.evaluateJavaScript("term.clearSelection(); document.getElementById('paste-text').click();")
+                try await testUntil("Paste did not reach PTY") { inputs.joined().contains("BOTERM_DRAFT") }
+                guard !inputs.joined().contains("\r"), !inputs.joined().contains("\n") else { throw VoiceTestError.message("Paste submitted input") }
+                voiceSessionID = original
+                try await web.evaluateJavaScript("window.voz.activate(\(Self.json(second)))")
+                dictation.completed?("BOTERM_PINNED_DICTATION")
+                try await testUntil("Dictation did not return to its original terminal") {
+                    (try await self.web.evaluateJavaScript("window.voz.snapshot(\(Self.json(original)))") as? String ?? "").contains("BOTERM_PINNED_DICTATION")
+                }
+                let wrongSession = try await web.evaluateJavaScript("window.voz.snapshot(\(Self.json(second)))") as? String ?? ""
+                guard !wrongSession.contains("BOTERM_PINNED_DICTATION") else { throw VoiceTestError.message("Dictation crossed terminals") }
+                try await web.evaluateJavaScript("window.voz.activate(\(Self.json(original)))")
+                result["dictationPinnedToOrigin"] = true
+                records[original]?.agent = "codex"; records[original]?.state = "running"; records[original]?.agentPID = Int32.max
+                app.refreshAgentStates()
+                guard records[original]?.state == "idle" else { throw VoiceTestError.message("A stopped agent remained marked running") }
+                records[original]?.agent = ""
+                try await web.evaluateJavaScript("window.voz.agent(\(Self.json(original)), '', 'idle')")
+                result["agentStateClearsAfterExit"] = true
+                try await web.evaluateJavaScript("split = true; fitVisible();")
+                try await Task.sleep(for: .milliseconds(200))
+                try await web.evaluateJavaScript("(() => { const r = sessions.get(\(Self.json(second))).host.getBoundingClientRect(); window.voz.drop(['/tmp/BOTERM_DROP_TARGET.txt'], r.x + r.width / 2, r.y + r.height / 2); })()")
+                try await testUntil("Drop did not reach the pane under the pointer") {
+                    (try await self.web.evaluateJavaScript("window.voz.snapshot(\(Self.json(second))).replace(/\\n/g, '')") as? String ?? "").contains("BOTERM_DROP_TARGET")
+                }
+                try await web.evaluateJavaScript("window.voz.activate(\(Self.json(original)))")
+                result["dropTargetsPointerPane"] = true
+                result["tabsKeepProcess"] = true; result["workspaceIsolation"] = true; result["peerMessages"] = true
+                result["nativeClipboard"] = true; result["pasteWithoutEnter"] = true; result["cliSocket"] = true; result["oceanANSI"] = true
+                result["explicitSubmitOrder"] = true
+                if let screenPath = env["VOZ_TEST_WINDOW_SCREEN"] {
+                    try await web.evaluateJavaScript("document.getElementById('team').open = true; split = true; fitVisible();")
+                    try await Task.sleep(for: .milliseconds(400))
+                    let image = try await web.takeSnapshot(configuration: nil)
+                    if let bitmap = NSBitmapImageRep(data: image.tiffRepresentation!), let png = bitmap.representation(using: .png, properties: [:]) { try png.write(to: URL(fileURLWithPath: screenPath)) }
+                }
+                result["passed"] = true
+                if env["VOZ_TEST_KEEP_OPEN"] == "1" { result["socket"] = controlPath; result["workspace"] = workspace; result["session"] = original; result["peer"] = second }
+                save()
+                if let command = env["VOZ_TEST_CONTROL_COMMAND"] {
+                    let runner = try await web.evaluateJavaScript("window.voz.create('Control regression')") as! String
+                    try await testUntil("Control runner did not start") { self.records[runner]?.shell.pid ?? 0 > 0 }
+                    try await Task.sleep(for: .seconds(1))
+                    records[runner]?.shell.write(command + "\r")
+                }
+                if env["VOZ_TEST_KEEP_OPEN"] != "1" { closeForTest() }; return
+            }
             if mode == "voice-controls" {
                 var transcript: String?
                 var failure: String?
@@ -112,6 +223,12 @@ extension TerminalWindow {
             if mode == "layout" {
                 let voiceStates = try await web.evaluateJavaScript("(() => { const states = ['idle', 'preparing', 'recording', 'pausing', 'paused', 'resuming', 'stopping']; return states.every(state => { window.voz.state(state); const panel = document.getElementById('voice-panel'); const enabled = ['recording', 'paused'].includes(state); return panel.hidden === (state === 'idle') && document.getElementById('voice-stop').disabled === !enabled && document.getElementById('voice-pause').disabled === !enabled && document.body.dataset.dictating === String(state !== 'idle'); }); })()") as? Bool == true
                 guard voiceStates else { throw VoiceTestError.message("Voice controls do not match the recording lifecycle.") }
+                guard web.frame.maxY >= window.contentView!.bounds.height - 1,
+                      status.frame.height > 0,
+                      try await web.evaluateJavaScript("document.body.firstElementChild.id === 'workspaces' && document.getElementById('terminal').compareDocumentPosition(document.getElementById('voice-panel')) === Node.DOCUMENT_POSITION_FOLLOWING") as? Bool == true else {
+                    throw VoiceTestError.message("Projects must lead the window and dictation must follow the terminal.")
+                }
+                result["projectsFirst"] = true
                 result["voiceStateControls"] = true
                 let originalLanguage = language.indexOfSelectedItem
                 var languageCodes: [String] = []
@@ -133,21 +250,27 @@ extension TerminalWindow {
                     var metrics: [String: Any] = [:]
                     do {
                         try await testUntil("Terminal grid extends beyond its content area.", seconds: 4) {
-                            metrics = try await self.web.evaluateJavaScript("(() => { const box = document.getElementById('terminal').getBoundingClientRect(); const grid = document.querySelector('.xterm-screen').getBoundingClientRect(); const panel = document.getElementById('voice-panel').getBoundingClientRect(); const expected = fit.proposeDimensions(); return {width: innerWidth, height: innerHeight, columns: term.cols, rows: term.rows, rightOverflow: Math.max(0, grid.right - box.right), bottomOverflow: Math.max(0, grid.bottom - box.bottom), fits: term.cols === expected.cols && term.rows === expected.rows && grid.right <= box.right + 1 && grid.bottom <= box.bottom + 1 && panel.bottom <= box.top && document.body.scrollWidth <= innerWidth}; })()") as? [String: Any] ?? [:]
-                            return abs(self.web.bounds.width - size.width) < 1 && metrics["fits"] as? Bool == true
+                            metrics = try await self.web.evaluateJavaScript("(() => { const box = term.element.parentElement.getBoundingClientRect(); const grid = term.element.querySelector('.xterm-screen').getBoundingClientRect(); const panel = document.getElementById('voice-panel').getBoundingClientRect(); const expected = fit.proposeDimensions(); return {width: innerWidth, height: innerHeight, columns: term.cols, rows: term.rows, rightOverflow: Math.max(0, grid.right - box.right), bottomOverflow: Math.max(0, grid.bottom - box.bottom), fits: term.cols === expected.cols && term.rows === expected.rows && grid.right <= box.right + 1 && grid.bottom <= box.bottom + 1 && panel.top >= box.bottom - 1 && document.body.scrollWidth <= innerWidth}; })()") as? [String: Any] ?? [:]
+                            return metrics["fits"] as? Bool == true
                         }
                     } catch {
                         sizes.append(metrics); result["sizes"] = sizes
                         throw error
                     }
                     sizes.append(metrics)
+                    if let directory = env["VOZ_TEST_LAYOUT_SCREENS"] {
+                        let image = try await web.takeSnapshot(configuration: nil)
+                        if let bitmap = NSBitmapImageRep(data: image.tiffRepresentation!), let png = bitmap.representation(using: .png, properties: [:]) {
+                            try png.write(to: URL(fileURLWithPath: directory).appendingPathComponent("layout-\(Int(size.width)).png"))
+                        }
+                    }
                 }
                 result["sizes"] = sizes
                 let pauseHistory = try await web.evaluateJavaScript("document.querySelector('#voice-pauses rect') !== null && voiceSamples.length > 100") as? Bool == true
                 guard pauseHistory else { throw VoiceTestError.message("The continuous waveform lost its voice or pause history.") }
                 result["pauseHistoryRendered"] = true
                 if env["VOZ_TEST_KEEP_OPEN"] == "1" {
-                    window.title = "VozTTY — Synthetic voice history preview"
+                    window.title = "Boterm — Synthetic voice history preview"
                     try await web.evaluateJavaScript("cancelAnimationFrame(waveFrame); waveFrame = undefined")
                     result["passed"] = true
                     save(); return
@@ -276,11 +399,7 @@ extension TerminalWindow {
             if mode == "cli" {
                 window.makeKeyAndOrderFront(nil)
                 NSApplication.shared.activate(ignoringOtherApps: true)
-                try await testUntil("No prompt accent was painted for the CLI composer.") {
-                    (try await self.web.evaluateJavaScript("accents.length")) as? Int ?? 0 > 0
-                }
-                result["accentedRows"] = try await web.evaluateJavaScript("accents.length")
-                let selectionPreserved = try await web.evaluateJavaScript("(() => { const row = accents[0].marker.line; const text = term.buffer.active.getLine(row).translateToString(true); term.select(0, row, term.cols); const selected = term.getSelection(); term.clearSelection(); return selected.trimEnd() === text.trimEnd(); })()") as? Bool == true
+                let selectionPreserved = try await web.evaluateJavaScript("(() => { const row = term.buffer.active.baseY; const text = term.buffer.active.getLine(row).translateToString(true); term.select(0, row, term.cols); const selected = term.getSelection(); term.clearSelection(); return selected.trimEnd() === text.trimEnd(); })()") as? Bool == true
                 result["selectionPreserved"] = selectionPreserved
                 guard selectionPreserved else { throw NSError(domain: "VozTTYTest", code: 6, userInfo: [NSLocalizedDescriptionKey: "Accented text selection changed the terminal text."]) }
             }

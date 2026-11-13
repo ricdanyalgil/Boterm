@@ -3,7 +3,7 @@ import WebKit
 
 /// Accepts files dragged from Finder and hands their paths to the terminal; everything else keeps WebKit's behaviour.
 final class DropWebView: WKWebView {
-    var droppedFiles: (([String]) -> Void)?
+    var droppedFiles: (([String], NSPoint) -> Void)?
     private func files(_ info: any NSDraggingInfo) -> [String] {
         (info.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []).map(\.path)
     }
@@ -13,7 +13,7 @@ final class DropWebView: WKWebView {
     override func performDragOperation(_ info: any NSDraggingInfo) -> Bool {
         let paths = files(info)
         guard !paths.isEmpty else { return super.performDragOperation(info) }
-        droppedFiles?(paths)
+        droppedFiles?(paths, convert(info.draggingLocation, from: nil))
         return true
     }
     override func concludeDragOperation(_ info: (any NSDraggingInfo)?) { if let info, !files(info).isEmpty { return }; super.concludeDragOperation(info) }
@@ -23,7 +23,16 @@ final class DropWebView: WKWebView {
 final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelegate, NSWindowDelegate {
     let window: NSWindow
     let web: DropWebView
-    let shell = ShellSession()
+    private let firstShell = ShellSession()
+    var shell: ShellSession { records[activeSessionID]?.shell ?? firstShell }
+    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0 }
+    var records: [String: Record] = [:]
+    var activeSessionID = ""
+    var voiceSessionID = ""
+    var messages: [[String: Any]] = []
+    var controlPath = ""
+    private var rootLoaded = false
+    private let theme = TerminalTheme.load()
     let dictation = TerminalDictation()
     let status = NSTextField(labelWithString: "Speak instead of typing · ⌃⌥V to start")
     let microphone = NSButton()
@@ -48,24 +57,21 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         web = DropWebView(frame: .zero, configuration: config)
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1120, height: 720), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         super.init()
-        window.title = "VozTTY"
+        window.title = "Boterm"
         window.minSize = NSSize(width: 620, height: 380)
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.appearance = NSAppearance(named: .darkAqua)
-        window.backgroundColor = .black
+        window.backgroundColor = NSColor(srgbRed: 15/255, green: 17/255, blue: 26/255, alpha: 1)
         window.titlebarAppearsTransparent = false
         window.titleVisibility = .visible
-        web.underPageBackgroundColor = .black
+        web.underPageBackgroundColor = window.backgroundColor
         web.navigationDelegate = self
         web.configuration.userContentController.add(self, name: "terminal")
-        let brand = NSTextField(labelWithString: "VozTTY")
-        brand.font = .systemFont(ofSize: 15, weight: .semibold)
         status.font = .systemFont(ofSize: 11)
         status.textColor = .secondaryLabelColor
         status.lineBreakMode = .byTruncatingTail
         status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        brand.setContentCompressionResistancePriority(.required, for: .horizontal)
         let savedLanguage = UserDefaults.standard.string(forKey: "language") ?? "pt-BR"
         for code in ["pt-BR", "pt-PT", "en-US"] {
             language.addItem(withTitle: code)
@@ -83,14 +89,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         microphone.target = self
         microphone.action = #selector(toggleVoice)
         let spacer = NSView()
-        let identity = NSStackView(views: [brand, status])
-        identity.orientation = .vertical
-        identity.alignment = .leading
-        identity.spacing = 3
-        let bar = NSStackView(views: [identity, spacer, language, microphone])
+        let bar = NSStackView(views: [status, spacer, language, microphone])
         bar.orientation = .horizontal
         bar.spacing = 12
-        bar.edgeInsets = NSEdgeInsets(top: 10, left: 24, bottom: 10, right: 24)
         you.textColor = NSColor(srgbRed: 169/255, green: 210/255, blue: 1, alpha: 1)
         assistant.textColor = .labelColor
         shortcuts.textColor = .secondaryLabelColor
@@ -102,31 +103,23 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         window.contentView = root
         for view in [bar, web, footer] { view.translatesAutoresizingMaskIntoConstraints = false; root.addSubview(view) }
         NSLayoutConstraint.activate([
-            bar.topAnchor.constraint(equalTo: root.topAnchor), bar.leadingAnchor.constraint(equalTo: root.leadingAnchor), bar.trailingAnchor.constraint(equalTo: root.trailingAnchor), bar.heightAnchor.constraint(equalToConstant: 64),
-            web.topAnchor.constraint(equalTo: bar.bottomAnchor), web.leadingAnchor.constraint(equalTo: root.leadingAnchor), web.trailingAnchor.constraint(equalTo: root.trailingAnchor), web.bottomAnchor.constraint(equalTo: footer.topAnchor, constant: -10),
-            footer.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 24), footer.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -24), footer.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -14)
+            web.topAnchor.constraint(equalTo: root.topAnchor), web.leadingAnchor.constraint(equalTo: root.leadingAnchor), web.trailingAnchor.constraint(equalTo: root.trailingAnchor), web.bottomAnchor.constraint(equalTo: bar.topAnchor, constant: -4),
+            bar.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 16), bar.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -16), bar.heightAnchor.constraint(equalToConstant: 32),
+            footer.topAnchor.constraint(equalTo: bar.bottomAnchor, constant: 4), footer.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 16), footer.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -16), footer.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -8)
         ])
         applyLanguage()
         web.registerForDraggedTypes(web.registeredDraggedTypes + [.fileURL])
-        web.droppedFiles = { [weak self] paths in
+        web.droppedFiles = { [weak self] paths, point in
             guard let self else { return }
             self.window.makeFirstResponder(self.web)
-            self.js("window.voz.drop(\(Self.json(paths)))")
-        }
-        shell.output = { [weak self] data in self?.js("window.voz.write(\(Self.json(data.base64EncodedString())))") }
-        shell.ended = { [weak self] in
-            guard let self else { return }
-            self.dictation.cancel()
-            self.status.stringValue = self.tr("Session ended · close this window when ready", "Sessão encerrada · feche esta janela quando quiser")
-            self.microphone.isEnabled = false
-            self.js("window.voz.write(\(Self.json(Data("\r\n[Session ended]\r\n".utf8).base64EncodedString())))")
+            self.js("window.voz.drop(\(Self.json(paths)), \(point.x), \(self.web.isFlipped ? point.y : self.web.bounds.height - point.y))")
         }
         dictation.changed = { [weak self] state in self?.voiceState(state) }
         dictation.metered = { [weak self] level, seconds in self?.js("window.voz.meter(\(level), \(seconds))") }
         dictation.completed = { [weak self] text in
             guard let self else { return }
-            guard self.shell.pid > 0 else { self.recover(text, reason: self.tr("Session ended. Your dictation is preserved here.", "Sessão encerrada. Seu ditado ficou guardado aqui.")); return }
-            self.web.evaluateJavaScript("window.voz.insert(\(Self.json(text)))") { [weak self] _, error in
+            guard let target = self.records[self.voiceSessionID], target.shell.pid > 0 else { self.recover(text, reason: self.tr("Session ended. Your dictation is preserved here.", "Sessão encerrada. Seu ditado ficou guardado aqui.")); return }
+            self.web.evaluateJavaScript("window.voz.insert(\(Self.json(text)), \(Self.json(self.voiceSessionID)))") { [weak self] _, error in
                 guard let self else { return }
                 if let error { self.recover(text, reason: self.tr("Could not insert the transcript: ", "Não foi possível inserir o texto: ") + error.localizedDescription) }
                 else { self.status.stringValue = self.tr("Text inserted · review before pressing Enter", "Texto inserido · revise antes de apertar Enter"); self.inserted?(text) }
@@ -169,7 +162,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
 
     @objc func toggleVoice() {
         if dictation.state == .recording || dictation.state == .paused { dictation.stop() }
-        else if dictation.state == .idle, shell.pid > 0 { dictation.start(language: languageCode) }
+        else if dictation.state == .idle, shell.pid > 0 { voiceSessionID = activeSessionID; dictation.start(language: languageCode) }
         window.makeFirstResponder(web)
         js("window.voz.focus()")
     }
@@ -185,9 +178,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         language.toolTip = tr("Choose the language you will speak. Recognition runs on your Mac.", "Escolha o idioma em que vai falar. O reconhecimento roda no seu Mac.")
         microphone.title = tr("Dictate", "Ditar")
         microphone.toolTip = tr("Start voice dictation (Control + Option + V). Your text stays editable.", "Começar a ditar (Control + Option + V). O texto continua editável.")
-        you.stringValue = tr("› Your input", "› Sua entrada")
-        assistant.stringValue = tr("Terminal output", "Saída do terminal")
-        shortcuts.stringValue = tr("⌃⌥V Voice   ·   Esc Cancel   ·   Drop files to attach", "⌃⌥V Voz   ·   Esc Cancelar   ·   Arraste arquivos para anexar")
+        you.stringValue = theme["name"] ?? "VS Code"
+        assistant.stringValue = "ANSI"
+        shortcuts.stringValue = tr("⌘C Copy · ⌘V Paste · ⌘T Terminal · ⌃⌥V Voice", "⌘C Copiar · ⌘V Colar · ⌘T Terminal · ⌃⌥V Voz")
         voiceState(dictation.state)
     }
 
@@ -213,26 +206,58 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         guard message.frameInfo.isMainFrame, let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
         switch type {
         case "ready":
-            guard !launched else { return }
+            guard let id = body["session"] as? String, UUID(uuidString: id) != nil,
+                  let workspace = body["workspace"] as? String, UUID(uuidString: workspace) != nil,
+                  records[id] == nil, records.count < 32 else { return }
+            js("window.voz.theme(\(Self.json(theme)))")
+            let session = launched ? ShellSession() : firstShell
+            let initial = !launched
             launched = true
+            records[id] = Record(shell: session, workspace: workspace, name: String((body["name"] as? String ?? "Terminal").prefix(80)))
+            activeSessionID = id
+            session.output = { [weak self] data in self?.js("window.voz.write(\(Self.json(data.base64EncodedString())), \(Self.json(id)))") }
+            session.ended = { [weak self] in
+                guard let self else { return }
+                if self.voiceSessionID == id { self.dictation.cancel() }
+                self.js("window.voz.ended(\(Self.json(id)))")
+                if self.activeSessionID == id { self.microphone.isEnabled = false }
+            }
             do {
                 let args = CommandLine.arguments
-                if primary, let index = args.firstIndex(of: "--"), args.count > index + 1 {
-                    try shell.start(executable: args[index + 1], arguments: Array(args.dropFirst(index + 2)), directory: FileManager.default.currentDirectoryPath)
+                let cwd = FileManager.default.currentDirectoryPath
+                let environment = ["BOTERM_SOCKET": controlPath, "BOTERM_SESSION": id, "BOTERM_WORKSPACE": workspace,
+                    "BOTERM_CLI": Bundle.main.resourceURL?.appendingPathComponent("bin/boterm").path ?? "",
+                    "BOTERM_AGENT_GUIDE": Bundle.main.resourceURL?.appendingPathComponent("AGENT_GUIDE.md").path ?? ""]
+                if let agent = body["agent"] as? String, ["codex", "claude", "gemini", "opencode"].contains(agent) {
+                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
+                } else if initial, primary, let index = args.firstIndex(of: "--"), args.count > index + 1 {
+                    try session.start(executable: args[index + 1], arguments: Array(args.dropFirst(index + 2)), directory: cwd, environment: environment)
                 } else {
-                    let cwd = primary ? FileManager.default.currentDirectoryPath : NSHomeDirectory()
-                    try shell.start(executable: "/bin/zsh", arguments: ["-l"], directory: cwd == "/" ? NSHomeDirectory() : cwd)
+                    try session.start(executable: "/bin/zsh", arguments: ["-l"], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
                 }
-                if let columns = body["columns"] as? Int, let rows = body["rows"] as? Int { shell.resize(columns: columns, rows: rows) }
-                voiceState(.idle)
-                didLoad?()
+                if let columns = body["columns"] as? Int, let rows = body["rows"] as? Int { session.resize(columns: columns, rows: rows) }
+                voiceState(dictation.state)
+                if !rootLoaded { rootLoaded = true; didLoad?() }
             } catch { self.error("Could not start the terminal: \(error.localizedDescription)") }
-        case "input": if let text = body["data"] as? String, text.utf8.count <= 1_048_576 { inputReceived?(text); shell.write(text) }
-        case "resize": if let cols = body["columns"] as? Int, let rows = body["rows"] as? Int { shell.resize(columns: cols, rows: rows) }
+        case "activate":
+            if let id = body["session"] as? String, records[id] != nil { activeSessionID = id; voiceState(dictation.state) }
+        case "input":
+            if let id = body["session"] as? String, let text = body["data"] as? String, text.utf8.count <= 1_048_576 {
+                inputReceived?(text); records[id]?.shell.write(text)
+            }
+        case "resize":
+            if let id = body["session"] as? String, let cols = body["columns"] as? Int, let rows = body["rows"] as? Int { records[id]?.shell.resize(columns: cols, rows: rows) }
         case "voice": toggleVoice()
         case "cancelVoice": cancelVoice()
         case "pauseVoice": dictation.togglePause()
-        case "title": if let title = body["title"] as? String { window.title = title.isEmpty ? "VozTTY" : "VozTTY — \(title.prefix(100))" }
+        case "copy": if let text = body["text"] as? String, !text.isEmpty, text.utf8.count <= 1_048_576 { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(text, forType: .string) }
+        case "paste": pasteText()
+        case "closeSession": if let id = body["session"] as? String { closeSession(id) }
+        case "rename": if let id = body["session"] as? String { renameSession(id) }
+        case "message":
+            if let from = body["session"] as? String, let to = body["to"] as? String, let text = body["text"] as? String {
+                do { _ = try postMessage(from: from, to: to, text: text) } catch { self.error(error.localizedDescription) }
+            }
         default: break
         }
     }
@@ -244,9 +269,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if !allowClose && shell.pid > 0 {
+        if !allowClose && records.values.contains(where: { $0.shell.pid > 0 }) {
             let alert = NSAlert()
-            alert.messageText = tr("Close this terminal?", "Fechar este terminal?")
+            alert.messageText = tr("Close this window and its terminals?", "Fechar esta janela e seus terminais?")
             alert.informativeText = tr("Running programs will end and unsent prompt text will be lost.", "Os programas em execução vão terminar e o texto não enviado será perdido.")
             alert.addButton(withTitle: tr("Keep Open", "Manter aberto"))
             alert.addButton(withTitle: tr("Close Terminal", "Fechar terminal"))
@@ -255,7 +280,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         end()
         return true
     }
-    func end() { allowClose = true; dictation.cancel(); shell.close() }
+    func end() { allowClose = true; dictation.cancel(); records.values.forEach { $0.shell.close() }; web.configuration.userContentController.removeScriptMessageHandler(forName: "terminal") }
     func windowWillClose(_ notification: Notification) { closed?() }
     func closeForTest() { allowClose = true; window.performClose(nil) }
 }
@@ -263,6 +288,8 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     var terminals: [TerminalWindow] = []
+    var control: LocalControl?
+    var agentTimer: Timer?
     private var cascade = NSPoint.zero
     func applicationDidFinishLaunching(_ notification: Notification) {
         let main = NSMenu()
@@ -273,18 +300,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let controlItem = appMenu.addItem(withTitle: pt ? "Permitir controle do computador…" : "Allow Computer Control…", action: #selector(allowComputerControl), keyEquivalent: "")
         controlItem.target = self
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit VozTTY", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Quit Boterm", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
         main.addItem(appItem)
         let shellItem = NSMenuItem()
         let shellMenu = NSMenu(title: "Shell")
+        shellMenu.addItem(withTitle: pt ? "Novo terminal" : "New Terminal", action: #selector(newTab), keyEquivalent: "t").target = self
         shellMenu.addItem(withTitle: pt ? "Nova janela" : "New Window", action: #selector(newWindow), keyEquivalent: "n").target = self
         shellItem.submenu = shellMenu
         main.addItem(shellItem)
         let editItem = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
         let edit = NSMenu(title: "Edit")
         for (title, action, key) in [("Copy", "copy:", "c"), ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a")] {
-            edit.addItem(withTitle: title, action: Selector(action), keyEquivalent: key)
+            edit.addItem(withTitle: title, action: Selector(action), keyEquivalent: key).target = self
         }
         editItem.submenu = edit
         main.addItem(editItem)
@@ -294,6 +322,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         main.addItem(windowItem)
         NSApplication.shared.mainMenu = main
         NSApplication.shared.windowsMenu = windowMenu
+        do {
+            control = try LocalControl { [weak self] data in
+                await self?.controlRequest(data) ?? Data("{}".utf8)
+            }
+        } catch { NSAlert(error: error).runModal() }
+        agentTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refreshAgentStates() }
+        }
         newWindow()
         NSApplication.shared.activate(ignoringOtherApps: true)
         #if VOZ_TEST
@@ -303,6 +339,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func newWindow() {
         let terminal = TerminalWindow(primary: terminals.isEmpty)
+        terminal.controlPath = control?.path ?? ""
         // The first window stays centred (.zero leaves it in place); each later one steps down and right.
         cascade = terminal.window.cascadeTopLeft(from: terminals.isEmpty ? .zero : cascade)
         // Removed on the next turn so the window is not released inside its own close callback.
@@ -321,21 +358,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    func applicationWillTerminate(_ notification: Notification) { control = nil }
     private var pt: Bool { (UserDefaults.standard.string(forKey: "language") ?? "pt-BR").hasPrefix("pt") }
 
     /// Programs started in this terminal inherit its macOS privacy grants, so agent CLIs can drive the mouse,
-    /// keyboard and screen once VozTTY itself is allowed. Ad hoc builds lose the grant on every rebuild.
+    /// keyboard and screen once Boterm itself is allowed. Ad hoc builds lose the grant on every rebuild.
     @objc func allowComputerControl() {
         let input = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
         let screen = CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess()
         let alert = NSAlert()
         let state = { (ok: Bool) in ok ? (self.pt ? "permitido" : "allowed") : (self.pt ? "falta permitir" : "not allowed yet") }
         alert.messageText = input && screen
-            ? (pt ? "O VozTTY já pode controlar o computador" : "VozTTY can control this Mac")
-            : (pt ? "Permita o VozTTY nos Ajustes do Sistema" : "Allow VozTTY in System Settings")
+            ? (pt ? "O Boterm já pode controlar o computador" : "Boterm can control this Mac")
+            : (pt ? "Permita o Boterm nos Ajustes do Sistema" : "Allow Boterm in System Settings")
         alert.informativeText = (pt
-            ? "Mouse e teclado (Acessibilidade): \(state(input))\nVer a tela (Gravação de Tela): \(state(screen))\n\nO que rodar neste terminal passa a poder usar o mouse, o teclado e a tela. Depois de permitir, feche e abra o VozTTY. AppleScript pede autorização na primeira vez que for usado."
-            : "Mouse and keyboard (Accessibility): \(state(input))\nScreen (Screen Recording): \(state(screen))\n\nPrograms run in this terminal can then use the mouse, keyboard and screen. Reopen VozTTY after allowing. AppleScript asks the first time it is used.")
+            ? "Mouse e teclado (Acessibilidade): \(state(input))\nVer a tela (Gravação de Tela): \(state(screen))\n\nO que rodar neste terminal passa a poder usar o mouse, o teclado e a tela. Depois de permitir, feche e abra o Boterm. AppleScript pede autorização na primeira vez que for usado."
+            : "Mouse and keyboard (Accessibility): \(state(input))\nScreen (Screen Recording): \(state(screen))\n\nPrograms run in this terminal can then use the mouse, keyboard and screen. Reopen Boterm after allowing. AppleScript asks the first time it is used.")
         alert.addButton(withTitle: "OK")
         if !input || !screen { alert.addButton(withTitle: pt ? "Abrir Ajustes" : "Open Settings") }
         if alert.runModal() == .alertSecondButtonReturn {
@@ -348,14 +386,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         do {
             try Vocabulary.createFileIfNeeded()
             if !NSWorkspace.shared.open(Vocabulary.fileURL) {
-                throw NSError(domain: "VozTTY.Vocabulary", code: 2, userInfo: [NSLocalizedDescriptionKey: "Could not open vocabulary.txt in your text editor."])
+                throw NSError(domain: "Boterm.Vocabulary", code: 2, userInfo: [NSLocalizedDescriptionKey: "Could not open vocabulary.txt in your text editor."])
             }
         } catch {
             NSAlert(error: error).runModal()
         }
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let running = terminals.filter { !$0.allowClose && $0.shell.pid > 0 }
+        let running = terminals.filter { !$0.allowClose && $0.records.values.contains(where: { $0.shell.pid > 0 }) }
         if running.count == 1 { return running[0].windowShouldClose(running[0].window) ? .terminateNow : .terminateCancel }
         if running.count > 1 {
             let alert = NSAlert()

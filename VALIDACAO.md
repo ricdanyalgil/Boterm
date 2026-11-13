@@ -139,3 +139,29 @@ After the maintainer authorized microphone access in macOS, the physical-microph
 ## Compact voice line — native source build 0.2.4
 
 Visual-only refinement: a transparent, borderless 40 px grid row with a 28 px waveform, muted monospace labels, and text controls. Native layout/history checks passed at 620, 800, 1120 and 1440 px with zero grid overflow. At 1120 px the terminal gains six visible rows compared with 0.2.3; at 620 px it gains five. Synthetic history was used for visual review. Microphone recognition was not rerun for this CSS-only change. Installed locally; public release assets remain 0.2.1. Owned preview windows were closed, preserving working app sessions.
+
+
+## Boterm 0.3.0 — 2026-11-13
+
+- 23 Node tests passed, including Ctrl+C selection/SIGINT and paste shortcuts.
+- Native unit checks passed: real PTY, Unicode sanitization, resize, no Enter without submission, installed-theme lookup with JSONC, inherited theme colors, overrides and invalid-color rejection.
+- Native workspace harness passed: independent processes retained across tabs; cross-project messages and reads rejected; native clipboard copy and paste without Return; explicit input submission ordered after paste; dictation completion delivered to its original session after switching focus.
+- Native agent-launch harness passed: the UI selector starts the real installed Codex CLI with its name/symbol and running-state badge, without submitting a model prompt.
+- Native layout harness passed 620, 800, 1120 and 1440 px with no terminal overflow; all voice panel states and the rolling waveform/pause-history renderer passed. Voice visual fixtures are synthetic; no fresh real-microphone accuracy benchmark.
+- `test/control.integration.py` passed against the running app: real MCP stdio -> Unix socket -> app messages/inbox, error handling and ancestry-based identity after BOTERM environment variables are removed. Generated per-session Codex configuration is checked with the actual installed CLI.
+- Two actual Codex agents in separate terminals exchanged a request and acknowledgment using the Boterm MCP tools with read-only shell sandboxing. No code files were read/edited by those test agents. Claude was not logged in; a real Claude/Gemini/OpenCode conversation was not verified.
+- Public app name/icon are Boterm. Release build is signed with the existing Danyalgil Developer ID and retains the bundle identifier. No GitHub release or remote repository rename in this task.
+
+Messages are bounded in-memory history, not a durable task queue. CLI process state is not model token-generation state. Agent inbox checks are explicit; a message does not automatically start a model turn. Closing Boterm ends its PTYs; no restart/reboot persistence.
+
+## Boterm layout refinement — 2026-11-13
+
+Projects now start immediately below the native title bar. Removed the duplicated brand/header; native dictation status, language and microphone controls sit in the footer, and the waveform follows terminal output. Reduced sidebar width, removed the single-pane frame and allowed toolbar actions to wrap.
+
+The native layout harness passed at 620×380, 800×600, 1120×720 and 1440×900, with no grid or page overflow; voice lifecycle/language IDs and pause history passed. WKWebView captures at 620 and 1120 were inspected. Workspace integration passed peer output reading, workspace isolation, clipboard/draft insertion, explicit submission ordering and dictation origin preservation. No physical microphone recheck in this pass. Existing sessions are preserved when installing; they keep their loaded native UI until restarted.
+
+## Boterm commit verification — 2026-11-13
+
+A real read-only Codex reviewer was launched in a separate Boterm terminal and exchanged request/report messages through MCP. Its review found that control requests trusted client-provided session IDs. Requests now require the kernel-reported peer process to descend from the claimed session's shell. The real-socket regression rejects a forged identity while preserving valid MCP messages/inbox, filtered-environment ancestry discovery and actual Codex configuration parsing. The control test now creates a fresh terminal so a previous draft cannot contaminate its shell command.
+
+The 23 JavaScript tests, native unit checks and workspace integration passed. Layout passed at 620–1440 px; the native agent selector launched the installed Codex. The source snapshot prepared for the commit is isolated from concurrent interface edits. Diagnostics and agent transcripts remain under ignored work/. No new physical microphone test, Claude/Gemini/OpenCode conversation, installed-app replacement or binary release is included. Message history remains an intentionally bounded shared window history (200 messages across its projects), not a durable queue or an OS security sandbox.
