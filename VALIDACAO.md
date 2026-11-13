@@ -223,3 +223,12 @@ Sem ciclo autônomo completo com modelos, teste físico de microfone, push ou pu
 - `npm test`: 27 testes aprovados. Build 19 assinado com Developer ID, instalado em `/Applications/Boterm.app` e verificado com `codesign --verify --deep --strict`. Build 18 preservado em `work/development-check/Boterm-before-build19.app`; sessões existentes mantidas.
 
 Sem novo teste físico de microfone, ciclo completo com modelos reais, push ou publicação.
+
+## Verificação com provedores reais e envio ao GitHub (2026-11-13)
+
+- Commits `7aa18cb` e `3424667` enviados para `origin/main`, com confirmação por `git ls-remote`. Nova instância do build 19 aberta; instância anterior e sessões do usuário preservadas.
+- Teste interativo nativo em pasta temporária vazia, usando o launcher real: Claude recebeu um prompt maior que 255 caracteres, passou pela confirmação da pasta e respondeu corretamente ao cálculo 37 × 41 (`1517`). Não foi solicitado trabalho sobre arquivos do projeto nem alteração das permissões do CLI.
+- Gemini abriu pelo launcher com `--prompt-interactive`, mas o login Google foi rejeitado com `This client is no longer supported for Gemini Code Assist for individuals`. Reproduzido também fora do Boterm com Gemini CLI 0.68.0, em pasta temporária, modo headless, código de saída 55. Não havia chave Gemini/Google API disponível no ambiente; valores de credenciais não foram lidos ou exibidos.
+- O [comunicado oficial do Google](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/) informa a migração do acesso pessoal para Antigravity CLI e a continuidade do Gemini CLI para API paga e licenças empresariais. O bloqueio de autenticação do Gemini permanece; a escolha entre adicionar Antigravity e configurar acesso compatível foi apresentada ao usuário.
+
+Esta verificação confirma uma resposta real do Claude e a inicialização do Gemini, não um ciclo completo de sete agentes com modelos reais. Nenhuma chave, conta ou cobrança foi criada.
