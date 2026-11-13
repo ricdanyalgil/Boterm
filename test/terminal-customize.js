@@ -26,9 +26,7 @@ key(original.host.querySelector('.resize-horizontal'), 'ArrowDown');
 check(grid.style.gridTemplateRows !== beforeRows, 'Split height did not change');
 const team = document.getElementById('team'); team.open = true;
 await tick();
-const log = document.getElementById('team-log'), oldHeight = log.clientHeight;
-key(team.querySelector('.resize-handle'), 'ArrowUp');
-check(log.clientHeight > oldHeight, 'Team height did not change');
+check(document.getElementById('team-form').checkVisibility() && !document.getElementById('team-log'), 'Team composer should not duplicate conversation history');
 // Exercise the same drop events as WebKit's HTML drag-and-drop path.
 const heading = sessions.get(third).host.querySelector('.pane-title');
 const transfer = new DataTransfer();
@@ -65,4 +63,4 @@ check(original.term.markers.length === 0, 'Normal buffer accents leaked into ful
 await new Promise(resolve => original.term.write('\x1b[?1049l', resolve));
 await tick();
 check(original.term.markers.length > 0, 'Normal accents did not recover');
-return {sessionColors: true, sidebarResize: true, splitResize: true, teamResize: true, dragOrder: true, processesPreserved: true, projectRename: true, privateLast: true, tokenRows: normalMarkers, fullScreenPreserved: true};
+return {sessionColors: true, sidebarResize: true, splitResize: true, teamComposer: true, dragOrder: true, processesPreserved: true, projectRename: true, privateLast: true, tokenRows: normalMarkers, fullScreenPreserved: true};

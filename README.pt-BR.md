@@ -25,6 +25,8 @@ Escolha Codex, Claude, **Gemini (Antigravity)**, Gemini CLI ou OpenCode e clique
 
 Execute `boterm list`, `boterm read ID`, `boterm message ID 'mensagem'` e `boterm inbox` nos terminais do mesmo projeto. O [guia dos agentes](docs/AGENT_GUIDE.md) explica a configuração. Os agentes precisam consultar suas mensagens; recebê-las não dispara um modelo automaticamente. `send` insere rascunho e `send --submit` é uma operação explícita de execução. A saída dos terminais do projeto é compartilhada com os colegas desse projeto; outros projetos ficam separados.
 
+As conversas aparecem nos dois terminais envolvidos, com nome, hora e a cor de quem falou. A área inferior serve apenas para enviar mensagens, sem duplicar o histórico. Um pedido comum de confirmação, seleção ou login faz a bolinha do terminal pulsar e mostra um aviso de atenção; o Boterm não responde por você. Com movimento reduzido, o indicador fica estático.
+
 O nome público do app nativo é Boterm. A extensão VS Code e o endereço do GitHub mantêm os identificadores VozTTY. Os downloads públicos existentes ainda são das versões VozTTY; 0.3.0 não foi publicado como release.
 
 ## Usar no VS Code

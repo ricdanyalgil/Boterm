@@ -32,6 +32,12 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
   const accents = terminalAccents(terminal);
   const session = {id, color, accents, workspace, name: name.slice(0, 80), term: terminal, fit: addon, host, ended: false, agent, agentState: 'idle'};
   sessions.set(id, session);
+  const conversation = document.createElement('details'), summary = document.createElement('summary'), log = document.createElement('div');
+  conversation.className = 'session-conversation'; conversation.hidden = true;
+  log.className = 'session-conversation-log'; log.setAttribute('role', 'log'); log.setAttribute('aria-live', 'polite');
+  conversation.append(summary, log); host.append(conversation);
+  conversation.addEventListener('toggle', fitVisible);
+  terminal.onWriteParsed(() => updateAttention(session));
   movableSession(session, heading);
   paneResizers(host);
   terminal.onData(data => send({type: 'input', session: id, data}));
@@ -53,6 +59,7 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
     return true;
   });
   activateSession(id);
+  renderConversations();
   send({type: 'ready', session: id, workspace, name: session.name, agent, directory: launch.directory ?? workspaceDirectories.get(workspace), prompt: launch.prompt, columns: terminal.cols, rows: terminal.rows});
   return id;
 }
@@ -77,9 +84,17 @@ function fitVisible() {
   for (const s of sessions.values()) {
     s.host.hidden = !visible.includes(s);
     s.host.classList.toggle('active', s.id === activeID);
+    s.host.querySelector('.session-conversation-log').setAttribute('aria-live', s.id === activeID ? 'polite' : 'off');
   }
   updateSplitLayout(visible.length);
   requestAnimationFrame(() => { for (const s of visible) { if (s.host.clientWidth > 30 && s.host.clientHeight > 30) s.fit.fit(); } });
+}
+function updateAttention(session) {
+  const buffer = session.term.buffer.active;
+  const text = Array.from({length: buffer.length - buffer.baseY}, (_, i) => buffer.getLine(buffer.baseY + i)?.translateToString(true) ?? '').join('\n');
+  const attention = session.ended ? '' : terminalAttention(text);
+  if (session.attention === attention) return;
+  session.attention = attention; session.host.classList.toggle('needs-attention', Boolean(attention)); renderNavigation();
 }
 function renderNavigation(forceProjects = false) {
   const tabs = document.getElementById('workspaces');
@@ -124,8 +139,10 @@ function renderNavigation(forceProjects = false) {
     row.classList.add('session-entry'); row.style.setProperty('--session-color', s.color);
     movableSession(s, row);
     const state = document.createElement('small');
-    state.textContent = s.ended ? 'Encerrado' : s.agent ? (s.agentState === 'running' ? '● Em execução' : '○ Pronto') : 'Shell';
-    state.className = s.agentState === 'running' ? 'agent-running' : ''; row.append(state);
+    state.textContent = s.ended ? 'Encerrado' : s.attention ? `! ${s.attention}` : s.agent ? (s.agentState === 'running' ? '● Em execução' : '○ Pronto') : 'Shell';
+    state.className = s.attention ? 'agent-attention' : s.agentState === 'running' ? 'agent-running' : ''; row.append(state);
+    row.classList.toggle('needs-attention', Boolean(s.attention));
+    if (s.attention) { row.title += ` · Atenção: ${s.attention}`; row.setAttribute('aria-label', `${s.name} · Atenção: ${s.attention}`); }
     if (s.lastMessage) { const task = document.createElement('small'); task.className = 'session-task'; task.textContent = s.lastMessage; task.title = s.lastMessage; row.append(task); }
     row.classList.toggle('selected', s.id === activeID); list.append(row);
     if (s.id !== activeID) select.add(new Option(s.name, s.id));
@@ -134,7 +151,7 @@ function renderNavigation(forceProjects = false) {
   const label = document.getElementById('session-label');
   label.textContent = sessions.get(activeID)?.name ?? '';
   label.style.setProperty('--session-color', sessions.get(activeID)?.color ?? sessionColors[0]);
-  renderMessages();
+  label.classList.toggle('needs-attention', Boolean(sessions.get(activeID)?.attention));
 }
 function renameWorkspace(id, name) {
   if (!workspaces.has(id) || !name.trim()) return;
@@ -142,7 +159,7 @@ function renameWorkspace(id, name) {
 }
 function renameSession(id, name) {
   const s = sessions.get(id); if (!s || !name.trim()) return;
-  s.name = name.trim().slice(0, 80); s.host.querySelector('.pane-title').textContent = s.name; s.host.setAttribute('aria-label', s.name); renderNavigation();
+  s.name = name.trim().slice(0, 80); s.host.querySelector('.pane-title').textContent = s.name; s.host.setAttribute('aria-label', s.name); renderNavigation(); renderConversations();
 }
 function removeSession(id) {
   const s = sessions.get(id); if (!s) return;
@@ -155,22 +172,39 @@ function removeSession(id) {
   } else { renderNavigation(); fitVisible(); }
 }
 function showMessage(message) {
-  messageHistory.push(message); if (messageHistory.length > 200) messageHistory.shift();
   const sender = sessions.get(message.from), recipient = sessions.get(message.to);
+  messageHistory.push({...message, color: sender?.color ?? sessionColors[0]}); if (messageHistory.length > 200) messageHistory.shift();
   if (sender) sender.lastMessage = 'Enviou: ' + message.text;
   if (recipient) recipient.lastMessage = 'Recebeu: ' + message.text;
-  if (message.workspace === activeWorkspace) document.getElementById('team').open = true;
-  renderNavigation();
+  renderNavigation(); renderConversations(); fitVisible();
 }
-function renderMessages() {
-  const log = document.getElementById('team-log'); log.replaceChildren();
-  const messages = messageHistory.filter(m => m.workspace === activeWorkspace);
-  for (const m of messages) {
-    const row = document.createElement('p'), label = document.createElement('strong'), text = document.createElement('span');
-    label.textContent = `${m.fromName} → ${m.toName} · ${new Date(m.time).toLocaleTimeString()} `;
-    text.textContent = m.text; row.append(label, text); log.append(row);
+function messageRow(message) {
+  const row = document.createElement('p'), label = document.createElement('strong'), text = document.createElement('span');
+  row.dataset.messageId = message.id;
+  row.className = 'conversation-message'; row.style.color = message.color;
+  label.textContent = `${message.fromName} → ${message.toName} · ${new Date(message.time).toLocaleTimeString()} `;
+  text.textContent = message.text; row.append(label, text); return row;
+}
+function updateMessageLog(log, messages) {
+  const ids = new Set(messages.map(m => m.id));
+  let changed = false;
+  for (const row of [...log.children]) if (!ids.has(row.dataset.messageId)) { row.remove(); changed = true; }
+  const displayed = new Set([...log.children].map(row => row.dataset.messageId));
+  for (const message of messages) if (!displayed.has(message.id)) { log.append(messageRow(message)); changed = true; }
+  return changed;
+}
+function renderConversations() {
+  for (const session of sessions.values()) {
+    const conversation = session.host.querySelector('.session-conversation'), log = conversation.querySelector('[role="log"]');
+    const messages = messageHistory.filter(m => m.workspace === session.workspace && (m.from === session.id || m.to === session.id || m.to === '*'));
+    const firstMessage = conversation.hidden && messages.length > 0;
+    conversation.hidden = !messages.length;
+    conversation.querySelector('summary').textContent = `Conversa · ${messages.length}`;
+    log.setAttribute('aria-label', `Conversa de ${session.name}`);
+    const changed = updateMessageLog(log, messages);
+    if (firstMessage) conversation.open = true;
+    if (changed) conversation.scrollTop = conversation.scrollHeight;
   }
-  document.getElementById('message-count').textContent = String(messages.length); log.scrollTop = log.scrollHeight;
 }
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('launch-agent').onclick = () => { const kind = document.getElementById('agent-kind').value; createSession({codex: 'Codex', claude: 'Claude', agy: 'Gemini (Antigravity)', gemini: 'Gemini CLI', opencode: 'OpenCode'}[kind], activeWorkspace, kind); };

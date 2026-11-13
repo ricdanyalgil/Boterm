@@ -65,10 +65,6 @@ button.selected { background: #232a3f; color: #c3e88d; }
 .terminal-pane[hidden] { display: none; }
 #team { flex: none; border-top: 1px solid #292d3e; background: #090b10; }
 #team summary { cursor: pointer; padding: 8px 14px; color: #a6acc3; }
-#message-count { color: #c3e88d; padding-left: 8px; }
-#team-log { height: 110px; overflow-y: auto; padding: 0 14px; user-select: text; }
-#team-log p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
-#team-log strong { color: #89ddff; font-size: 11px; }
 #team-form { display: flex; gap: 8px; padding: 8px 12px; }
 #team-form input, #team-form select { min-width: 0; background: #0f111a; border: 1px solid #3b4664; border-radius: 4px; padding: 8px; }
 #team-text { flex: 1; }
@@ -83,6 +79,15 @@ button.selected { background: #232a3f; color: #c3e88d; }
 #agent-kind { border: 1px solid #3b4664; border-radius: 4px; background: #0f111a; color: #babed8; padding: 3px; max-width: 105px; font-size: 11px; }
 #sessions small { display: block; font-size: 11px; font-weight: 400; color: #7b829a; padding: 4px 0 0 18px; }
 #sessions small.agent-running { color: #c3e88d; }
+#sessions small.agent-attention { color: var(--session-color); font-weight: 600; }
+.session-conversation { flex: 0 1 auto; min-height: 24px; max-height: min(140px, 35%); overflow: auto; border-top: 1px solid #292d3e; font-size: 11px; }
+.session-conversation[hidden] { display: none; }
+.session-conversation summary { cursor: pointer; padding: 5px 8px; color: #a6acc3; position: sticky; top: 0; z-index: 1; background: var(--terminal-bg, #0f111a); }
+.session-conversation summary:focus-visible { outline: 2px solid var(--session-color); outline-offset: -2px; }
+.session-conversation-log { padding: 0 8px; }
+.conversation-message { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; margin: 5px 0 8px; }
+.session-conversation .conversation-message { border-left: 2px solid currentColor; padding-left: 8px; }
+.session-conversation .conversation-message strong { display: block; font-weight: 600; }
 @media (max-width: 750px) { #terminal-actions { flex-wrap: wrap; gap: 0; } #terminal-actions > div { flex-wrap: wrap; } #session-label { display: none; } }
 
 #sessions .session-task { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; color: #89ddff; }
@@ -93,13 +98,16 @@ button.selected { background: #232a3f; color: #c3e88d; }
   border-radius: 50%; background: var(--session-color); vertical-align: middle;
 }
 #terminal.split .terminal-pane.active { border-color: var(--session-color); }
+.session-entry.needs-attention::before, .terminal-pane.needs-attention > .pane-title::before, #session-label.needs-attention::before { animation: terminal-attention 1.4s ease-in-out infinite; }
+@keyframes terminal-attention { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--session-color) 30%, transparent); opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .session-entry.needs-attention::before, .terminal-pane.needs-attention > .pane-title::before, #session-label.needs-attention::before { animation: none; box-shadow: 0 0 0 3px var(--session-color); } }
 .pane-title { display: block; cursor: grab; min-height: 24px; box-sizing: border-box; }
 .pane-title:active { cursor: grabbing; }
 .pane-title:focus-visible { outline: 2px solid var(--session-color); outline-offset: -2px; }
 .project-tab { display: flex; align-items: center; flex: none; }
 .project-tab > button + button { padding: 6px; color: #a6acc3; }
 .project-tab input { width: 150px; padding: 6px; background: #1e1e1e; border: 1px solid #82aaff; border-radius: 4px; }
-.terminal-pane, #team { position: relative; }
+.terminal-pane { position: relative; }
 .resize-handle { flex: none; position: relative; touch-action: none; z-index: 4; }
 .resize-vertical { width: 6px; cursor: col-resize; }
 .resize-horizontal { height: 6px; cursor: row-resize; }
@@ -112,7 +120,6 @@ button.selected { background: #232a3f; color: #c3e88d; }
 #terminal.mosaic .terminal-pane > .resize-handle { display: none; }
 .terminal-pane > .resize-vertical { right: 0; top: 0; bottom: 6px; }
 .terminal-pane > .resize-horizontal { bottom: 0; left: 0; right: 6px; }
-#team:not([open]) > .resize-handle { display: none; }
 .drop-target { outline: 2px dashed var(--session-color, #82aaff); outline-offset: -3px; }
 @media (max-width: 750px) { #terminal.split .terminal-pane > .resize-vertical { display: none; } }
 

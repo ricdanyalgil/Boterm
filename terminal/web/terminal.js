@@ -88,7 +88,7 @@ window.voz = {
   },
   fit() { fitVisible(); },
   snapshot(id) { return screenText(sessions.get(id)?.term); },
-  ended(id) { const s = sessions.get(id); if (s) { s.ended = true; renderNavigation(); } },
+  ended(id) { const s = sessions.get(id); if (s) { s.ended = true; updateAttention(s); renderNavigation(); } },
   write(base64, id = activeID) { sessions.get(id)?.term.write(Uint8Array.from(atob(base64), c => c.charCodeAt(0))); },
   insert(text, id = activeID, submit = false) {
     const target = sessions.get(id); if (!target) throw new Error("Session closed");

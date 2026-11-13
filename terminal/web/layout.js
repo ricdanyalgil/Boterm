@@ -108,14 +108,9 @@ function movableSession(session, handle) {
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
-  const sidebar = document.getElementById('sidebar'), team = document.getElementById('team');
+  const sidebar = document.getElementById('sidebar');
   sidebar.after(resizeHandle('Largura da lateral', 'vertical', delta => {
     sidebar.style.width = `${clamp(sidebar.clientWidth + delta, 110, innerWidth * .5)}px`;
     return sidebar.clientWidth / innerWidth * 100;
-  }));
-  team.prepend(resizeHandle('Altura da equipe', 'horizontal', delta => {
-    const log = document.getElementById('team-log');
-    log.style.height = `${clamp(log.clientHeight - delta, 50, Math.max(50, innerHeight - 260))}px`;
-    return log.clientHeight / innerHeight * 100;
   }));
 });

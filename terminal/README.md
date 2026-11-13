@@ -10,6 +10,10 @@ See [the agent guide](../docs/AGENT_GUIDE.md) for `boterm list/read/message/inbo
 
 Mosaico, beside Dividir, arranges all open terminals in the active project using as many columns as the available space allows. Click a pane to work in it, or click Mosaico again to return to the active terminal. Layout changes preserve processes and drafts. Small windows scroll vertically when needed.
 
+Each terminal has a compact, collapsible Conversa history. A direct message and its reply appear in both participants' panes, with names, time and the speaker's terminal color. Broadcasts appear in the project's panes. Enviar mensagem à equipe at the bottom contains only the composer, avoiding a second transcript. Messages never alter the CLI output or send terminal input.
+
+Recognized permission, trust, login and input prompts pulse the session's color dot and show a text attention label. Reduced motion keeps a static marker. Detection uses common CLI prompt patterns, so a client with a different format may need a pattern update. Boterm never selects a menu option or accepts a permission automatically.
+
 Copy/paste works through buttons, native Edit menu, ⌘C/⌘V and Ctrl+C/Ctrl+V. Ctrl+C without selection still interrupts a process. Dictation and dropped files never append Enter. The active VS Code theme is read from the user's local settings and installed extension on launch; third-party themes are not redistributed. CLI ANSI output is preserved. Default-colour links, paths/files and shell variables receive accents in the normal buffer; full-screen programs retain their own styling. Without an installed theme, the renderer uses the VS Code dark terminal palette.
 
 ## Build and open
