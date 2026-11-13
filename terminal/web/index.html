@@ -49,15 +49,18 @@
 </details>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações">×</button></form>
 <h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/VozTTY">GitHub · código-fonte do Boterm</a></p>
+<p>Versão 0.3.1 · build 18</p>
 <p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
 <dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
 <dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>
-<dt>Sessões</dt><dd>Projetos, nomes e mensagens duram nesta janela. Fechar o app encerra os terminais; não há restauração após reiniciar.</dd>
+<dt>Sessões</dt><dd>Ao fechar, escolha salvar o histórico disponível neste Mac. Consulte os arquivos em Shell → Histórico salvo. As dez pastas recentes ficam guardadas e podem ser reabertas pelo Dock. Fechar encerra os processos; os arquivos salvos servem para consulta.</dd>
 <dt>Cores</dt><dd>Tema do VS Code, cores ANSI dos programas e realce de comandos, arquivos, links, diferenças e estados no texto sem cor.</dd>
 <dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
 <dialog id="development-dialog" aria-labelledby="development-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar preset">×</button></form>
 <h2 id="development-title">Desenvolvimento</h2><p>Uma equipe para planejar, implementar, testar e revisar o software.</p>
-<form id="development-form"><label>Pasta do software<input id="development-directory" required placeholder="/Users/…/meu-software" autocomplete="off"></label>
+<form id="development-form"><label for="development-directory">Pasta do projeto</label>
+<div class="directory-picker"><input id="development-directory" required placeholder="/Users/…/meu-software" autocomplete="off"><button id="development-choose-directory" type="button">Selecionar pasta…</button></div>
+<div id="development-recents" aria-label="Projetos recentes" hidden></div>
 <label>Objetivo<input id="development-objective" maxlength="2000" placeholder="Você também pode explicar ao orquestrador depois."></label>
 <div id="development-roles"></div><p id="development-error" role="alert"></p><button type="submit" class="primary-action">Criar equipe</button></form></dialog>
 <script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="text-tokens.js"></script><script src="terminal-accents.js"></script><script src="layout.js"></script><script src="workspace.js"></script><script src="development.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>

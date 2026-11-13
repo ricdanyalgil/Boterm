@@ -1,7 +1,75 @@
 import AppKit
 import WebKit
 
+enum TerminalHistory {
+    static var directory: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Boterm/History", isDirectory: true) }
+    static func save(_ text: String, in directory: URL) throws -> URL {
+        let manager = FileManager.default
+        try manager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        try manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directory.path)
+        let timestamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let file = directory.appendingPathComponent("Boterm-\(timestamp)-\(UUID().uuidString).txt")
+        try Data(text.utf8).write(to: file, options: .atomic)
+        try manager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)
+        return file
+    }
+}
+
+enum ProjectHistory {
+    static func directory(_ path: String) -> String? {
+        guard path.hasPrefix("/"), !path.contains("\0") else { return nil }
+        let url = URL(fileURLWithPath: path).standardizedFileURL.resolvingSymlinksInPath()
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue else { return nil }
+        return url.path
+    }
+    static func paths(defaults: UserDefaults = .standard) -> [String] {
+        var result: [String] = []
+        for path in defaults.stringArray(forKey: "recentProjectDirectories") ?? [] {
+            if let path = directory(path), !result.contains(path) { result.append(path) }
+            if result.count == 10 { break }
+        }
+        return result
+    }
+    static func remember(_ path: String, defaults: UserDefaults = .standard) {
+        guard let path = directory(path) else { return }
+        defaults.set(Array(([path] + paths(defaults: defaults).filter { $0 != path }).prefix(10)), forKey: "recentProjectDirectories")
+    }
+}
+
 @MainActor extension TerminalWindow {
+    func saveHistory(sessionID: String? = nil) async throws -> URL {
+        guard let text = try await web.callAsyncJavaScript("return await window.voz.historySnapshot(sessionID);", arguments: ["sessionID": sessionID as Any? ?? NSNull()], in: nil, contentWorld: .page) as? String,
+              text.utf8.count <= 64 * 1024 * 1024 else { throw ControlError.invalid("Could not capture terminal history") }
+        let file = try TerminalHistory.save("Boterm · \(ISO8601DateFormatter().string(from: Date()))\n\n" + text, in: TerminalHistory.directory)
+        status.stringValue = tr("History saved: ", "Histórico salvo: ") + file.path
+        return file
+    }
+
+    func confirmHistoryClose(sessionID: String? = nil) async -> Bool {
+        guard !confirmingClose, window.attachedSheet == nil else { return false }
+        confirmingClose = true
+        defer { confirmingClose = false }
+        let alert = NSAlert()
+        alert.messageText = tr("Save history before closing?", "Salvar o histórico antes de fechar?")
+        alert.informativeText = tr("Saves the available terminal output and team messages locally. Running programs will end; unsent input may be lost. Saved History in the Shell menu opens your files.", "Salva a saída disponível dos terminais e as mensagens da equipe neste Mac. Os programas vão terminar; texto não enviado pode ser perdido. Acesse os arquivos em Shell → Histórico salvo.")
+        alert.addButton(withTitle: tr("Save and Close", "Salvar e fechar"))
+        alert.addButton(withTitle: tr("Close Without Saving", "Fechar sem salvar"))
+        alert.addButton(withTitle: tr("Cancel", "Cancelar")).keyEquivalent = "\u{1b}"
+        let response = await withCheckedContinuation { continuation in
+            alert.beginSheetModal(for: window) { continuation.resume(returning: $0) }
+        }
+        if response == .alertSecondButtonReturn { return true }
+        guard response == .alertFirstButtonReturn else { return false }
+        do { _ = try await saveHistory(sessionID: sessionID); return true }
+        catch {
+            let failure = NSAlert(error: error)
+            failure.messageText = tr("History was not saved. The terminal remains open.", "O histórico não foi salvo. O terminal continua aberto.")
+            failure.beginSheetModal(for: window, completionHandler: nil)
+            return false
+        }
+    }
+
     @objc func pasteText() {
         if let text = NSPasteboard.general.string(forType: .string), text.utf8.count <= 1_048_576 {
             js("window.voz.paste(\(Self.json(text)))")
@@ -9,15 +77,13 @@ import WebKit
     }
 
     func closeSession(_ id: String) {
-        guard let record = records[id] else { return }
-        let alert = NSAlert()
-        alert.messageText = tr("Close \(record.name)?", "Fechar \(record.name)?")
-        alert.informativeText = tr("Programs in this session will end. Unsent text will be lost.", "Os programas desta sessão vão terminar. O texto não enviado será perdido.")
-        alert.addButton(withTitle: tr("Keep Open", "Manter aberto")); alert.addButton(withTitle: tr("Close", "Fechar"))
-        guard record.shell.pid == 0 || alert.runModal() == .alertSecondButtonReturn else { return }
-        if voiceSessionID == id, dictation.state != .idle { cancelVoice() }
-        record.shell.close(); records.removeValue(forKey: id)
-        js("window.voz.remove(\(Self.json(id)))")
+        guard records[id] != nil else { return }
+        Task {
+            guard await confirmHistoryClose(sessionID: id), let record = records[id] else { return }
+            if voiceSessionID == id, dictation.state != .idle { cancelVoice() }
+            record.shell.close(); records.removeValue(forKey: id)
+            js("window.voz.remove(\(Self.json(id)))")
+        }
     }
 
     func renameSession(_ id: String) {
@@ -45,6 +111,19 @@ import WebKit
 }
 
 @MainActor extension AppDelegate {
+    @objc func saveHistory() {
+        guard let terminal = focused else { return }
+        Task {
+            do { _ = try await terminal.saveHistory() }
+            catch { NSAlert(error: error).beginSheetModal(for: terminal.window, completionHandler: nil) }
+        }
+    }
+    @objc func showHistory() {
+        do {
+            try FileManager.default.createDirectory(at: TerminalHistory.directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+            NSWorkspace.shared.open(TerminalHistory.directory)
+        } catch { NSAlert(error: error).runModal() }
+    }
     var focused: TerminalWindow? { terminals.first { $0.window === NSApplication.shared.keyWindow } }
     @objc func copy(_ sender: Any?) { focused?.js("window.voz.copy()") }
     @objc func paste(_ sender: Any?) { focused?.pasteText() }

@@ -17,7 +17,7 @@ Com as ferramentas de desenvolvimento da Apple instaladas:
 open terminal/Boterm.app
 ```
 
-Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `gemini` dentro da shell; não estão incluídos na aplicação. A versão 0.3.0 oferece abas por projeto, terminais na lateral, divisão de sessões, mensagens entre agentes e copiar/colar por botões, ⌘C/⌘V e Ctrl+C/Ctrl+V. Ctrl+C sem seleção continua interrompendo comandos. O tema é lido do VS Code instalado e as cores ANSI dos programas são preservadas. Não há persistência de processos após fechar o app ou notarização. Fechar uma sessão ativa pede confirmação e descarta o texto não enviado.
+Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `gemini` dentro da shell; não estão incluídos na aplicação. A versão 0.3.1 oferece abas por projeto, terminais na lateral, divisão de sessões, mensagens entre agentes e copiar/colar por botões, ⌘C/⌘V e Ctrl+C/Ctrl+V. Ctrl+C sem seleção continua interrompendo comandos. O tema é lido do VS Code instalado e as cores ANSI dos programas são preservadas. Ao fechar, escolha salvar o histórico disponível em arquivo local, fechar sem salvar ou cancelar. Consulte os arquivos em Shell → Histórico salvo. Não há retomada de processos após fechar o app ou notarização; texto não enviado pode ser perdido.
 
 ## Equipe de agentes
 
@@ -49,7 +49,7 @@ Requer VS Code desktop, Apple Silicon e macOS 26 ou superior. A extensão é exe
 
 - O texto entra no prompt depois de parar; não há transcrição palavra a palavra durante a gravação.
 - O áudio é guardado temporariamente numa pasta privada do utilizador e apagado ao concluir ou cancelar normalmente. Um encerramento forçado pode deixar áudio no diretório temporário do macOS.
-- Não há envio de áudio para uma API da nossa ferramenta, histórico de transcrições nem leitura de credenciais dos assistentes. A Apple pode descarregar modelos de idioma quando necessário.
+- Não há envio de áudio para uma API da nossa ferramenta nem leitura de credenciais dos assistentes. Se você escolher salvar o histórico do terminal, os arquivos locais podem incluir ditados inseridos e outros textos exibidos no terminal. A Apple pode descarregar modelos de idioma quando necessário.
 - Quebras de linha e espaços repetidos são reduzidos a espaços; controlos de terminal são removidos. A pontuação, acentos e palavras permanecem.
 - O reconhecimento tem até 60 segundos para devolver o resultado depois de parar. O texto final tem limite de 64 KiB nesta versão. Um erro ou cancelamento descarta o novo ditado; o texto já existente no prompt permanece.
 - Não identifica o campo interno de cada CLI: a inserção vai para a entrada do terminal selecionado. Use num prompt de texto; um programa que reage imediatamente a caracteres pode reagir à transcrição.

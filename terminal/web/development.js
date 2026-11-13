@@ -22,6 +22,7 @@ function startDevelopment(config) {
   if (sessions.size + developmentRoles.length > 32) { error.textContent = 'A equipe precisa de 7 terminais livres nesta janela.'; return; }
   if (!Array.isArray(config.providers) || config.providers.length !== developmentRoles.length || config.providers.some(p => !['codex', 'claude', 'gemini'].includes(p))) { error.textContent = 'Escolha um provedor válido para cada função.'; return; }
   const workspace = activeWorkspace;
+  workspaceDirectories.set(workspace, config.directory);
   // Start the coordinator last so its peers already exist when it lists the team.
   for (const index of [1, 2, 3, 4, 5, 6, 0]) {
     createSession(developmentRoles[index][0], workspace, config.providers[index], {directory: config.directory, prompt: developmentPrompt(index, config.objective)});
@@ -38,7 +39,9 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
   document.getElementById('development-preset').onclick = () => {
     document.getElementById('development-error').textContent = '';
     document.getElementById('development-dialog').showModal();
+    send({type: 'recentProjects'});
   };
+  document.getElementById('development-choose-directory').onclick = () => send({type: 'chooseDevelopmentDirectory', directory: document.getElementById('development-directory').value.trim()});
   for (const [index, [name]] of developmentRoles.entries()) {
     const label = document.createElement('label'); label.textContent = name;
     const select = document.createElement('select'); select.id = `development-provider-${index}`;

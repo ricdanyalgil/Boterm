@@ -42,7 +42,8 @@ import Darwin
                     }
                 } else if kind == "claude" {
                     let config = ["mcpServers": ["boterm": ["command": executable, "args": ["mcp"], "env": ["BOTERM_SOCKET": path, "BOTERM_SESSION": from, "BOTERM_WORKSPACE": workspace]]]] as [String: Any]
-                    flags = ["--mcp-config", String(decoding: try JSONSerialization.data(withJSONObject: config), as: UTF8.self)]
+                    // Bind the variadic option to its JSON so it cannot consume the initial prompt.
+                    flags = ["--mcp-config=" + String(decoding: try JSONSerialization.data(withJSONObject: config), as: UTF8.self)]
                 }
                 _ = try call(path, ["command": "agentState", "from": from, "workspace": workspace, "agent": kind, "state": "running"])
                 // Replace the launcher so the agent keeps the terminal's foreground process group.

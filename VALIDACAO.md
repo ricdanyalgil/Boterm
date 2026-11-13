@@ -186,3 +186,32 @@ The 23 JavaScript tests, native unit checks and workspace integration passed. La
 ## Build 15 — crédito e ícone no sistema
 
 Sobre validado no harness nativo com o crédito Ricardo Danyalgil Junior, aviso open source/MIT e URL do GitHub. Link abre apenas o repositório autorizado no navegador padrão após clique. Build assinado e instalado em /Applications/Boterm.app. Exportação ICNS regenerada pelo script e comparada ao ícone instalado. Registro do macOS/Dock atualizado; o ícone retornado por NSWorkspace foi inspecionado e contém o novo símbolo >_ menta. Sessões antigas preservadas; sua imagem em execução pode persistir até serem reabertas. Abertura real do navegador pelo link não foi automatizada.
+
+## Boterm — pastas e projetos recentes, build 16 (2026-11-13)
+
+- Seletor nativo de diretórios validado por clique, navegação e confirmação: caminho preenchido, objetivo preservado, sem iniciar a equipe. Cancelamento e configuração de pasta única também verificados no harness nativo.
+- Histórico local: limite de dez, ordem por uso, deduplicação e exclusão de pastas indisponíveis aprovados com preferências isoladas. Menu do Dock inspecionado pelo harness; clicar no item abriu uma janela com projeto nomeado e `pwd` real na pasta correta. O clique direito visual no Dock não foi validado: o acesso à UI do Dock expirou.
+- Harness de desenvolvimento aprovado: quatro atalhos recentes, seleção sem alterar o objetivo, caminhos com espaços/aspas, pasta inválida rejeitada e sete processos de teste com diretórios e funções corretos. Tamanhos 620×380, 800×600, 1440×900 e 1120×720 sem overflow. Provedores substituídos por stub somente no bundle de teste.
+- `npm test`: 27 testes aprovados. Build 16 assinado com Developer ID, verificado e instalado em `/Applications/Boterm.app`; build 15 preservado em `work/development-check/Boterm-before-build16.app`. Sessões do app anterior não foram encerradas.
+
+O histórico registra pastas escolhidas/abertas a partir desta versão; não reconstrói uso anterior nem restaura conversas dos provedores. As janelas abertas continuam na seção padrão de janelas do macOS.
+
+## Boterm — histórico local, 0.3.1 / build 17 (2026-11-13)
+
+- Harness nativo `VOZ_TEST_MODE=history` aprovado: arquivo UTF-8 com acentos e metacaracteres literais, nomes únicos, permissões 0700/0600, captura acima do antigo limite de 262.144 caracteres, mensagens da equipe, cancelamento mantendo janela e sessão, falha de captura mantendo a sessão aberta, gravação antes de autorizar fechamento e descarte encerrando apenas a sessão escolhida.
+- Confirmação visual no app de teste com duas janelas: ⌘Q mostrou Salvar e fechar / Fechar sem salvar / Cancelar; Cancelar manteve a janela utilizável. Saída repetida apresentou uma confirmação por janela. O app de teste foi encerrado separadamente; não foram encerradas sessões do app do usuário.
+- `npm test`: 27 testes aprovados. Build de produção compilado em Swift 6, assinado com o Developer ID existente e verificado com `codesign --verify --deep --strict`. Instalado em `/Applications/Boterm.app`, versão 0.3.1/build 17; cópia anterior em `work/development-check/Boterm-before-build17.app`.
+- Nova instância de produção aberta sem encerrar a instância antiga. O Dock já tinha um item fixado para `/Applications/Boterm.app`; não foi necessário alterar a configuração do Dock.
+
+Os arquivos contêm a saída ainda disponível no buffer e as mensagens retidas na janela, não uma gravação contínua de toda a execução. São arquivos para consulta; não retomam processos, prompts pendentes ou conversas dos provedores. A versão antiga já em execução mantém seu comportamento anterior até ser encerrada.
+
+## Boterm — inicialização dos provedores, 0.3.1 / build 18 (2026-11-13)
+
+- Reproduzido no Claude instalado: `--mcp-config JSON PROMPT` consome o prompt longo como caminho de configuração e gera `ENAMETOOLONG`. Com `--mcp-config=JSON`, o mesmo prompt chega à configuração interativa inicial. Teste também passou pelo launcher compilado, com configuração isolada, sem enviar trabalho a um modelo.
+- `python3 test/agent-launch.integration.py terminal/Boterm.app/Contents/Resources/bin/boterm`: quatro provedores, com/sem prompt e opções; configuração MCP por sessão, metacaracteres literais e ausência de execução do conteúdo do prompt. Socket e provedores substituídos apenas no teste.
+- Gemini real aceitou a chamada do launcher com `--prompt-interactive` e `--help` (saída 0). Não foi validada uma conversa autenticada com Gemini.
+- Harness nativo compilado com Swift 6: sete funções, diretório, prompts, opção interativa do Gemini, rejeição de pasta inválida e quatro tamanhos sem overflow aprovados. Usa o launcher real e substitui somente os executáveis dos provedores no bundle de teste. O limite inicial de 10 segundos expirou durante a partida das shells; a execução com 40 segundos passou e o teste agora permite esse intervalo.
+- `npm test`: 27 testes aprovados. Unidade nativa aprovada: PTY real, resize, sanitização e ausência de envio sem Enter. Build 18 compilado, assinado com Developer ID e verificado com `codesign --verify --deep --strict`.
+- Instalado em `/Applications/Boterm.app`, build 18; assinatura e teste dos quatro launchers repetidos no bundle instalado, ambos aprovados. Build anterior preservado em `work/development-check/Boterm-before-build18.app`; sessões existentes mantidas.
+
+Sem ciclo autônomo completo com modelos, teste físico de microfone, push ou publicação nesta validação.

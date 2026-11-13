@@ -27,7 +27,9 @@ Click **Dictate**, wait for **Listening**, speak, then **Stop & insert**. The sh
 
 Window controls live only in the standard macOS title bar. The content header holds the language picker and **Dictate**; both hide while dictating, so the voice strip inside the terminal is the only place with Pause, Stop & insert and Cancel. Labels follow the selected dictation language (Portuguese for pt-BR/pt-PT, English for en-US). The language names map to the same pt-BR, pt-PT and en-US engine identifiers and preserve existing preferences. Closing an active session still asks for confirmation.
 
-No process restoration or notarization yet. Closing a running shell asks for confirmation. Closing the app loses unsent terminal text and unsaved recovery windows.
+No process restoration or notarization yet. Closing a session, window or app asks whether to save its history, close without saving or cancel. A save failure keeps the terminal open. Unsent terminal text and unsaved recovery windows can still be lost.
+
+Build 17 (0.3.1) saves the available terminal scrollback (up to 5,000 retained lines per terminal), project/session labels, project paths and retained team messages as UTF-8 text under `~/Library/Application Support/Boterm/History`. Files are local, with owner-only directory/file permissions. Shell → Save History (⌘S) saves without closing; Shell → Saved History opens the folder in Finder. Archives are for reading, not resuming provider processes. They contain terminal output, including any sensitive text printed there, only when you choose to save.
 
 ## Windows
 
@@ -55,6 +57,8 @@ xcrun swiftc -parse-as-library -swift-version 6 \
 ```
 
 `npm test` also checks prompt recognition, wrapping, Unicode and reused rows.
+
+After building, `python3 test/agent-launch.integration.py terminal/Boterm.app/Contents/Resources/bin/boterm` checks all four launchers with a temporary socket and client substitutes, including long literal prompts and Claude's bounded MCP argument. It does not contact model providers.
 
 Checks terminal control removal, preserved Unicode/punctuation, a real child PTY, resize and the difference between a draft and explicitly submitted input.
 
@@ -112,7 +116,9 @@ Click the pencil beside a project name to edit it; Enter saves, Escape cancels, 
 
 The top-right ⋯ menu reveals session actions on mouse hover, click or keyboard activation; Escape closes it. Project pencils appear on hover/focus, while + remains visible. The top bar uses muted icons with colour on interaction. Settings (⚙) contains About, author credit, collaboration, privacy, colour and session-lifetime information.
 
-The ⌘ button opens the Development preset: choose an absolute software directory, an optional objective, and Codex/Claude/Gemini for each of seven roles. Creating the team launches six specialists, then the Orchestrator, in the chosen directory. Each receives its role prompt as an argument, never as interpolated shell code. Gemini uses `--prompt-interactive`. Existing sessions stay intact; a project with a live preset team rejects duplicate creation. There must be seven free session slots.
+The ⌘ button opens the Development preset: use “Selecionar pasta…” to browse for the project directory (or type its absolute path), keep an optional objective, and choose Codex/Claude/Gemini for each of seven roles. Selecting or cancelling the folder picker preserves the objective and does not launch the team. Creating the team launches six specialists, then the Orchestrator, in the chosen directory. Each receives its role prompt as an argument, never as interpolated shell code. Gemini uses `--prompt-interactive`. Existing sessions stay intact; a project with a live preset team rejects duplicate creation. There must be seven free session slots.
+
+Build 16 keeps ten recent project folders in local preferences, with four quick choices beneath the folder selector. Missing folders are filtered out. The Dock menu lists recent folders above New Window; selecting one opens a named project in a new window with its shell and subsequent terminals in that directory. macOS lists open windows in its standard Dock section. Recent folders survive restarting the app; terminal conversations do not.
 
 The Orchestrator is instructed to maintain `BOTERM_PLAN.md`, assign file ownership, dispatch to ready peer CLI prompts and iterate through implementation, tests, integrations, UX/design, loop review and final evidence. This is model-driven coordination through the existing Boterm tools, not a background job scheduler. Login, trust and tool approvals can require user action. A message alone does not wake a stopped model; the coordinator must check readiness and explicitly submit the next task. Closing the app ends the team. Full autonomous completion across real provider accounts has not been validated.
 

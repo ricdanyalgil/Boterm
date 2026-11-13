@@ -148,7 +148,7 @@ The native app uses AppKit, WKWebView, xterm.js 6.0.0 and a macOS pseudo-termina
 
 ### Privacy and current limits
 
-- Voice recognition runs on the Mac. VozTTY has no cloud transcription backend, assistant credentials or persistent transcript history.
+- Voice recognition runs on the Mac. VozTTY has no cloud transcription backend or assistant credentials. Boterm 0.3.1 optionally saves terminal output and team messages as local text files when you choose Save History or Save and Close; these can include inserted dictation and other text printed in the terminal.
 - Recordings use a private temporary folder and are removed on normal completion/cancellation. A forced shutdown can leave temporary audio behind.
 - Terminal control characters are removed and line breaks become spaces. A program that reacts immediately to characters can still react without Enter; dictate into the intended text input.
 - Transcription has a 60-second timeout **after Stop** and a 64 KiB text limit. Recording itself is not limited to 60 seconds.

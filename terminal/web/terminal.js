@@ -28,6 +28,15 @@ cancelButton.addEventListener('click', () => send({type: 'cancelVoice'}));
 pauseButton.addEventListener('click', () => send({type: 'pauseVoice'}));
 stopButton.addEventListener('click', () => send({type: 'voice'}));
 window.voz = {
+  async historySnapshot(sessionID) {
+    const selected = [...sessions.values()].filter(s => !sessionID || s.id === sessionID);
+    if (!selected.length) throw new Error('Session not found');
+    await Promise.all(selected.map(s => new Promise(resolve => s.term.write('', resolve))));
+    const projects = new Set(selected.map(s => s.workspace));
+    const output = selected.map(s => `=== ${workspaces.get(s.workspace)} · ${s.name} · ${s.agent || 'Shell'} ===\nPasta: ${workspaceDirectories.get(s.workspace) || 'Diretório inicial do terminal'}\n\n${screenText(s.term, null)}`);
+    const messages = messageHistory.filter(m => projects.has(m.workspace)).map(m => `${m.time} · ${m.fromName} → ${m.toName}: ${m.text}`);
+    return output.join('\n\n') + '\n\n=== Mensagens da equipe ===\n' + messages.join('\n');
+  },
   theme(colors) {
     const {name, ...palette} = colors;
     Object.assign(BOTERM_THEME, palette);
@@ -41,6 +50,22 @@ window.voz = {
   },
   create: createSession,
   startDevelopment,
+  recentProjects(paths) {
+    const list = document.getElementById('development-recents');
+    list.replaceChildren(); list.hidden = !paths.length;
+    if (paths.length) {
+      const label = document.createElement('p'); label.textContent = 'Projetos recentes'; list.append(label);
+      for (const path of paths.slice(0, 4)) {
+        const entry = button(path.split('/').pop() || path, () => window.voz.developmentDirectory(path), path);
+        entry.title = path; list.append(entry);
+      }
+    }
+  },
+  developmentDirectory(path) {
+    document.getElementById('development-directory').value = path;
+    document.getElementById('development-error').textContent = '';
+    document.getElementById('development-choose-directory').focus();
+  },
   developmentError(message) { document.getElementById('development-error').textContent = message; },
   newWorkspace,
   activate: activateSession,
@@ -133,6 +158,6 @@ window.voz = {
   screen() { return screenText(term); }
 };
 new ResizeObserver(fitVisible).observe(document.getElementById('terminal'));
-newWorkspace('Projeto 1');
+newWorkspace(window.botermInitialDirectory?.split('/').pop() || 'Projeto 1', window.botermInitialDirectory);
 workspaces.set(privateWorkspace, 'Private Project');
 renderNavigation();

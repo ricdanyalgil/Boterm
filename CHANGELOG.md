@@ -1,4 +1,14 @@
+# Boterm 0.3.1 — local build 18, 2026-11-13
+
+- Build 18: bind Claude's per-session MCP JSON to `--mcp-config=` so initial role prompts cannot be interpreted as configuration file paths. Preserve client options, authentication and permissions; Gemini continues to use its interactive prompt option.
+
+- Ask to save local terminal history before closing a session, window or the app, including ended sessions. Save failures keep the session open; Cancel leaves processes running.
+- Save available scrollback and team messages as private UTF-8 archives. Shell → Save History saves without closing; Shell → Saved History opens the archive folder. Archives do not resume agent processes.
+- Identify the new window as Boterm 0.3.1 while older running versions remain open.
+
 # Boterm 0.3.0 — local build, 2026-11-13
+
+- Build 16: native project folder picker, four recent folder shortcuts in Development and ten persistent recent projects in the Dock menu. Dock projects open a new named workspace with terminals in the chosen folder; the objective field is preserved.
 
 - Renamed the native application to Boterm with the connected-terminal icon; GitHub URL, extension IDs and bundle identifier retained.
 - Project tabs, session sidebar, split terminals, rename/close actions, independent PTYs and visible team messages.

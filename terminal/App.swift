@@ -42,22 +42,28 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     let shortcuts = NSTextField(labelWithString: "")
     private var launched = false
     private(set) var allowClose = false
+    var confirmingClose = false
     /// Only the first window runs the command given after `--`; windows opened later start a login shell.
     private let primary: Bool
+    private let initialDirectory: String?
     private var recoveredTranscripts: [NSWindow] = []
     var didLoad: (() -> Void)?
     var inserted: ((String) -> Void)?
     var inputReceived: ((String) -> Void)?
     var closed: (() -> Void)?
 
-    init(primary: Bool = true) {
+    init(primary: Bool = true, directory: String? = nil) {
         self.primary = primary
+        self.initialDirectory = directory
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
+        if let directory {
+            config.userContentController.addUserScript(WKUserScript(source: "window.botermInitialDirectory = \(Self.json(directory));", injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        }
         web = DropWebView(frame: .zero, configuration: config)
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1120, height: 720), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         super.init()
-        window.title = "Boterm"
+        window.title = directory.map { URL(fileURLWithPath: $0).lastPathComponent + " — Boterm 0.3.1" } ?? "Boterm 0.3.1"
         window.minSize = NSSize(width: 620, height: 380)
         window.isReleasedWhenClosed = false
         window.delegate = self
@@ -205,6 +211,24 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.frameInfo.isMainFrame, let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
         switch type {
+        case "recentProjects":
+            js("window.voz.recentProjects(\(Self.json(ProjectHistory.paths())))")
+        case "chooseDevelopmentDirectory":
+            guard window.attachedSheet == nil else { return }
+            let panel = NSOpenPanel()
+            panel.title = "Selecionar pasta do projeto"
+            panel.prompt = "Selecionar pasta"
+            panel.canChooseFiles = false
+            panel.canChooseDirectories = true
+            panel.allowsMultipleSelection = false
+            let current = body["directory"] as? String ?? ""
+            panel.directoryURL = URL(fileURLWithPath: current.hasPrefix("/") ? current : NSHomeDirectory(), isDirectory: true)
+            panel.beginSheetModal(for: window) { [weak self] response in
+                guard response == .OK, let url = panel.url else { return }
+                ProjectHistory.remember(url.path)
+                self?.js("window.voz.developmentDirectory(\(Self.json(url.path)))")
+                self?.js("window.voz.recentProjects(\(Self.json(ProjectHistory.paths())))")
+            }
         case "development":
             guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
                   let providers = body["providers"] as? [String], providers.count == 7,
@@ -236,20 +260,25 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
             do {
                 let args = CommandLine.arguments
-                let cwd = (body["directory"] as? String) ?? FileManager.default.currentDirectoryPath
+                let currentDirectory = FileManager.default.currentDirectoryPath
+                let cwd = (body["directory"] as? String) ?? initialDirectory ?? (currentDirectory == "/" ? NSHomeDirectory() : currentDirectory)
                 let prompt = body["prompt"] as? String ?? ""
                 guard prompt.utf8.count <= 15000, !prompt.contains("\0") else { throw ControlError.invalid("Invalid agent prompt") }
                 let environment = ["BOTERM_INITIAL_PROMPT": prompt, "BOTERM_SOCKET": controlPath, "BOTERM_SESSION": id, "BOTERM_WORKSPACE": workspace,
                     "BOTERM_CLI": Bundle.main.resourceURL?.appendingPathComponent("bin/boterm").path ?? "",
                     "BOTERM_AGENT_GUIDE": Bundle.main.resourceURL?.appendingPathComponent("AGENT_GUIDE.md").path ?? ""]
                 if let agent = body["agent"] as? String, ["codex", "claude", "gemini", "opencode"].contains(agent) {
-                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent + (prompt.isEmpty ? "" : (agent == "gemini" ? " --prompt-interactive" : "") + " \"$BOTERM_INITIAL_PROMPT\"")], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
+                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent + (prompt.isEmpty ? "" : (agent == "gemini" ? " --prompt-interactive" : "") + " \"$BOTERM_INITIAL_PROMPT\"")], directory: cwd, environment: environment)
                 } else if initial, primary, let index = args.firstIndex(of: "--"), args.count > index + 1 {
                     try session.start(executable: args[index + 1], arguments: Array(args.dropFirst(index + 2)), directory: cwd, environment: environment)
                 } else {
-                    try session.start(executable: "/bin/zsh", arguments: ["-l"], directory: cwd == "/" ? NSHomeDirectory() : cwd, environment: environment)
+                    try session.start(executable: "/bin/zsh", arguments: ["-l"], directory: cwd, environment: environment)
                 }
                 if let columns = body["columns"] as? Int, let rows = body["rows"] as? Int { session.resize(columns: columns, rows: rows) }
+                if body["directory"] as? String != nil || initialDirectory != nil {
+                    ProjectHistory.remember(cwd)
+                    window.title = URL(fileURLWithPath: cwd).lastPathComponent + " — Boterm 0.3.1"
+                }
                 voiceState(dictation.state)
                 if !rootLoaded { rootLoaded = true; didLoad?() }
             } catch { self.error("Could not start the terminal: \(error.localizedDescription)") }
@@ -287,13 +316,12 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if !allowClose && records.values.contains(where: { $0.shell.pid > 0 }) {
-            let alert = NSAlert()
-            alert.messageText = tr("Close this window and its terminals?", "Fechar esta janela e seus terminais?")
-            alert.informativeText = tr("Running programs will end and unsent prompt text will be lost.", "Os programas em execução vão terminar e o texto não enviado será perdido.")
-            alert.addButton(withTitle: tr("Keep Open", "Manter aberto"))
-            alert.addButton(withTitle: tr("Close Terminal", "Fechar terminal"))
-            guard alert.runModal() == .alertSecondButtonReturn else { return false }
+        if !allowClose {
+            Task {
+                guard await confirmHistoryClose() else { return }
+                end(); window.performClose(nil)
+            }
+            return false
         }
         end()
         return true
@@ -325,6 +353,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let shellMenu = NSMenu(title: "Shell")
         shellMenu.addItem(withTitle: pt ? "Novo terminal" : "New Terminal", action: #selector(newTab), keyEquivalent: "t").target = self
         shellMenu.addItem(withTitle: pt ? "Nova janela" : "New Window", action: #selector(newWindow), keyEquivalent: "n").target = self
+        shellMenu.addItem(.separator())
+        shellMenu.addItem(withTitle: pt ? "Salvar histórico…" : "Save History…", action: #selector(saveHistory), keyEquivalent: "s").target = self
+        shellMenu.addItem(withTitle: pt ? "Histórico salvo…" : "Saved History…", action: #selector(showHistory), keyEquivalent: "").target = self
         shellItem.submenu = shellMenu
         main.addItem(shellItem)
         let editItem = NSMenuItem(title: "Edit", action: nil, keyEquivalent: "")
@@ -356,7 +387,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func newWindow() {
-        let terminal = TerminalWindow(primary: terminals.isEmpty)
+        openWindow()
+    }
+    func openWindow(directory: String? = nil) {
+        let terminal = TerminalWindow(primary: terminals.isEmpty, directory: directory)
         terminal.controlPath = control?.path ?? ""
         // The first window stays centred (.zero leaves it in place); each later one steps down and right.
         cascade = terminal.window.cascadeTopLeft(from: terminals.isEmpty ? .zero : cascade)
@@ -368,8 +402,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         let menu = NSMenu()
+        for path in ProjectHistory.paths() {
+            let item = menu.addItem(withTitle: URL(fileURLWithPath: path).lastPathComponent, action: #selector(openRecentProject(_:)), keyEquivalent: "")
+            item.target = self; item.representedObject = path; item.toolTip = path
+        }
+        if !menu.items.isEmpty { menu.addItem(.separator()) }
         menu.addItem(withTitle: pt ? "Nova janela" : "New Window", action: #selector(newWindow), keyEquivalent: "").target = self
         return menu
+    }
+    @objc func openRecentProject(_ sender: NSMenuItem) {
+        guard let path = sender.representedObject as? String else { return }
+        guard let directory = ProjectHistory.directory(path) else {
+            let alert = NSAlert(); alert.messageText = pt ? "A pasta do projeto não está disponível." : "The project folder is unavailable."
+            alert.informativeText = path; alert.runModal(); return
+        }
+        ProjectHistory.remember(directory)
+        openWindow(directory: directory)
+        NSApplication.shared.activate(ignoringOtherApps: true)
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag { newWindow() }
@@ -411,17 +460,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let running = terminals.filter { !$0.allowClose && $0.records.values.contains(where: { $0.shell.pid > 0 }) }
-        if running.count == 1 { return running[0].windowShouldClose(running[0].window) ? .terminateNow : .terminateCancel }
-        if running.count > 1 {
-            let alert = NSAlert()
-            alert.messageText = pt ? "Fechar \(running.count) terminais?" : "Close \(running.count) terminals?"
-            alert.informativeText = pt ? "Os programas em execução vão terminar e o texto não enviado será perdido." : "Running programs will end and unsent prompt text will be lost."
-            alert.addButton(withTitle: pt ? "Manter abertos" : "Keep Open")
-            alert.addButton(withTitle: pt ? "Fechar todos" : "Close All")
-            guard alert.runModal() == .alertSecondButtonReturn else { return .terminateCancel }
-            running.forEach { $0.end() }
+        let pending = terminals.filter { !$0.allowClose }
+        guard !pending.isEmpty else { return .terminateNow }
+        Task {
+            for terminal in pending {
+                terminal.window.makeKeyAndOrderFront(nil)
+                guard await terminal.confirmHistoryClose() else {
+                    sender.reply(toApplicationShouldTerminate: false); return
+                }
+            }
+            pending.forEach { $0.end() }
+            sender.reply(toApplicationShouldTerminate: true)
         }
-        return .terminateNow
+        return .terminateLater
     }
 }

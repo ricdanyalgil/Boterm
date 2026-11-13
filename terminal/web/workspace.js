@@ -1,5 +1,6 @@
 'use strict';
 const sessions = new Map(), workspaces = new Map();
+const workspaceDirectories = new Map();
 let activeID, activeWorkspace, split = false;
 let nextSessionColor = 0, nextProjectNumber = 2;
 const privateWorkspace = crypto.randomUUID();
@@ -10,10 +11,10 @@ function button(text, action, label = text) {
   b.type = 'button'; b.textContent = text; b.title = label; b.setAttribute('aria-label', label);
   b.addEventListener('click', action); return b;
 }
-function screenText(terminal) {
+function screenText(terminal, limit = 262144) {
   if (!terminal) throw new Error('Session not found');
   const b = terminal.buffer.active;
-  return Array.from({length: b.length}, (_, i) => b.getLine(i)?.translateToString(true) ?? '').join('\n').slice(-262144);
+  return Array.from({length: b.length}, (_, i) => b.getLine(i)?.translateToString(true) ?? '').join('\n').slice(limit === null ? 0 : -limit);
 }
 function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '', launch = {}) {
   if (sessions.size >= 32) throw new Error('Maximum 32 terminals per window');
@@ -52,12 +53,13 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
     return true;
   });
   activateSession(id);
-  send({type: 'ready', session: id, workspace, name: session.name, agent, directory: launch.directory, prompt: launch.prompt, columns: terminal.cols, rows: terminal.rows});
+  send({type: 'ready', session: id, workspace, name: session.name, agent, directory: launch.directory ?? workspaceDirectories.get(workspace), prompt: launch.prompt, columns: terminal.cols, rows: terminal.rows});
   return id;
 }
-function newWorkspace(name) {
+function newWorkspace(name, directory) {
   if (sessions.size >= 32) throw new Error('Maximum 32 terminals per window');
   const id = crypto.randomUUID(); workspaces.set(id, name || `Projeto ${nextProjectNumber++}`);
+  if (directory) workspaceDirectories.set(id, directory);
   activeWorkspace = id; createSession('Terminal 1', id); return id;
 }
 function activateSession(id, focus = true) {
@@ -143,7 +145,7 @@ function removeSession(id) {
   const s = sessions.get(id); if (!s) return;
   s.accents.dispose(); s.term.dispose(); s.host.remove(); sessions.delete(id);
   const next = [...sessions.values()].find(other => other.workspace === s.workspace);
-  if (!next && s.workspace !== privateWorkspace) workspaces.delete(s.workspace);
+  if (!next && s.workspace !== privateWorkspace) { workspaces.delete(s.workspace); workspaceDirectories.delete(s.workspace); }
   if (id === activeID) {
     const target = next || sessions.values().next().value;
     if (target) activateSession(target.id); else newWorkspace();

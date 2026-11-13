@@ -57,6 +57,103 @@ extension TerminalWindow {
             if let path = env["VOZ_TEST_SCREEN"] { try before.write(toFile: path, atomically: true, encoding: .utf8) }
             result["frontendReady"] = true
             result["childPID"] = shell.pid
+            if mode == "history" {
+                let root = FileManager.default.temporaryDirectory.appendingPathComponent("BotermHistory-\(UUID().uuidString)")
+                defer { try? FileManager.default.removeItem(at: root) }
+                let content = "Histórico: ação, espaços, \"aspas\" e $(sem executar)\n"
+                let first = try TerminalHistory.save(content, in: root)
+                let second = try TerminalHistory.save("Segundo arquivo", in: root)
+                guard first != second, try String(contentsOf: first, encoding: .utf8) == content,
+                      (try FileManager.default.attributesOfItem(atPath: root.path)[.posixPermissions] as? NSNumber)?.intValue == 0o700,
+                      (try FileManager.default.attributesOfItem(atPath: first.path)[.posixPermissions] as? NSNumber)?.intValue == 0o600 else { throw VoiceTestError.message("History content, unique files or private permissions failed") }
+                do {
+                    _ = try TerminalHistory.save("Failure", in: first)
+                    throw VoiceTestError.message("Saving to a file path should fail")
+                } catch is CocoaError { }
+                _ = try await web.callAsyncJavaScript("await new Promise(resolve => term.write('H'.repeat(270000) + '\\r\\nHISTORY_TEST_ação\\r\\n', resolve)); return true;", arguments: [:], in: nil, contentWorld: .page)
+                _ = try postMessage(from: activeSessionID, to: "*", text: "HISTORY_TEAM_TEST")
+                let saved = try await saveHistory()
+                defer { try? FileManager.default.removeItem(at: saved) }
+                let archive = try String(contentsOf: saved, encoding: .utf8)
+                guard archive.count > 262144, archive.contains("HISTORY_TEST_ação"), archive.contains("HISTORY_TEAM_TEST") else { throw VoiceTestError.message("History dropped scrollback, Unicode or team messages") }
+                func respond(_ response: NSApplication.ModalResponse) async throws {
+                    try await testUntil("Close prompt did not open") { self.window.attachedSheet != nil }
+                    window.endSheet(window.attachedSheet!, returnCode: response)
+                    try await testUntil("Close prompt did not finish") { !self.confirmingClose }
+                }
+                guard !windowShouldClose(window) else { throw VoiceTestError.message("Window closed before saving decision") }
+                try await respond(.alertThirdButtonReturn)
+                guard !allowClose, shell.pid > 0, window.isVisible else { throw VoiceTestError.message("Cancel closed the terminal") }
+                let id = activeSessionID
+                closeSession(id)
+                try await respond(.alertThirdButtonReturn)
+                guard records[id] != nil else { throw VoiceTestError.message("Cancel removed session") }
+                try await web.evaluateJavaScript("window.voz.originalHistorySnapshot = window.voz.historySnapshot; window.voz.historySnapshot = async () => { throw new Error('HISTORY_EXPECTED_FAILURE'); }; void 0;")
+                var allowed: Bool?
+                Task { allowed = await self.confirmHistoryClose() }
+                try await respond(.alertFirstButtonReturn)
+                guard allowed == false, records[id]?.shell.pid ?? 0 > 0, window.attachedSheet != nil else { throw VoiceTestError.message("Save failure allowed closing") }
+                window.endSheet(window.attachedSheet!, returnCode: .OK)
+                try await testUntil("Error alert did not close") { self.window.attachedSheet == nil }
+                try await web.evaluateJavaScript("window.voz.historySnapshot = window.voz.originalHistorySnapshot; delete window.voz.originalHistorySnapshot;")
+                allowed = nil
+                Task { allowed = await self.confirmHistoryClose() }
+                try await respond(.alertFirstButtonReturn)
+                guard allowed == true else { throw VoiceTestError.message("Save and close was rejected") }
+                let prefix = tr("History saved: ", "Histórico salvo: ")
+                let confirmed = URL(fileURLWithPath: String(status.stringValue.dropFirst(prefix.count)))
+                guard confirmed.deletingLastPathComponent() == TerminalHistory.directory,
+                      try String(contentsOf: confirmed, encoding: .utf8).contains("HISTORY_TEST_ação") else { throw VoiceTestError.message("Save before close did not write history") }
+                try FileManager.default.removeItem(at: confirmed)
+                closeSession(id)
+                try await respond(.alertSecondButtonReturn)
+                try await testUntil("Discard did not close session") { self.records[id] == nil }
+                result["checks"] = ["privateFiles": true, "uniqueArchives": true, "fullScrollback": true, "teamMessages": true, "cancelKeepsSession": true, "saveFailureKeepsSession": true, "saveBeforeClose": true, "discardClosesSession": true]
+                result["passed"] = true; save(); closeForTest(); return
+            }
+            if mode == "project-navigation" {
+                let root = FileManager.default.temporaryDirectory.appendingPathComponent("Boterm projetos \(UUID().uuidString)")
+                try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+                let suite = "BotermHistoryTest-\(UUID().uuidString)"
+                let defaults = UserDefaults(suiteName: suite)!
+                let savedHistory = UserDefaults.standard.object(forKey: "recentProjectDirectories")
+                defer {
+                    UserDefaults.standard.set(savedHistory, forKey: "recentProjectDirectories")
+                    defaults.removePersistentDomain(forName: suite)
+                    try? FileManager.default.removeItem(at: root)
+                }
+                for i in 0..<12 {
+                    let folder = root.appendingPathComponent("Projeto \(i)")
+                    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                    ProjectHistory.remember(folder.path, defaults: defaults)
+                }
+                ProjectHistory.remember(root.appendingPathComponent("Projeto 5").path, defaults: defaults)
+                let history = ProjectHistory.paths(defaults: defaults)
+                guard history.count == 10, history.first?.hasSuffix("Projeto 5") == true, Set(history).count == 10 else { throw VoiceTestError.message("Recent history order, deduplication or limit failed") }
+                ProjectHistory.remember(root.appendingPathComponent("missing").path, defaults: defaults)
+                guard ProjectHistory.paths(defaults: defaults) == history else { throw VoiceTestError.message("Missing folder entered history") }
+                try FileManager.default.removeItem(atPath: history[1])
+                guard ProjectHistory.paths(defaults: defaults).count == 9 else { throw VoiceTestError.message("Deleted folder was not filtered") }
+                UserDefaults.standard.set(history, forKey: "recentProjectDirectories")
+                try await web.evaluateJavaScript("document.getElementById('development-preset').click(); document.getElementById('development-directory').value = \(Self.json(root.path)); document.getElementById('development-objective').value = 'Meu objetivo'; document.getElementById('development-choose-directory').click();")
+                try await testUntil("Native directory picker did not open") { self.window.attachedSheet is NSOpenPanel }
+                guard let panel = window.attachedSheet as? NSOpenPanel, panel.canChooseDirectories, !panel.canChooseFiles, !panel.allowsMultipleSelection else { throw VoiceTestError.message("Wrong folder picker configuration") }
+                panel.cancel(nil)
+                try await testUntil("Folder picker did not cancel") { self.window.attachedSheet == nil }
+                guard try await web.evaluateJavaScript("document.getElementById('development-objective').value === 'Meu objetivo' && document.getElementById('development-directory').value === \(Self.json(root.path))") as? Bool == true else { throw VoiceTestError.message("Cancel altered the form") }
+                guard let delegate = NSApp.delegate as? AppDelegate, let menu = delegate.applicationDockMenu(NSApp), menu.items.filter({ $0.representedObject is String }).count == 9 else { throw VoiceTestError.message("Dock menu does not list valid recent projects") }
+                let item = menu.items.first { $0.representedObject is String }!
+                delegate.openRecentProject(item)
+                let opened = delegate.terminals.last!
+                defer { opened.closeForTest() }
+                try await testUntil("Recent project terminal did not start") { opened.shell.pid > 0 }
+                let path = item.representedObject as! String
+                guard try await opened.web.evaluateJavaScript("workspaceDirectories.get(activeWorkspace) === \(Self.json(path)) && workspaces.get(activeWorkspace) === \(Self.json(URL(fileURLWithPath: path).lastPathComponent))") as? Bool == true else { throw VoiceTestError.message("Recent project opened wrong workspace") }
+                opened.shell.write("/bin/pwd\n")
+                try await testUntil("Recent project shell has wrong working directory") { try await opened.screenText().replacingOccurrences(of: "\n", with: "").contains(path) }
+                result["checks"] = ["historyLimit": 10, "deduplicated": true, "missingFoldersFiltered": true, "nativePicker": true, "cancelPreservesObjective": true, "dockProjects": 9, "dockOpensDirectory": true]
+                result["passed"] = true; save(); closeForTest(); return
+            }
             if mode == "customize", let fixture = env["VOZ_TEST_UI_SCRIPT"] {
                 let script = try String(contentsOfFile: fixture, encoding: .utf8)
                 result["checks"] = try await web.callAsyncJavaScript(script, arguments: [:], in: nil, contentWorld: .page)
@@ -427,7 +524,7 @@ extension TerminalWindow {
             }
             result["insertionPassed"] = true
             result["passed"] = mode != "long-microphone" || (result["openingPreserved"] as? Bool == true && result["closingPreserved"] as? Bool == true)
-        } catch { dictation.cancel(); result["error"] = error.localizedDescription }
+        } catch { dictation.cancel(); result["error"] = error.localizedDescription; result["errorDetails"] = (error as NSError).userInfo.description }
         save()
         if env["VOZ_TEST_KEEP_OPEN"] != "1" { closeForTest() }
     }
