@@ -2,7 +2,7 @@
 
 Project tabs, a session sidebar, split terminals, visible agent messaging and local voice dictation. AppKit + bundled xterm.js + real PTYs; no Node.js runtime or CDN. Apple Silicon and macOS 26+.
 
-Use the agent selector to start Codex, Claude, Gemini or OpenCode with a visible symbol and state. Codex/Claude receive per-session MCP tools; other clients retain their own integration setup. The existing animated microphone history and pause/continue strip are preserved.
+Use the agent selector to start Codex, Claude, Gemini (Antigravity), Gemini CLI or OpenCode with a visible symbol and state. Gemini (Antigravity) starts the installed `agy` terminal with its existing Google account login; Boterm does not configure an API key. The client's model and permissions remain under its own control. Codex/Claude receive per-session MCP tools; other clients retain their own integration setup. The existing animated microphone history and pause/continue strip are preserved.
 
 See [the agent guide](../docs/AGENT_GUIDE.md) for `boterm list/read/message/inbox/new/send`. Messages never type into another shell. Model CLIs keep their own authentication and permissions. All sessions within a project are shared with its team; other projects are isolated. Maximum 32 terminals per window; messages retain the latest 200 in memory. Closing the application ends its processes.
 
@@ -60,7 +60,7 @@ xcrun swiftc -parse-as-library -swift-version 6 \
 
 `npm test` also checks prompt recognition, wrapping, Unicode and reused rows.
 
-After building, `python3 test/agent-launch.integration.py terminal/Boterm.app/Contents/Resources/bin/boterm` checks all four launchers with a temporary socket and client substitutes, including long literal prompts and Claude's bounded MCP argument. It does not contact model providers.
+After building, `python3 test/agent-launch.integration.py terminal/Boterm.app/Contents/Resources/bin/boterm` checks all five launchers with a temporary socket and client substitutes, including long literal prompts and Claude's bounded MCP argument. It does not contact model providers.
 
 Checks terminal control removal, preserved Unicode/punctuation, a real child PTY, resize and the difference between a draft and explicitly submitted input.
 
@@ -118,7 +118,7 @@ Click the pencil beside a project name to edit it; Enter saves, Escape cancels, 
 
 The top-right ⋯ menu reveals session actions on mouse hover, click or keyboard activation; Escape closes it. Project pencils appear on hover/focus, while + remains visible. The top bar uses muted icons with colour on interaction. Settings (⚙) contains About, author credit, collaboration, privacy, colour and session-lifetime information.
 
-The ⌘ button opens the Development preset: use “Selecionar pasta…” to browse for the project directory (or type its absolute path), keep an optional objective, and choose Codex/Claude/Gemini for each of seven roles. Selecting or cancelling the folder picker preserves the objective and does not launch the team. Creating the team launches six specialists, then the Orchestrator, in the chosen directory. Each receives its role prompt as an argument, never as interpolated shell code. Gemini uses `--prompt-interactive`. Existing sessions stay intact; a project with a live preset team rejects duplicate creation. There must be seven free session slots.
+The ⌘ button opens the Development preset: use “Selecionar pasta…” to browse for the project directory (or type its absolute path), keep an optional objective, and choose Codex/Claude/Gemini (Antigravity)/Gemini CLI for each of seven roles. Selecting or cancelling the folder picker preserves the objective and does not launch the team. Creating the team launches six specialists, then the Orchestrator, in the chosen directory. Each receives its role prompt as an argument, never as interpolated shell code. Antigravity and Gemini CLI use `--prompt-interactive`. Existing sessions stay intact; a project with a live preset team rejects duplicate creation. There must be seven free session slots.
 
 Build 16 keeps ten recent project folders in local preferences, with four quick choices beneath the folder selector. Missing folders are filtered out. The Dock menu lists recent folders above New Window; selecting one opens a named project in a new window with its shell and subsequent terminals in that directory. macOS lists open windows in its standard Dock section. Recent folders survive restarting the app; terminal conversations do not.
 

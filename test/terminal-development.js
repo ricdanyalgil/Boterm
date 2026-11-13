@@ -41,6 +41,7 @@ await wait(() => document.getElementById('development-error').textContent.includ
 check(sessions.size === count, 'Invalid directory created sessions');
 directory.value = '/tmp';
 document.getElementById('development-objective').value = 'Testar aspas " $(touch /tmp/BOTERM_UNSAFE) `echo unsafe` sem executar.';
+document.getElementById('development-provider-3').value = 'agy';
 document.getElementById('development-provider-4').value = 'gemini';
 document.getElementById('development-provider-5').value = 'claude';
 document.getElementById('development-form').requestSubmit();
@@ -58,10 +59,10 @@ for (const s of sessions.values()) {
   const output = screenText(s.term).replace(/\n/g, '');
   check(output.includes('cwd=/private/tmp') || output.includes('cwd=/tmp'), 'Agent started in wrong directory');
   check(output.includes(s.name), 'Agent role prompt missing');
-  if (s.agent === 'gemini') check(output.includes('--prompt-interactive'), 'Gemini interactive prompt missing');
+  if (['gemini', 'agy'].includes(s.agent)) check(output.includes('--prompt-interactive'), 'Gemini interactive prompt missing');
 }
 activateSession(initial);
 sessions.get(initial).term.clear();
 await new Promise(resolve => term.write('\r\n› Codex · desenvolvimento\r\n\r\nRan npm test\r\nRead VerifierContext.kt application.properties\r\n\x1b[32mPASS\x1b[0m · 27 testes aprovados\r\nBUILD FAILED · revisão pendente\r\n\r\n+++ src/app.ts\r\n+const ready = true;\r\n-const ready = false;\r\n\r\n$HOME ~/src/app.ts https://example.com\r\n', resolve));
 sessions.get(initial).accents.refresh();
-return {hoverActions: true, escapeActions: true, pencilFocus: true, about: true, sevenRoles: true, invalidDirectoryRejected: true, nativeLaunches: 7, nativeCwd: true, rolePrompts: true, geminiInteractive: true};
+return {hoverActions: true, escapeActions: true, pencilFocus: true, about: true, sevenRoles: true, invalidDirectoryRejected: true, nativeLaunches: 7, nativeCwd: true, rolePrompts: true, geminiInteractive: true, antigravityInteractive: true};

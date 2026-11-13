@@ -1,4 +1,6 @@
-# Boterm 0.3.1 — local build 19, 2026-11-13
+# Boterm 0.3.1 — local build 20, 2026-11-13
+
+- Build 20: Gemini (Antigravity) launches the installed `agy` terminal with its existing account, without configuring API credentials. Available in the agent selector and all seven development roles; interactive prompts, local Boterm CLI coordination and the client's permissions are preserved. Gemini CLI remains available as a separate option.
 
 - Build 19: Mosaic beside Split shows the active project's open terminals in a grid that adapts to the available width and height. Selecting a terminal preserves the grid; toggling Mosaic off returns to the selected terminal. Small windows scroll when needed to keep terminal rows usable.
 

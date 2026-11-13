@@ -7,7 +7,7 @@ import Darwin
             let args = Array(CommandLine.arguments.dropFirst()), env = ProcessInfo.processInfo.environment
             if args.isEmpty || args[0] == "--help" {
                 print("""
-                boterm agent codex|claude|gemini|opencode [ARGS...]
+                boterm agent codex|claude|agy|gemini|opencode [ARGS...]
                 boterm mcp
                 boterm list | read [SESSION] | inbox | new NAME
                 boterm message SESSION|'*' TEXT
@@ -30,7 +30,7 @@ import Darwin
             guard let path, let from, let workspace else { throw ControlError.invalid("Run this command inside Boterm") }
             if args[0] == "mcp" { BotermMCP.serve(path: path, from: from, workspace: workspace); return }
             if args[0] == "agent" {
-                guard args.count >= 2, ["codex", "claude", "gemini", "opencode"].contains(args[1]) else { throw ControlError.invalid("Usage: boterm agent codex|claude|gemini|opencode [ARGS...]") }
+                guard args.count >= 2, ["codex", "claude", "agy", "gemini", "opencode"].contains(args[1]) else { throw ControlError.invalid("Usage: boterm agent codex|claude|agy|gemini|opencode [ARGS...]") }
                 let kind = args[1], executable = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL.path
                 var flags: [String] = []
                 if kind == "codex" {

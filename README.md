@@ -2,7 +2,7 @@
 <h1 align="center">Boterm</h1>
 <p align="center"><strong>Your terminals. One team.</strong><br />Native macOS terminal workspaces, agent messaging and local voice dictation.<br />Speak freely. Review the text. Press Enter when you are ready.</p>
 
-**Boterm 0.3.0 source:** project tabs, session sidebar, split terminals, visible agent messages, copy/paste buttons and ⌘C/⌘V or Ctrl+C/Ctrl+V (Ctrl+C interrupts when nothing is selected). Reads the active installed VS Code theme at launch and preserves CLI ANSI colors. Start Codex, Claude, Gemini or OpenCode from the selector; the sidebar shows symbols, process state and recent messages. Codex/Claude receive per-session MCP tools; agents can also coordinate through the bundled `boterm` CLI; see [the agent guide](docs/AGENT_GUIDE.md).
+**Boterm 0.3.1 source:** project tabs, session sidebar, split terminals, adaptive terminal mosaic, visible agent messages, copy/paste buttons and ⌘C/⌘V or Ctrl+C/Ctrl+V (Ctrl+C interrupts when nothing is selected). Reads the active installed VS Code theme at launch and preserves CLI ANSI colors. Start Codex, Claude, Gemini (Antigravity), Gemini CLI or OpenCode from the selector; Gemini (Antigravity) uses the installed `agy` CLI with its existing account login, without configuring API credentials. The sidebar shows symbols, process state and recent messages. Codex/Claude receive per-session MCP tools; agents can also coordinate through the bundled `boterm` CLI; see [the agent guide](docs/AGENT_GUIDE.md).
 
 The GitHub URL and VS Code extension retain the VozTTY identifiers. The release downloads below are the older VozTTY builds; Boterm 0.3.0 has not been published as a release. Older screenshots and clips document the previous interface.
 

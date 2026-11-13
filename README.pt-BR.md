@@ -21,7 +21,7 @@ Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `
 
 ## Equipe de agentes
 
-Escolha Codex, Claude, Gemini ou OpenCode e clique **Iniciar**. A lateral mostra símbolo, nome, estado do processo e última mensagem enviada/recebida. Codex e Claude recebem integração MCP por sessão; os demais mantêm sua configuração própria. O efeito de gravação com a onda de voz, pausar/continuar e ditado local foi preservado.
+Escolha Codex, Claude, **Gemini (Antigravity)**, Gemini CLI ou OpenCode e clique **Iniciar**. Gemini (Antigravity) chama o terminal `agy` instalado, usando seu login existente, sem configurar chave de API. A opção também está disponível em cada função da equipe de desenvolvimento. A lateral mostra símbolo, nome, estado do processo e última mensagem enviada/recebida. Codex e Claude recebem integração MCP por sessão; os demais mantêm sua configuração própria. O efeito de gravação com a onda de voz, pausar/continuar e ditado local foi preservado.
 
 Execute `boterm list`, `boterm read ID`, `boterm message ID 'mensagem'` e `boterm inbox` nos terminais do mesmo projeto. O [guia dos agentes](docs/AGENT_GUIDE.md) explica a configuração. Os agentes precisam consultar suas mensagens; recebê-las não dispara um modelo automaticamente. `send` insere rascunho e `send --submit` é uma operação explícita de execução. A saída dos terminais do projeto é compartilhada com os colegas desse projeto; outros projetos ficam separados.
 

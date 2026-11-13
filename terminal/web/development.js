@@ -20,7 +20,7 @@ function startDevelopment(config) {
     error.textContent = 'Este projeto já tem uma equipe. Continue pelo Orquestrador ou crie outro projeto.'; return;
   }
   if (sessions.size + developmentRoles.length > 32) { error.textContent = 'A equipe precisa de 7 terminais livres nesta janela.'; return; }
-  if (!Array.isArray(config.providers) || config.providers.length !== developmentRoles.length || config.providers.some(p => !['codex', 'claude', 'gemini'].includes(p))) { error.textContent = 'Escolha um provedor válido para cada função.'; return; }
+  if (!Array.isArray(config.providers) || config.providers.length !== developmentRoles.length || config.providers.some(p => !['codex', 'claude', 'agy', 'gemini'].includes(p))) { error.textContent = 'Escolha um provedor válido para cada função.'; return; }
   const workspace = activeWorkspace;
   workspaceDirectories.set(workspace, config.directory);
   // Start the coordinator last so its peers already exist when it lists the team.
@@ -46,7 +46,7 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
     const label = document.createElement('label'); label.textContent = name;
     const select = document.createElement('select'); select.id = `development-provider-${index}`;
     select.setAttribute('aria-label', `Provedor: ${name}`);
-    for (const [value, title] of [['codex', '◇ Codex'], ['claude', '✳ Claude'], ['gemini', '✦ Gemini']]) select.add(new Option(title, value));
+    for (const [value, title] of [['codex', '◇ Codex'], ['claude', '✳ Claude'], ['agy', '✦ Gemini (Antigravity)'], ['gemini', '✦ Gemini CLI']]) select.add(new Option(title, value));
     label.append(select); document.getElementById('development-roles').append(label);
   }
   document.getElementById('development-form').onsubmit = event => {

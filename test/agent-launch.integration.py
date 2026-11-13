@@ -25,7 +25,7 @@ with tempfile.TemporaryDirectory(prefix="boterm-launch-", dir="/tmp") as directo
                 connection.sendall(b'{"result":"ok"}\n')
 
     threading.Thread(target=serve, daemon=True).start()
-    for kind in ("codex", "claude", "gemini", "opencode"):
+    for kind in ("codex", "claude", "agy", "gemini", "opencode"):
         executable = root / kind
         executable.write_text("#!" + sys.executable + "\nimport json, sys\nprint(json.dumps(sys.argv[1:]))\n")
         executable.chmod(0o700)
@@ -33,8 +33,8 @@ with tempfile.TemporaryDirectory(prefix="boterm-launch-", dir="/tmp") as directo
                BOTERM_SOCKET=str(root / "control.sock"), BOTERM_SESSION="session",
                BOTERM_WORKSPACE="workspace")
     prompt = 'Você integra a equipe como Integrações. "aspas" $(touch INJECTION) `touch INJECTION`\n' * 50
-    for kind in ("codex", "claude", "gemini", "opencode"):
-        for forwarded in ([], ["--help"], ["--prompt-interactive", prompt] if kind == "gemini" else [prompt]):
+    for kind in ("codex", "claude", "agy", "gemini", "opencode"):
+        for forwarded in ([], ["--help"], ["--prompt-interactive", prompt] if kind in ("gemini", "agy") else [prompt]):
             result = subprocess.run([cli, "agent", kind, *forwarded], env=env, cwd=root,
                                     capture_output=True, text=True, check=True, timeout=15)
             arguments = json.loads(result.stdout)
@@ -53,4 +53,4 @@ with tempfile.TemporaryDirectory(prefix="boterm-launch-", dir="/tmp") as directo
             assert requests[-1] == dict(command="agentState", agent=kind, state="running",
                                         **{"from": "session", "workspace": "workspace"})
     assert not (root / "INJECTION").exists()
-    print("PASS: all four launchers preserve options, long literal prompts and per-session MCP configuration")
+    print("PASS: all five launchers preserve options, long literal prompts and per-session MCP configuration")

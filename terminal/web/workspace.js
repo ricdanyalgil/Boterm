@@ -119,7 +119,7 @@ function renderNavigation(forceProjects = false) {
   const recipient = select.value; list.replaceChildren(); select.replaceChildren(new Option('Toda a equipe', '*'));
   for (const s of sessions.values()) {
     if (s.workspace !== activeWorkspace) continue;
-    const marks = {codex: '◇', claude: '✳', gemini: '✦', opencode: '⌘'};
+    const marks = {codex: '◇', claude: '✳', agy: '✦', gemini: '✦', opencode: '⌘'};
     const row = button(`${marks[s.agent] || '›_'} ${s.name}`, () => activateSession(s.id), s.title || s.name);
     row.classList.add('session-entry'); row.style.setProperty('--session-color', s.color);
     movableSession(s, row);
@@ -173,7 +173,7 @@ function renderMessages() {
   document.getElementById('message-count').textContent = String(messages.length); log.scrollTop = log.scrollHeight;
 }
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('launch-agent').onclick = () => { const kind = document.getElementById('agent-kind').value; createSession({codex: 'Codex', claude: 'Claude', gemini: 'Gemini', opencode: 'OpenCode'}[kind], activeWorkspace, kind); };
+  document.getElementById('launch-agent').onclick = () => { const kind = document.getElementById('agent-kind').value; createSession({codex: 'Codex', claude: 'Claude', agy: 'Gemini (Antigravity)', gemini: 'Gemini CLI', opencode: 'OpenCode'}[kind], activeWorkspace, kind); };
   document.getElementById('new-session').onclick = () => createSession(`Terminal ${sessions.size + 1}`);
   document.getElementById('split').onclick = () => {
     split = !split; mosaic = false;

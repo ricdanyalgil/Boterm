@@ -232,7 +232,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         case "development":
             guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
                   let providers = body["providers"] as? [String], providers.count == 7,
-                  providers.allSatisfy({ ["codex", "claude", "gemini"].contains($0) }),
+                  providers.allSatisfy({ ["codex", "claude", "agy", "gemini"].contains($0) }),
                   let objective = body["objective"] as? String, objective.count <= 2000, records.count + 7 <= 32 else {
                 js("window.voz.developmentError('Configuração inválida ou limite de terminais atingido.')"); return
             }
@@ -267,8 +267,8 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
                 let environment = ["BOTERM_INITIAL_PROMPT": prompt, "BOTERM_SOCKET": controlPath, "BOTERM_SESSION": id, "BOTERM_WORKSPACE": workspace,
                     "BOTERM_CLI": Bundle.main.resourceURL?.appendingPathComponent("bin/boterm").path ?? "",
                     "BOTERM_AGENT_GUIDE": Bundle.main.resourceURL?.appendingPathComponent("AGENT_GUIDE.md").path ?? ""]
-                if let agent = body["agent"] as? String, ["codex", "claude", "gemini", "opencode"].contains(agent) {
-                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent + (prompt.isEmpty ? "" : (agent == "gemini" ? " --prompt-interactive" : "") + " \"$BOTERM_INITIAL_PROMPT\"")], directory: cwd, environment: environment)
+                if let agent = body["agent"] as? String, ["codex", "claude", "agy", "gemini", "opencode"].contains(agent) {
+                    try session.start(executable: "/bin/zsh", arguments: ["-lic", "exec \"$BOTERM_CLI\" agent " + agent + (prompt.isEmpty ? "" : (["gemini", "agy"].contains(agent) ? " --prompt-interactive" : "") + " \"$BOTERM_INITIAL_PROMPT\"")], directory: cwd, environment: environment)
                 } else if initial, primary, let index = args.firstIndex(of: "--"), args.count > index + 1 {
                     try session.start(executable: args[index + 1], arguments: Array(args.dropFirst(index + 2)), directory: cwd, environment: environment)
                 } else {

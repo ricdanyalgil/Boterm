@@ -232,3 +232,14 @@ Sem novo teste físico de microfone, ciclo completo com modelos reais, push ou p
 - O [comunicado oficial do Google](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/) informa a migração do acesso pessoal para Antigravity CLI e a continuidade do Gemini CLI para API paga e licenças empresariais. O bloqueio de autenticação do Gemini permanece; a escolha entre adicionar Antigravity e configurar acesso compatível foi apresentada ao usuário.
 
 Esta verificação confirma uma resposta real do Claude e a inicialização do Gemini, não um ciclo completo de sete agentes com modelos reais. Nenhuma chave, conta ou cobrança foi criada.
+
+## Gemini com login existente, 0.3.1 / build 20 (2026-11-13)
+
+- Localizados `/Applications/Gemini.app` e `/opt/homebrew/bin/agy`. O terminal Antigravity já instalado está autenticado; não foi necessário instalar outro cliente nem iniciar login. O app Gemini de desktop permanece separado da integração por terminal.
+- Adicionada a opção Gemini (Antigravity) ao seletor e às sete funções da equipe. Executa `boterm agent agy`, aceita estado do processo no controle local e usa `--prompt-interactive` para o prompt inicial. Mantém modelo, autenticação e permissões do cliente; não altera configurações globais ou configura chave de API. Gemini CLI permanece como opção separada.
+- Teste real em pasta temporária: `agy --model gemini-3.8-flash-low --mode plan --print-timeout 45s --print ...` retornou `1517` para 37 × 41, saída 0. Variáveis Gemini/Google API ausentes e provedor de API por chave desativado na configuração existente.
+- Harness nativo com launcher real e `agy` real: prompt inicial longo, resposta `1517`, estado Em execução e quatro tamanhos sem overflow aprovados. Captura inspecionada: Antigravity CLI 1.5.8, conta Google AI Pro e modelo Gemini 4 Argon (Medium). O teste não solicitou leitura, alteração de arquivos ou uso de ferramentas.
+- `npm test`: 27 testes aprovados. Regressão dos cinco launchers aprovada. Harness das sete funções aprovado com Codex, Claude, Gemini CLI e Antigravity simulados, verificando diretório, prompts e modo interativo. Compilações de produção e de teste em Swift 6 concluídas; assinatura de produção verificada.
+- Instalado em `/Applications/Boterm.app`, build 20; assinatura e regressão dos cinco launchers verificadas novamente no app instalado. Build 19 preservado em `work/development-check/Boterm-before-build20.app`. Nova instância aberta sem encerrar as sessões anteriores.
+
+Sem novo teste de microfone nem ciclo completo de desenvolvimento com sete modelos reais. A integração validada usa a sessão local já autorizada, sem criar conta, chave ou cobrança por API.

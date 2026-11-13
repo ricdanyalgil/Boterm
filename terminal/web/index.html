@@ -20,7 +20,7 @@
   <div class="terminal-layout-actions"><button id="split" type="button" aria-pressed="false">Dividir</button><button id="mosaic" type="button" aria-pressed="false" title="Mostrar todos os terminais do projeto em mosaico">Mosaico</button></div>
 </aside>
 <div id="stage">
-<div id="terminal-actions"><span id="session-label"></span><div id="session-controls"><details id="action-menu"><summary title="Ações do terminal" aria-label="Ações do terminal">⋯</summary><div class="action-items"><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="gemini">✦ Gemini</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></details></div></div>
+<div id="terminal-actions"><span id="session-label"></span><div id="session-controls"><details id="action-menu"><summary title="Ações do terminal" aria-label="Ações do terminal">⋯</summary><div class="action-items"><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="agy">✦ Gemini (Antigravity)</option><option value="gemini">✦ Gemini CLI</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></details></div></div>
 <main id="terminal" aria-label="Sessões de terminal"></main>
 <section id="voice-panel" aria-label="Voice dictation" hidden>
   <div class="voice-info">
@@ -49,13 +49,13 @@
 </details>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações">×</button></form>
 <h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/VozTTY">GitHub · código-fonte do Boterm</a></p>
-<p>Versão 0.3.1 · build 19</p>
+<p>Versão 0.3.1 · build 20</p>
 <p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
 <dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
 <dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>
 <dt>Sessões</dt><dd>Ao fechar, escolha salvar o histórico disponível neste Mac. Consulte os arquivos em Shell → Histórico salvo. As dez pastas recentes ficam guardadas e podem ser reabertas pelo Dock. Fechar encerra os processos; os arquivos salvos servem para consulta.</dd>
 <dt>Cores</dt><dd>Tema do VS Code, cores ANSI dos programas e realce de comandos, arquivos, links, diferenças e estados no texto sem cor.</dd>
-<dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
+<dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini (Antigravity) por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
 <dialog id="development-dialog" aria-labelledby="development-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar preset">×</button></form>
 <h2 id="development-title">Desenvolvimento</h2><p>Uma equipe para planejar, implementar, testar e revisar o software.</p>
 <form id="development-form"><label for="development-directory">Pasta do projeto</label>

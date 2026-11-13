@@ -172,7 +172,7 @@ enum ProjectHistory {
                     ["id": id, "name": record.name, "pid": record.shell.pid, "workspace": workspace, "agent": record.agent, "state": record.state] as [String: Any]
                 }.sorted { ($0["name"] as? String ?? "") < ($1["name"] as? String ?? "") }
             case "agentState":
-                guard let agent = request["agent"] as? String, ["codex", "claude", "gemini", "opencode"].contains(agent),
+                guard let agent = request["agent"] as? String, ["codex", "claude", "agy", "gemini", "opencode"].contains(agent),
                       let state = request["state"] as? String, ["running", "idle"].contains(state) else { throw ControlError.invalid("Invalid agent state") }
                 terminal.records[from]?.agent = agent; terminal.records[from]?.state = state
                 terminal.records[from]?.agentPID = request["peerPID"] as? Int32 ?? 0
