@@ -236,16 +236,18 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
         case "development":
             guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
-                  let providers = body["providers"] as? [String], providers.count == 8,
+                  let providers = body["providers"] as? [String], providers.count == 9,
                   providers.allSatisfy({ ["codex", "claude", "agy", "gemini"].contains($0) }),
-                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 8 <= 32 else {
+                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 9 <= 32 else {
                 js("window.voz.developmentError('Configuração inválida ou limite de terminais atingido.')"); return
             }
             var isDirectory: ObjCBool = false
             guard FileManager.default.fileExists(atPath: directory, isDirectory: &isDirectory), isDirectory.boolValue else {
                 js("window.voz.developmentError('A pasta do software não existe. Use um caminho absoluto válido.')"); return
             }
-            js("window.voz.startDevelopment(\(Self.json(["directory": directory, "objective": objective, "providers": providers])))")
+            // Rules the Qualidade role learned in earlier sessions; the page appends them to each role's prompt with a cap.
+            let roles = (try? String(contentsOfFile: directory + "/.boterm/ROLES.md", encoding: .utf8)).map { String($0.prefix(8000)) } ?? ""
+            js("window.voz.startDevelopment(\(Self.json(["directory": directory, "objective": objective, "providers": providers, "roles": roles])))")
         case "ready":
             guard let id = body["session"] as? String, UUID(uuidString: id) != nil,
                   let workspace = body["workspace"] as? String, UUID(uuidString: workspace) != nil,

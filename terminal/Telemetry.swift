@@ -61,6 +61,8 @@ enum Telemetry {
     static func history(directory: String) -> [String: Any] {
         let entries = SessionLog.entries(SessionLog.read(directory))
         let titles = entries.reversed().prefix(5).map { $0.split(separator: "\n").first.map { String($0.dropFirst(3)) } ?? "" }
-        return ["entries": entries.count, "recent": titles, "archive": FileManager.default.fileExists(atPath: SessionLog.archive(directory).path)]
+        let roles = (try? String(contentsOfFile: directory + "/.boterm/ROLES.md", encoding: .utf8)) ?? ""
+        let learned = roles.split(separator: "\n").filter { $0.hasPrefix("## ") }.count
+        return ["entries": entries.count, "recent": titles, "archive": FileManager.default.fileExists(atPath: SessionLog.archive(directory).path), "roles": learned]
     }
 }

@@ -170,3 +170,16 @@ Claude agents are launched with `--settings` hooks (PreToolUse/PostToolUse for M
 Two worlds share one structure, chosen in Settings → Aparência and kept in preferences (`world`). **Grelha construída** (default): near-black ground, hairline rules, a blue construction grid visible in empty mosaic cells and while arranging, square identity chips that pulse while a terminal produces output, one orange plane on the active terminal's header, Saira for the count, headings and figures. **Set de rodagem**: tally lamps (red rolling, amber needs you, hollow standby, no halos), camera-tape identity bars, Barlow Condensed headings. Product context lives in `PRODUCT.md`; the direction contract in `.impeccable/surfaces/`; design tokens in `DESIGN.md`. Fonts are bundled under `web/fonts` (OFL, see README there).
 
 Clicking the large count (e.g. 8/32) cycles single view → mosaic → dashboard. "Salvar layout" appears only after an arrangement action in the current project; the profile selector appears once a profile exists.
+
+## Qualidade and learned role rules (build 27)
+
+The Development preset has nine roles; Qualidade is the eighth, before Mensageiro. After the Orquestrador records an activity in the history, it asks Qualidade to review the cycle. Qualidade keeps `.boterm/ROLES.md`, for example:
+
+```markdown
+## Todos
+Rode npm test antes de reportar.
+## Testes
+Anexe o comando exato e a saída da falha.
+```
+
+On team launch the app reads the first 8 KB of that file. The page appends `## Todos` and the role's own section (1200 characters each at most) to that role's prompt, labelled as repository data. Other headings are ignored. The dashboard's history line shows how many sections were learned.

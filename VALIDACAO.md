@@ -299,3 +299,10 @@ Limites: hooks não exercitados dentro de uma sessão real do Boterm com um agen
 - Uma fixture inicial criou terminais com tipo de agente e lançou Codex e Claude reais no app de teste; ficaram no ecrã de confiança da pasta e terminaram com o app de teste, sem tarefa. A fixture passou a usar shells.
 
 Limites: a faixa nativa de ditado (microfone e Ditar) e o painel de voz durante a gravação não foram capturados. Sem teste físico de microfone.
+
+## Agente de Qualidade — 0.4.1 / build 27 (2026-11-17)
+
+- `test/development.test.js`: nove funções; o prompt da Qualidade contém a revisão de documentação, harness, skills e prompts, `.boterm/ROLES.md`, event improvement, a proibição de segredos e a espera por atribuição explícita. As regras aprendidas chegam à função certa e à secção Todos, com teto, e secções desconhecidas e títulos de nível 1 são ignorados. Todos os prompts ficam abaixo de 15 KB com objetivo máximo e ROLES.md cheio. O Orquestrador pede a revisão do ciclo. npm test 34/34.
+- No app real, com um `.boterm/ROLES.md` provisório em /tmp (removido no fim): o Testes recebeu a sua regra e a de Todos, o Desenvolvimento só a de Todos, a secção inexistente não chegou a nenhum prompt e a Qualidade foi lançada. O harness do preset lançou nove processos, e o do painel passou.
+
+Limites: ciclo real com modelos (revisão da Qualidade e nova equipe a nascer com as regras) não exercitado.

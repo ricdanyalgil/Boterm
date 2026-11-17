@@ -1,3 +1,8 @@
+# Boterm 0.4.1 — local build 27, 2026-11-17
+
+- Qualidade, ninth Development role (Claude by default). After each activity finished end to end, the Orquestrador asks it to review the cycle: history entry, events and diff. It checks change, test and general documentation, harness and tests, and the project's prompts and skills. It fixes small, safe documentation and test gaps itself and proposes the rest.
+- Learning across sessions: Qualidade maintains `.boterm/ROLES.md` (`## Todos` plus one `## <Função>` section per role). When a team starts, Boterm appends the matching sections to each role's prompt, at most 1200 characters per section from the first 8 KB, marked as repository data that never overrides the built-in rules. Unknown sections are ignored. The dashboard history line counts the learned sections.
+
 # Boterm 0.4.0 — local build 26, 2026-11-17
 
 - Redesign through the Impeccable design process (PRODUCT.md, a direction round with six sketched worlds, a direction contract, two inspection rounds, an independent finish review). The chosen world is Grelha construída: square cells on a blue construction grid, hairline rules, one orange plane on the active terminal's header, Saira for display and figures.

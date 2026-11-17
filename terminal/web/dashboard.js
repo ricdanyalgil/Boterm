@@ -151,7 +151,7 @@ function renderDashboard(force = false) {
   grid.append(mcp);
 
   const history = data.history;
-  const historyBox = section('Histórico do projeto', history ? (history.entries ? `${plural(history.entries, 'entrada', 'entradas')} em .boterm/HISTORY.md${history.archive ? ' · arquivo antigo disponível' : ''}` : 'Ainda sem entradas. O Orquestrador regista cada atividade concluída.') : 'Sem pasta de projeto.', 'dash-history');
+  const historyBox = section('Histórico do projeto', history ? (history.entries ? `${plural(history.entries, 'entrada', 'entradas')} em .boterm/HISTORY.md${history.archive ? ' · arquivo antigo disponível' : ''}` : 'Ainda sem entradas. O Orquestrador regista cada atividade concluída.') + (history.roles ? ` · ${plural(history.roles, 'secção aprendida', 'secções aprendidas')} pela Qualidade em .boterm/ROLES.md` : '') : 'Sem pasta de projeto.', 'dash-history');
   if (history?.recent?.length) { const list = element('ol', 'dash-commits'); for (const t of history.recent) list.append(element('li', '', t)); historyBox.append(list); }
   grid.append(historyBox);
 
