@@ -1,82 +1,198 @@
-# Boterm — Seus terminais. Uma equipe.
+<p align="center">
+  <img src="assets/boterm/banner.png" width="100%" alt="Boterm: seus terminais, uma equipe. Rode e supervisione agentes de IA no seu Mac." />
+</p>
 
-**Vários terminais, agentes colaborando e ditado local.** Projeto open source com licença MIT. [English](README.md) · [Releases](https://github.com/ricdanyalgil/VozTTY/releases)
+<p align="center">
+  <a href="https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-ff4d2e?style=flat-square&labelColor=0c0d10" alt="Release v0.4.1" /></a>
+  <img src="https://img.shields.io/badge/macOS-26%2B-e8e9ec?style=flat-square&logo=apple&labelColor=0c0d10" alt="macOS 26 ou posterior" />
+  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-e8e9ec?style=flat-square&labelColor=0c0d10" alt="Apple Silicon" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-2e54c4?style=flat-square&labelColor=0c0d10" alt="Licença MIT" /></a>
+</p>
 
-**Estado de publicação:** prévia pública autorizada pelo responsável. O terminal Mac e a extensão VS Code estão disponíveis nos [downloads da release v0.2.0](https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.2.1). Os pacotes ainda não têm notarização da Apple.
+<p align="center">
+  <a href="#download">Download</a> ·
+  <a href="#o-que-ele-faz">Funcionalidades</a> ·
+  <a href="#a-equipe-de-desenvolvimento">A equipe</a> ·
+  <a href="#agentes-conversam-entre-si">CLI dos agentes</a> ·
+  <a href="#compilar-a-partir-do-código">Compilar</a> ·
+  <a href="README.md">English</a>
+</p>
 
-Microfone na barra do terminal, com reconhecimento local no Mac e inserção direta no prompt. Não lê nem escreve no clipboard e não acrescenta Enter.
+---
 
-## Terminal próprio para Mac — prévia 0.2.0
+**Boterm é um terminal nativo para macOS feito para rodar uma equipe de agentes de IA.** Codex, Claude, Gemini e OpenCode ganham cada um um terminal real. Eles trocam mensagens por um socket local e MCP, e você acompanha todos numa só tela: quem está trabalhando, quem está esperando e quem precisa de você.
 
-Já existe uma primeira aplicação nativa: uma janela, uma sessão de shell real e o botão **Dictate / Stop & insert** na própria barra. Usa AppKit, WebKit e xterm.js local, sem runtime Node.js. O mesmo motor de voz serve a extensão e o terminal próprio.
+Quem manda é você. O Boterm nunca aperta Enter por você, nunca responde a um pedido de aprovação e só fala com você fora do app com permissões que você concedeu e pode revogar.
 
-Com as ferramentas de desenvolvimento da Apple instaladas:
+> O Boterm se chamava **VozTTY** até a 0.2.9. O repositório e a extensão do VS Code mantêm esse nome; o ditado por voz continua aqui.
+
+<p align="center">
+  <img src="assets/boterm/screens/grid-mosaic.png" width="100%" alt="Mosaico do Boterm: nove agentes da equipe de desenvolvimento num projeto, o Orquestrador ativo em laranja e o terminal de Testes aguardando permissão." />
+  <br /><sub>Modo mosaico. Cada terminal ocupa células inteiras da grade; arraste o canto para redimensionar e o título para mover.</sub>
+</p>
+
+## O que ele faz
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Projetos e terminais
+Abas de projeto no topo, os terminais do projeto à esquerda e uma área que mostra um terminal, uma divisão ou um mosaico livre. Salve um arranjo como perfil de layout e reaplique pelo nome.
+
+</td>
+<td width="50%" valign="top">
+
+### Supervisão num olhar
+Cada linha mostra função, provedor, estado e tempo do agente. Um terminal que pede confirmação, escolha ou login ganha um aviso de atenção com o motivo (“Pede: …”). O Boterm não responde por você.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### Agentes que conversam
+Agentes do mesmo projeto listam, leem, mandam mensagens e entregam rascunhos uns aos outros com a CLI `boterm` incluída. Codex e Claude também recebem ferramentas MCP por sessão. Outros projetos ficam isolados, verificados pela ancestralidade dos processos.
+
+</td>
+<td valign="top">
+
+### Memória do projeto
+`.boterm/HISTORY.md` guarda um resumo das sessões anteriores com menos de 8 KB, lido antes de planejar. `.boterm/ROLES.md` reúne as regras que a equipe aprendeu; elas entram nos prompts da próxima equipe. Agentes ociosos têm o contexto compactado.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### Painel
+Tempo de sessão, estado dos agentes ao vivo, código alterado desde que o projeto abriu, testes que pegaram falhas, correções, tempo de MCP por servidor e o histórico do projeto. Clique num agente para abrir o terminal dele.
+
+</td>
+<td valign="top">
+
+### Voz que nunca envia
+Dite com o reconhecimento de fala da Apple, no próprio Mac (pt-BR, pt-PT, en-US). O texto chega ao prompt como rascunho editável. O Enter é seu.
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="assets/boterm/screens/grid-dashboard.png" width="100%" alt="Painel do projeto no Boterm: tabela da equipe com estado, edições, comandos e tempo de MCP por agente, alterações de código em células e a linha do tempo de qualidade." />
+  <br /><sub>Painel do projeto. Os números destas capturas são dados de exemplo do harness de testes nativo.</sub>
+</p>
+
+## A equipe de desenvolvimento
+
+Um clique (⌘ na barra superior) abre nove funções, cada uma no seu terminal com o provedor que você escolher:
+
+| Função | O que faz |
+| :--- | :--- |
+| **Orquestrador** | Planeja com o histórico do projeto, distribui a posse dos arquivos, mantém o `BOTERM_PLAN.md` e confere resultados reais |
+| **Desenvolvimento** | Escreve o código |
+| **Testes** | Escreve e roda testes, registra as falhas encontradas |
+| **Integrações** | APIs, serviços e sistemas externos |
+| **UX e design** | Interface e interação |
+| **Engenharia de loop** | Mantém o ciclo de desenvolvimento andando |
+| **Resposta e entrega** | Fecha e entrega |
+| **Qualidade** | Revisa cada ciclo concluído e mantém as regras aprendidas em `.boterm/ROLES.md` |
+| **Mensageiro** | O único canal com você fora do Boterm: Telegram (token no Keychain), WhatsApp ou email |
+
+O Mensageiro espera a sua resposta e registra permissões permanentes, listadas e revogáveis em Ajustes. Nenhuma outra função fala com você fora do app.
+
+## Agentes conversam entre si
 
 ```sh
+boterm list                              # colegas neste projeto
+boterm read SESSION                      # a saída deles
+boterm message SESSION 'Testes falhando' # uma mensagem, não teclas
+boterm send SESSION 'rascunho'           # um rascunho editável no prompt deles
+boterm event test-fail 'api/session.test.ts: 401'   # um fato para o painel
+boterm history                           # o que as sessões anteriores fizeram
+```
+
+Uma mensagem nunca dispara um modelo sozinha, e `send` insere um rascunho sem Enter. Enviar entrada a um colega exige `--submit` explícito. A saída dos terminais é tratada como dado não confiável. O guia completo está em [docs/AGENT_GUIDE.md](docs/AGENT_GUIDE.md).
+
+## Dois visuais
+
+<p align="center">
+  <img src="assets/boterm/screens/set-mosaic.png" width="80%" alt="Boterm no visual Set de rodagem: lâmpadas de gravação, faixas de identidade e títulos condensados." />
+  <br /><sub><b>Grelha construída</b> é o padrão: uma grade de construção azul e um só cabeçalho laranja no terminal ativo. <b>Set de rodagem</b> (acima) fica em Ajustes → Aparência.</sub>
+</p>
+
+O texto dos terminais segue sempre o tema do VS Code instalado, e as cores ANSI das CLIs são preservadas.
+
+## Download
+
+**Requer um Mac com Apple Silicon e macOS 26 ou posterior.**
+
+| Pacote | Download | Instalação |
+| :--- | :--- | :--- |
+| **Boterm 0.4.1** | [boterm-0.4.1-darwin-arm64.zip](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/boterm-0.4.1-darwin-arm64.zip) | Extraia e mova o **Boterm.app** para Aplicativos |
+| Extensão VS Code 0.1.3 | [voztty-0.1.3-darwin-arm64.vsix](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/voztty-0.1.3-darwin-arm64.vsix) | Extensões → … → Install from VSIX… |
+| Checksums | [SHA256SUMS.txt](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/SHA256SUMS.txt) | `shasum -a 256 -c SHA256SUMS.txt` |
+
+É uma prévia pública, assinada com Developer ID mas **ainda sem notarização da Apple**; o macOS pode pedir aprovação na primeira abertura. Codex, Claude, Gemini (Antigravity `agy`) e OpenCode são instalados e autenticados à parte; o Boterm usa os seus logins e nunca configura chaves de API.
+
+## Compilar a partir do código
+
+Ferramentas de desenvolvimento da Apple com o SDK do macOS 26, e Node.js 22+ para os testes.
+
+```sh
+git clone https://github.com/ricdanyalgil/VozTTY.git
+cd VozTTY
+npm test
 ./terminal/build.sh
 open terminal/Boterm.app
 ```
 
-Por omissão abre `/bin/zsh -l`. Execute os seus comandos `claude`, `codex` ou `gemini` dentro da shell; não estão incluídos na aplicação. A versão 0.3.1 oferece abas por projeto, terminais na lateral, divisão de sessões, mensagens entre agentes e copiar/colar por botões, ⌘C/⌘V e Ctrl+C/Ctrl+V. Ctrl+C sem seleção continua interrompendo comandos. O tema é lido do VS Code instalado e as cores ANSI dos programas são preservadas. Ao fechar, escolha salvar o histórico disponível em arquivo local, fechar sem salvar ou cancelar. Consulte os arquivos em Shell → Histórico salvo. Não há retomada de processos após fechar o app ou notarização; texto não enviado pode ser perdido.
+Sem dependências npm de produção. AppKit, WKWebView, um PTY real do macOS e o xterm.js empacotado localmente; sem CDN e sem runtime Node no app. Os harnesses nativos e a geração do ícone estão em [terminal/README.md](terminal/README.md).
 
-## Equipe de agentes
+<details>
+<summary><b>Ditado por voz e vocabulário pessoal</b></summary>
 
-Escolha Codex, Claude, **Gemini (Antigravity)**, Gemini CLI ou OpenCode e clique **Iniciar**. Gemini (Antigravity) chama o terminal `agy` instalado, usando seu login existente, sem configurar chave de API. A opção também está disponível em cada função da equipe de desenvolvimento. A lateral mostra símbolo, nome, estado do processo e última mensagem enviada/recebida. Codex e Claude recebem integração MCP por sessão; os demais mantêm sua configuração própria. O efeito de gravação com a onda de voz, pausar/continuar e ditado local foi preservado.
+<br />
 
-Execute `boterm list`, `boterm read ID`, `boterm message ID 'mensagem'` e `boterm inbox` nos terminais do mesmo projeto. O [guia dos agentes](docs/AGENT_GUIDE.md) explica a configuração. Os agentes precisam consultar suas mensagens; recebê-las não dispara um modelo automaticamente. `send` insere rascunho e `send --submit` é uma operação explícita de execução. A saída dos terminais do projeto é compartilhada com os colegas desse projeto; outros projetos ficam separados.
+Clique em **Ditar** na faixa inferior ou use <kbd>Control</kbd> + <kbd>Option</kbd> + <kbd>V</kbd>, fale e depois **Parar e inserir**. <kbd>Esc</kbd> cancela. O texto chega depois que você para; não há transcrição palavra a palavra. O reconhecimento roda no Mac pelo SpeechAnalyzer da Apple, sem nuvem do Boterm e sem chave de API de transcrição.
 
-As conversas aparecem nos dois terminais envolvidos, com nome, hora e a cor de quem falou. A área inferior serve apenas para enviar mensagens, sem duplicar o histórico. Um pedido comum de confirmação, seleção ou login faz a bolinha do terminal pulsar e mostra um aviso de atenção; o Boterm não responde por você. Com movimento reduzido, o indicador fica estático.
+O Boterm corrige a grafia de nomes de assistentes e projetos depois da transcrição (“Cloud Code” → “Claude Code”). Edite a lista em **Boterm → Edit Vocabulary…** (⌘,). Um nome preferido por linha, alternativas depois do `=`:
 
-O nome público do app nativo é Boterm. A extensão VS Code e o endereço do GitHub mantêm os identificadores VozTTY. Os downloads públicos existentes ainda são das versões VozTTY; 0.3.0 não foi publicado como release.
+```text
+Claude Code = Cloud Code
+MeuProjeto = Meu Projeto | Mel Projeto
+```
 
-## Usar no VS Code
+É correção de texto, não treino acústico. Até 100 entradas, 32 KB, UTF-8. Um arquivo vazio desativa as correções; apague-o para voltar ao padrão.
 
-1. Abra o terminal integrado e selecione a sessão em que quer escrever.
-2. Clique no ícone de microfone na barra do painel, junto aos controlos do terminal. Também pode executar **Voz: Começar ditado no terminal** na Paleta de Comandos.
-3. Aguarde o indicador **Voz: a gravar**. No primeiro uso, autorize o microfone no pedido do macOS; um modelo de idioma pode precisar de ser descarregado pela Apple.
-4. Fale e clique no botão de parar para terminar. A extensão transcreve e insere o texto diretamente no prompt, conservando a pontuação.
-5. Reveja e continue a escrever. Você escolhe quando enviar.
+A extensão do VS Code traz o mesmo ditado aos terminais integrados: instale o VSIX e clique no microfone da barra do terminal. Defina `voz.language` como `pt-BR`, `pt-PT` ou `en-US`.
 
-**Control + Option + V** começa ou termina uma gravação com o terminal focado. **Esc** cancela. Durante a preparação ou transcrição, clique no indicador da barra inferior para cancelar.
+</details>
 
-A gravação pertence à sessão em que começou. Mudar de terminal ou fechar essa sessão cancela o ditado. O texto que já estava no prompt não é apagado. O texto é inserido na posição atual do cursor quando a transcrição termina.
+<details>
+<summary><b>Privacidade e limites</b></summary>
 
-## Idioma e requisitos
+<br />
 
-Em Definições do VS Code, procure **Voz: Language**. Idioma inicial: `pt-BR`; também estão disponíveis `pt-PT` e `en-US`, sujeitos ao suporte da Apple no computador.
+- Tudo roda localmente. Os sockets dos agentes ficam restritos ao seu usuário do macOS e às sessões do mesmo projeto; isto não é um sandbox do sistema contra programas rodando como você.
+- As mensagens da equipe ficam em memória (últimas 200 por janela). O histórico do projeto e as regras aprendidas são arquivos de texto na pasta `.boterm/` do projeto. O histórico dos terminais só é gravado quando você escolhe Salvar histórico.
+- “Trabalhando” quer dizer saída recente no terminal, não prova de que um modelo está gerando. A detecção de atenção cobre os pedidos comuns, não todos.
+- Fechar o app encerra as shells; as sessões não sobrevivem a um reinício.
+- Ainda sem teste de ponta a ponta: Telegram com um bot real, um ciclo completo da equipe com modelos reais e o microfone físico nesta versão.
+- Macs Intel, Windows, Linux e o VS Code no navegador não são suportados.
 
-Requer VS Code desktop, Apple Silicon e macOS 26 ou superior. A extensão é executada localmente, inclusive em janelas Remote SSH/Containers. A captura e inserção num terminal remoto ainda precisam de validação. VS Code no navegador, Linux, Windows e Mac Intel não são suportados por esta versão.
+</details>
 
-## Limites desta primeira versão
+## Contribuir
 
-- O texto entra no prompt depois de parar; não há transcrição palavra a palavra durante a gravação.
-- O áudio é guardado temporariamente numa pasta privada do utilizador e apagado ao concluir ou cancelar normalmente. Um encerramento forçado pode deixar áudio no diretório temporário do macOS.
-- Não há envio de áudio para uma API da nossa ferramenta nem leitura de credenciais dos assistentes. Se você escolher salvar o histórico do terminal, os arquivos locais podem incluir ditados inseridos e outros textos exibidos no terminal. A Apple pode descarregar modelos de idioma quando necessário.
-- Quebras de linha e espaços repetidos são reduzidos a espaços; controlos de terminal são removidos. A pontuação, acentos e palavras permanecem.
-- O reconhecimento tem até 60 segundos para devolver o resultado depois de parar. O texto final tem limite de 64 KiB nesta versão. Um erro ou cancelamento descarta o novo ditado; o texto já existente no prompt permanece.
-- Não identifica o campo interno de cada CLI: a inserção vai para a entrada do terminal selecionado. Use num prompt de texto; um programa que reage imediatamente a caracteres pode reagir à transcrição.
-- O componente nativo tem assinatura local ad hoc; ainda não é uma distribuição notarizada pela Apple.
+Relatos de bugs, correções de documentação, retorno sobre acessibilidade e pull requests são bem-vindos. Uma pequena correção de documentação ou um bug reproduzível é um ótimo primeiro passo.
 
-## Instalar o pacote
+[Guia de contribuição](CONTRIBUTING.md) · [Relatar um bug](https://github.com/ricdanyalgil/VozTTY/issues/new/choose) · [Discussões](https://github.com/ricdanyalgil/VozTTY/discussions) · [Changelog](CHANGELOG.md)
 
-No VS Code, abra **Extensions → … → Install from VSIX…** e selecione o ficheiro `voztty-0.1.2-darwin-arm64.vsix` disponível na release pública ou compilado a partir do repositório. Se o painel Terminal não mostrar o microfone depois da instalação, execute **Developer: Reload Window** quando puder interromper a janela atual.
+Use exemplos sintéticos, nunca gravações, tokens ou transcrições privadas.
 
-## Desenvolvimento
+## Licença
 
-`./build-helper.sh` compila o componente Swift com as ferramentas da Apple. `npm test` executa os testes da entrega de texto, sem gravar áudio. Não há dependências npm de produção.
+[MIT](LICENSE). Copyright © 2026 Ricardo Danyalgil Junior. Os componentes de terceiros incluídos mantêm as próprias [licenças](terminal/web/vendor/README.md).
 
-O teste `test/integration.js` é executado pelo Extension Development Host do VS Code: usa uma gravação sintética definida em `VOZ_TEST_AUDIO`, o motor real da Apple e um pseudo-terminal de teste para confirmar que o texto chega uma única vez e sem Enter. Não abre o microfone nem executa comandos de shell.
-
-## Validação da versão 0.1.1
-
-Os dez testes automatizados passaram. No VS Code, o teste acústico reproduziu uma frase sintética pelos altifalantes e captou-a pelo microfone físico: chegou uma única transcrição ao terminal, sem Enter ou Escape. Cancelar, recomeçar e encerrar o motor também passaram. A versão corrige uma tentativa de escrita num canal já fechado que gerava `SIGPIPE` após a transcrição.
-
-O teste `test/microphone.integration.js` exige `VOZ_TEST_MICROPHONE=1` e `VOZ_TEST_RESULT` com o caminho do resultado JSON. Abre o microfone e reproduz a frase no dispositivo de saída atual, sem alterar as definições de áudio. Guarda apenas estados e contagens. O responsável também confirmou o ditado com a própria voz num terminal normal do VS Code. Os testes posteriores passaram nos campos reais do Claude Code e Codex, tanto pelo terminal de teste do VS Code como no terminal próprio, sem Enter. O Gemini continua bloqueado pela autenticação do serviço.
-
-No terminal próprio, o ensaio acústico longo controlado captou 82 segundos e entregou 182 palavras, com início, fim e prefixo anterior preservados. Ensaios acústicos anteriores perderam partes do texto; continuam a ser necessários testes com fala longa natural do responsável. Não é um benchmark de precisão. Consulte [VALIDACAO.md](VALIDACAO.md).
-
-Ainda falta avaliar a recusa de permissões numa instalação nova, sessões remotas, uso continuado do terminal próprio e autenticação/compositor do Gemini.
-
-## Organização visual do terminal próprio
-
-Fundo preto, perguntas reconhecidas pelo marcador do CLI em azul suave e saída normal em cinzento claro. Cabeçalho com estado do microfone e rodapé com legenda e atalhos. A cor é apenas visual: não altera o texto, as permissões ou o envio. Usa os marcadores ›, ❯ e >; citações com o mesmo formato podem receber o destaque e continuações com quebra explícita podem conservar as cores do CLI.
+<p align="center"><br /><img src="assets/boterm/icon-grid.svg" width="56" alt="Ícone do Boterm" /></p>

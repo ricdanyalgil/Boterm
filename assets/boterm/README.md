@@ -19,3 +19,13 @@ Prompt: Use case: logo-brand. Asset type: final macOS application icon for Boter
 ## Ícone da Grelha construída — 17/11/2026
 
 `icon-grid.svg` (fonte) e `icon-grid.png` (1024 px, render do Chrome headless com fundo transparente) substituem o ícone profissional no aplicativo, alinhando-o ao mundo visual Grelha construída. É o `>_` em giz (#e8e9ec) sobre base quase preta, construído célula a célula sobre a grelha de construção azul, com uma célula laranja no lugar do cursor. Foi desenhado à mão em SVG, sem ferramenta de geração de imagem. Exportado com `terminal/build-icon.sh`; legibilidade conferida a 32 px.
+
+## Banner do README — 17/11/2026
+
+`banner.png` (2560×1280) é a capa do README e a imagem de pré-visualização social do repositório. Fonte em `banner.html`, que usa `icon-grid.svg`, a Saira do app e `screens/grid-mosaic.png`. As três capturas em `screens/` vêm do harness nativo com dados de exemplo, reduzidas para 1600 px. Para regenerar a partir desta pasta:
+
+```sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+  --allow-file-access-from-files --force-device-scale-factor=2 --window-size=1280,640 \
+  --screenshot="$PWD/banner.png" "file://$PWD/banner.html"
+```

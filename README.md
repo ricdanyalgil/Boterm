@@ -1,202 +1,199 @@
-<p align="center"><img src="assets/boterm/icon-concept.png" width="96" alt="Boterm terminal icon" /></p>
-<h1 align="center">Boterm</h1>
-<p align="center"><strong>Your terminals. One team.</strong><br />Native macOS terminal workspaces, agent messaging and local voice dictation.<br />Speak freely. Review the text. Press Enter when you are ready.</p>
-
-**Boterm 0.3.1 source:** project tabs, session sidebar, split terminals, adaptive terminal mosaic, visible agent messages, copy/paste buttons and ⌘C/⌘V or Ctrl+C/Ctrl+V (Ctrl+C interrupts when nothing is selected). Reads the active installed VS Code theme at launch and preserves CLI ANSI colors. Start Codex, Claude, Gemini (Antigravity), Gemini CLI or OpenCode from the selector; Gemini (Antigravity) uses the installed `agy` CLI with its existing account login, without configuring API credentials. The sidebar shows symbols, process state and recent messages. Codex/Claude receive per-session MCP tools; agents can also coordinate through the bundled `boterm` CLI; see [the agent guide](docs/AGENT_GUIDE.md).
-
-The GitHub URL and VS Code extension retain the VozTTY identifiers. The release downloads below are the older VozTTY builds; Boterm 0.3.0 has not been published as a release. Older screenshots and clips document the previous interface.
-
 <p align="center">
-  <a href="https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.2.9"><img src="https://img.shields.io/badge/public_preview-v0.2.9-orange?style=flat" alt="Public preview release" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat" alt="MIT license" /></a>
-  <img src="https://img.shields.io/badge/macOS-26%2B-black?logo=apple&amp;style=flat" alt="macOS 26 or later" />
-  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-555555?style=flat" alt="Apple Silicon arm64" />
-  <img src="https://img.shields.io/badge/VS%20Code-1.93%2B-007ACC?style=flat" alt="VS Code 1.93 or later" />
-  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-78A641?style=flat" alt="Pull requests welcome" /></a>
+  <img src="assets/boterm/banner.png" width="100%" alt="Boterm: Your terminals. One team. Run and supervise AI coding agents on your Mac." />
 </p>
 
-<p align="center"><a href="#download-and-install">Download</a> · <a href="#two-ways-to-work">Features</a> · <a href="#compatibility-and-validation">Compatibility</a> · <a href="#build-from-source">Build</a> · <a href="#contributions-are-welcome">Contribute</a></p>
+<p align="center">
+  <a href="https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-ff4d2e?style=flat-square&labelColor=0c0d10" alt="Release v0.4.1" /></a>
+  <img src="https://img.shields.io/badge/macOS-26%2B-e8e9ec?style=flat-square&logo=apple&labelColor=0c0d10" alt="macOS 26 or later" />
+  <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-e8e9ec?style=flat-square&labelColor=0c0d10" alt="Apple Silicon" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2e54c4?style=flat-square&labelColor=0c0d10" alt="MIT license" /></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-c3e88d?style=flat-square&labelColor=0c0d10" alt="Pull requests welcome" /></a>
+</p>
 
-<img src="assets/social-preview.png" width="1100" alt="VozTTY: Speak your next prompt. Stay in your terminal. Local voice dictation for macOS and VS Code." />
+<p align="center">
+  <a href="#download">Download</a> ·
+  <a href="#what-it-does">Features</a> ·
+  <a href="#the-development-team">The team</a> ·
+  <a href="#agents-talk-to-each-other">Agent CLI</a> ·
+  <a href="#build-from-source">Build</a> ·
+  <a href="README.pt-BR.md">Português</a>
+</p>
 
-### See the workflow
+---
 
-<img src="assets/voice-demo.gif" width="1100" alt="Edited walkthrough of the real VozTTY app: a synthetic audio file is transcribed locally and inserted as an unsent prompt." />
-<p align="center"><sub>20-second edited walkthrough of the real app and Apple recognizer, using a synthetic audio file through a temporary demo adapter. No live microphone or assistant is connected in this clip. Frames are held for readability; this is not elapsed transcription time or an accuracy benchmark.</sub></p>
+**Boterm is a native macOS terminal for running a team of AI coding agents.** Codex, Claude, Gemini and OpenCode each get a real terminal. They message each other through a local socket and MCP, and you watch all of them from one screen: who is working, who is waiting, and who needs you.
 
-[Download the 20-second demo video](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.2.6/voztty-demo.mp4).
+You stay in charge. Boterm never presses Enter for you, never answers an approval prompt, and only reaches you outside the app through permissions you granted and can revoke.
 
-## Your voice, where you already work
+> Boterm was called **VozTTY** until 0.2.9. The repository and the VS Code extension keep that name; the voice dictation is still here.
 
-**Dictating can be faster than typing long prompts—and gives you room to explain more.** Speak through your ideas, describe the context and include the details you might skip when typing. VozTTY brings a microphone directly to your terminal so you can keep your train of thought, then review and edit the transcript before sending it.
+<p align="center">
+  <img src="assets/boterm/screens/grid-mosaic.png" width="100%" alt="Boterm mosaic: nine agents of the Development team in one project, the active Orquestrador header in orange and a Testes terminal waiting for permission." />
+  <br /><sub>Mosaic view. Each terminal spans whole cells of the grid; drag the corner to resize, the title to move.</sub>
+</p>
 
-**Click the microphone → speak → stop → review → send it yourself.**
+## What it does
 
-- **Local speech recognition** through Apple's SpeechAnalyzer. No VozTTY cloud account or transcription API key.
-- **Direct insertion** into your prompt, preserving existing text. No clipboard round trip.
-- **No automatic Enter.** Dictation stays editable until you choose to send it.
-- **Three recognition languages:** Brazilian Portuguese, European Portuguese and US English, subject to Apple's model availability.
-- **Keyboard control:** <kbd>Control</kbd> + <kbd>Option</kbd> + <kbd>V</kbd> starts/stops dictation; <kbd>Esc</kbd> cancels while the terminal has focus.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-Text arrives **after you stop recording**. Word-by-word live transcription is not included.
+### Projects and terminals
+Project tabs on top, that project's terminals on the left, and a stage that shows one terminal, a split, or a free mosaic. Save an arrangement as a layout profile and reapply it by name.
 
-**New in Terminal 0.2.9:** several terminals at once. Right-click the Dock icon → New Window, or press ⌘N, and each window gets its own shell. The Window menu lists them; closing one ends only that session.
+</td>
+<td width="50%" valign="top">
 
-**Terminal 0.2.8:** colours that separate what you read. Your whole sent prompt is blue (not only its first row), the draft you are still writing is amber, paths and files are mint and links are lilac. VozTTY → Allow Computer Control… asks macOS for Accessibility and Screen Recording, so agent CLIs running inside can use the mouse, keyboard and screen. The app is now signed with a Developer ID, so these permissions survive updates.
+### Supervision at a glance
+Every row shows the agent's role, provider, state and time. A terminal that asks for confirmation, a choice or a login gets an attention marker with the reason (“Pede: …”). Boterm does not answer it for you.
 
-**Terminal 0.2.7:** drag images, audio, PDFs or any file from Finder into the terminal to insert their paths, so Claude Code and Codex can attach them. While you dictate, the top-bar buttons hide and only the voice strip controls remain; the interface follows the dictation language (Portuguese or English).
+</td>
+</tr>
+<tr>
+<td valign="top">
 
-**Terminal 0.2.6:** a transparent, borderless voice strip with a full-width, 42 px waveform showing the last 20 seconds, paused intervals, recorded duration, **Pause / Continue**, **Stop & insert**, and **Cancel**. Both downloads now include [personal vocabulary](#personal-vocabulary) for assistant and project names.
+### Agents that talk
+Agents in the same project list, read, message and hand drafts to each other with the bundled `boterm` CLI. Codex and Claude also get per-session MCP tools. Other projects stay isolated, checked by process ancestry.
 
-## Two ways to work
+</td>
+<td valign="top">
 
-| | VozTTY Terminal | VS Code extension |
-| :--- | :--- | :--- |
-| Where | A standalone native Mac application | Your existing integrated terminals |
-| Voice controls | **Dictate / Stop & insert** in the header | Microphone and Stop icons in the terminal toolbar |
-| Display | Black background, blue prompt accents and light output | Your VS Code terminal theme |
-| Window | Standard macOS title-bar controls | Standard VS Code controls |
-| Engine | AppKit, WebKit, xterm.js and a real macOS PTY | VS Code terminal API and a native Swift helper |
-| Current package | **0.2.9** | **0.1.3** |
+### Project memory
+`.boterm/HISTORY.md` keeps a summary of earlier sessions under 8 KB, read before planning. `.boterm/ROLES.md` holds rules the team learned; they join the next team's prompts. Idle agents get their context compacted.
 
-The Mac terminal opens as many windows as you need, each with its own session (⌘N or the Dock menu). Tabs, split panes and session restoration are on the roadmap.
+</td>
+</tr>
+<tr>
+<td valign="top">
 
-## Download and install
+### Dashboard
+Session time, live agent state, code changed since the project opened, tests that caught failures, fixes, MCP time per server and the project history. Click an agent to open its terminal.
 
-**Requires an Apple Silicon Mac running macOS 26 or later.** VS Code integration additionally requires VS Code desktop 1.93+. Apple's speech models may require an initial download.
+</td>
+<td valign="top">
+
+### Voice that never sends
+Dictate with Apple's on-device speech recognition (pt-BR, pt-PT, en-US). The text lands in the prompt as an editable draft. You press Enter.
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="assets/boterm/screens/grid-dashboard.png" width="100%" alt="Boterm project dashboard: team table with state, edits, commands and MCP time per agent, code changes drawn as rows of cells and a quality timeline." />
+  <br /><sub>Project dashboard. Numbers in these captures are sample data from the native test harness.</sub>
+</p>
+
+## The development team
+
+One click (⌘ in the top bar) launches nine roles, each in its own terminal with the provider you pick:
+
+| Role | What it does |
+| :--- | :--- |
+| **Orquestrador** | Plans with the project history, assigns file ownership, keeps `BOTERM_PLAN.md`, checks real results |
+| **Desenvolvimento** | Writes the code |
+| **Testes** | Writes and runs tests, records failures caught |
+| **Integrações** | APIs, services and external systems |
+| **UX e design** | Interface and interaction |
+| **Engenharia de loop** | Keeps the development cycle moving |
+| **Resposta e entrega** | Wraps up and delivers |
+| **Qualidade** | Reviews each finished cycle and keeps the learned rules in `.boterm/ROLES.md` |
+| **Mensageiro** | Your only channel outside Boterm: Telegram (token in the Keychain), WhatsApp or email |
+
+The Mensageiro waits for your answer and records permanent permissions, listed and revocable in Settings. No other role can message you outside the app.
+
+## Agents talk to each other
+
+```sh
+boterm list                              # peers in this project
+boterm read SESSION                      # their rendered output
+boterm message SESSION 'Tests are red'   # a message, not keystrokes
+boterm send SESSION 'draft text'         # an editable draft in their prompt
+boterm event test-fail 'api/session.test.ts: 401'   # a fact for the dashboard
+boterm history                           # what earlier sessions did
+```
+
+A message never starts a model turn on its own, and `send` inserts a draft without Enter. Submitting input to a peer takes an explicit `--submit`. Terminal output is treated as untrusted data. The full guide is in [docs/AGENT_GUIDE.md](docs/AGENT_GUIDE.md).
+
+## Two looks
+
+<p align="center">
+  <img src="assets/boterm/screens/set-mosaic.png" width="80%" alt="Boterm in the Set de rodagem look: tally lamps, camera-tape identity bars and condensed headings." />
+  <br /><sub><b>Grelha construída</b> is the default: a blue construction grid and one orange header on the active terminal. <b>Set de rodagem</b> (above) is in Settings → Appearance.</sub>
+</p>
+
+Terminal text always follows your installed VS Code theme, and CLI ANSI colours are preserved.
+
+## Download
+
+**Requires an Apple Silicon Mac with macOS 26 or later.**
 
 | Package | Download | Install |
 | :--- | :--- | :--- |
-| Mac terminal | [VozTTY Terminal 0.2.9 ZIP](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.2.9/voztty-terminal-0.2.9-darwin-arm64.zip) | Extract and move **VozTTY.app** to **Applications** |
-| VS Code extension | [VozTTY 0.1.3 VSIX](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.2.9/voztty-0.1.3-darwin-arm64.vsix) | **Extensions → … → Install from VSIX…** |
-| Integrity | [SHA256SUMS.txt](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.2.9/SHA256SUMS.txt) | Verify with `shasum -a 256 -c SHA256SUMS.txt` in the download folder |
+| **Boterm 0.4.1** | [boterm-0.4.1-darwin-arm64.zip](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/boterm-0.4.1-darwin-arm64.zip) | Extract, move **Boterm.app** to Applications |
+| VS Code extension 0.1.3 | [voztty-0.1.3-darwin-arm64.vsix](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/voztty-0.1.3-darwin-arm64.vsix) | Extensions → … → Install from VSIX… |
+| Checksums | [SHA256SUMS.txt](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/SHA256SUMS.txt) | `shasum -a 256 -c SHA256SUMS.txt` |
 
-These are **public preview builds**, signed ad hoc and **not notarized by Apple**. macOS may require a manual security review before opening them. Building from source is also supported. The extension is distributed through GitHub Releases; it is not listed on the VS Code Marketplace yet.
-
-### In the Mac terminal
-
-Open **VozTTY**, then run your installed assistant as usual:
-
-```sh
-codex
-# or
-claude
-# or
-agy
-```
-
-Click **Dictate**, wait for **Listening**, speak, then choose **Stop & insert**. Read and edit the transcript before pressing Enter. Choose your spoken language by name in the header; the interface keeps window actions in the standard macOS title bar. The CLIs must be installed and authenticated separately; VozTTY does not bundle them or manage their accounts.
-
-### In VS Code
-
-Install the VSIX, open an integrated terminal and click its microphone icon. You can also run **VozTTY: Start Terminal Dictation** from the Command Palette. If the icon is missing, use **Developer: Reload Window** when it is safe to interrupt your window.
-
-The extension ID remains `danyalgil.voz-terminal`. Set **Voz: Language** (`voz.language`) to `pt-BR`, `pt-PT` or `en-US`; the default is `pt-BR`. Switching or closing the source terminal cancels an active recording.
-
-## Personal vocabulary
-
-VozTTY can normalize the spelling of assistant and project names after transcription, entirely on your Mac. Built-in entries include **Claude, Claude Code, Codex, OpenAI Codex, Gemini and VozTTY**; for example, “Cloud Code” becomes “Claude Code”. The word “cloud” on its own is preserved.
-
-In the native app, choose **VozTTY → Edit Vocabulary…** (`⌘,`). In VS Code, run **VozTTY: Edit Vocabulary** from the Command Palette. Both use the same local file:
-
-```text
-~/Library/Application Support/VozTTY/vocabulary.txt
-```
-
-Save one preferred name per line. Add explicit alternatives after `=`, separated by `|`:
-
-```text
-Claude Code = Cloud Code
-BlueAuth = Blue Auth
-MyProject = My Project | Mai Project
-```
-
-Changes apply to the next recording, with no app restart. Matches ignore case and respect word boundaries; longer phrases win, and replacements are applied once. Use at most 100 names and alternatives, each 1–80 characters, in a UTF-8 file up to 32 KB. Blank lines and lines starting with `#` are ignored. An empty file disables all corrections; delete the file to restore the defaults. Invalid files stop dictation before microphone capture and show an error.
-
-This is explicit text correction, **not acoustic model training or a guarantee of recognition accuracy**. Register specific alternatives to avoid changing words you intended to say. Project names stay in this local file and are not committed or uploaded by VozTTY. Transcripts remain editable and are never submitted automatically. Included in Terminal 0.2.6 and extension 0.1.3.
-
-## Compatibility and validation
-
-| Client / check | Verified behavior |
-| :--- | :--- |
-| Codex in VozTTY Terminal | Maintainer microphone test and long draft insertion |
-| Claude Code in VozTTY Terminal | Maintainer microphone test and long draft/paste block insertion |
-| Gemini through Antigravity (`agy`) | Maintainer microphone test and a 182-word draft retained without Enter |
-| Claude Code and Codex in VS Code | Long synthetic audio recognized by the real Apple engine and inserted through the extension without Enter |
-| Physical microphone, Mac terminal | Controlled 82-second recording, 182 recognized words, opening/closing and existing prefix preserved |
-| Automated checks | 16 JavaScript unit tests; native PTY/input checks; window-fit regression from 620 to 1440 px |
-
-Earlier acoustic runs lost words, and proper names can be misrecognized. The controlled long recording used speech played through speakers into the physical microphone. **It is an integration check, not a claim of perfect accuracy or a completed long test with the maintainer's natural voice.** Automated CLI tests leave prompts unsent; the maintainer separately confirmed real voice use in all three clients.
-
-Google [moved personal-account terminal access to Antigravity CLI](https://github.com/google-gemini/gemini-cli/discussions/27274). Use `agy` for that workflow. Legacy Gemini CLI remains available with eligible enterprise or paid API access.
-
-## How it works
-
-```mermaid
-flowchart LR
-    A[Start dictation] --> B[Native Swift helper]
-    B --> C[Microphone capture]
-    C --> D[Apple SpeechAnalyzer]
-    D --> E[Terminal-safe text]
-    E --> F[VS Code terminal]
-    E --> G[VozTTY PTY]
-    F --> H[Review and press Enter yourself]
-    G --> H
-```
-
-The native app uses AppKit, WKWebView, xterm.js 6.0.0 and a macOS pseudo-terminal. Its renderer is bundled locally with no CDN or Node.js runtime. The extension has no npm production dependencies. Both share the same Swift speech helper. Upstream [renderer licenses](terminal/web/vendor/README.md) are included.
-
-### Privacy and current limits
-
-- Voice recognition runs on the Mac. VozTTY has no cloud transcription backend or assistant credentials. Boterm 0.3.1 optionally saves terminal output and team messages as local text files when you choose Save History or Save and Close; these can include inserted dictation and other text printed in the terminal.
-- Recordings use a private temporary folder and are removed on normal completion/cancellation. A forced shutdown can leave temporary audio behind.
-- Terminal control characters are removed and line breaks become spaces. A program that reacts immediately to characters can still react without Enter; dictate into the intended text input.
-- Transcription has a 60-second timeout **after Stop** and a 64 KiB text limit. Recording itself is not limited to 60 seconds.
-- Native prompt colors recognize `›`, `❯` and `>` markers and automatic wraps. Output using the same markers may also be highlighted; explicit multiline continuations may retain their CLI colors.
-- Closing the app ends running programs and loses unsent prompts or unsaved recovery text. An active session asks for confirmation.
-- Intel Macs, Windows, Linux and browser-based VS Code are unsupported. Remote terminals and fresh-install permission failures need more validation.
+This is a public preview, signed with a Developer ID but **not notarized by Apple** yet, so macOS may ask you to approve it on first open. Codex, Claude, Gemini (Antigravity `agy`) and OpenCode are installed and logged in separately; Boterm uses your existing logins and never configures API keys.
 
 ## Build from source
 
-Use an Apple Silicon Mac, Apple's development tools with the macOS 26 SDK or later, and Node.js 22+ for extension packaging/tests.
+Apple's developer tools with the macOS 26 SDK, plus Node.js 22+ for the tests.
 
 ```sh
 git clone https://github.com/ricdanyalgil/VozTTY.git
 cd VozTTY
 npm test
-
-# Native terminal
 ./terminal/build.sh
 open terminal/Boterm.app
-
-# VS Code extension
-./build-helper.sh
-npx @vscode/vsce@4.0.0 package --no-dependencies --target darwin-arm64 \
-  --out voztty-0.1.3-darwin-arm64.vsix
 ```
 
-No npm install is required for production dependencies. Native checks, test-only integration hooks and icon generation are described in [`terminal/README.md`](terminal/README.md).
+No npm production dependencies. AppKit, WKWebView, a real macOS PTY and a locally bundled xterm.js; no CDN, no Node runtime in the app. Native harnesses and icon generation are described in [terminal/README.md](terminal/README.md).
 
-## Contributions are welcome
+<details>
+<summary><b>Voice dictation and personal vocabulary</b></summary>
 
-**We would love to build VozTTY with you. It would be a pleasure to welcome your contribution.**
+<br />
 
-Bug reports, documentation improvements, accessibility feedback, recognition-language testing and pull requests are all welcome. First contribution? A small documentation fix or a reproducible bug report is a great place to start.
+Click **Ditar** in the bottom strip or press <kbd>Control</kbd> + <kbd>Option</kbd> + <kbd>V</kbd>, speak, then **Stop & insert**. <kbd>Esc</kbd> cancels. Text arrives after you stop; there is no word-by-word live transcription. Recognition runs on the Mac through Apple's SpeechAnalyzer; there is no Boterm cloud and no transcription API key.
 
-- Read the [contribution guide](CONTRIBUTING.md).
-- [Report a bug or propose an improvement](https://github.com/ricdanyalgil/VozTTY/issues/new/choose).
-- [Ask a question or share your workflow](https://github.com/ricdanyalgil/VozTTY/discussions).
-- [Open a pull request](https://github.com/ricdanyalgil/VozTTY/pulls).
-- Please use synthetic examples instead of private recordings or sensitive transcripts.
+Boterm can fix the spelling of assistant and project names after transcription (“Cloud Code” → “Claude Code”). Edit the list in **Boterm → Edit Vocabulary…** (⌘,). One preferred name per line, alternatives after `=`:
 
-### Roadmap
+```text
+Claude Code = Cloud Code
+MyProject = My Project | Mai Project
+```
 
-- Longer tests with natural speech and more microphones/languages.
-- Fresh-install permissions, interruption recovery and remote-terminal validation.
-- Native terminal stability, accessibility and notarized distribution.
-- Tabs and split panes after the single-session experience is solid.
-- VS Code Marketplace distribution.
+This is text correction, not acoustic training. Up to 100 entries, 32 KB, UTF-8. An empty file disables corrections; delete it to restore the defaults.
+
+The VS Code extension adds the same dictation to integrated terminals: install the VSIX and click the microphone in the terminal toolbar. Set `voz.language` to `pt-BR`, `pt-PT` or `en-US`.
+
+</details>
+
+<details>
+<summary><b>Privacy and limits</b></summary>
+
+<br />
+
+- Everything runs locally. Agent sockets are restricted to your macOS user and to sessions in the same project; this is not an OS sandbox against programs running as your user.
+- Team messages live in memory (last 200 per window). Project history and learned rules are plain files in the project's `.boterm/` folder. Saved terminal history is written only when you choose Save History.
+- “Working” means recent output in a terminal, not proof that a model is generating. Attention detection covers common prompts, not all of them.
+- Closing the app ends its shells; sessions do not survive a restart.
+- Not tested end to end yet: Telegram with a real bot, a full team cycle with real models, the physical microphone in this release.
+- Intel Macs, Windows, Linux and browser-based VS Code are unsupported.
+
+</details>
+
+## Contributing
+
+Bug reports, documentation fixes, accessibility feedback and pull requests are welcome. A small documentation fix or a reproducible bug report is a great first contribution.
+
+[Contribution guide](CONTRIBUTING.md) · [Report a bug](https://github.com/ricdanyalgil/VozTTY/issues/new/choose) · [Discussions](https://github.com/ricdanyalgil/VozTTY/discussions) · [Changelog](CHANGELOG.md)
+
+Please use synthetic examples, never private recordings, tokens or transcripts.
 
 ## License
 
-VozTTY is open source under the [MIT license](LICENSE). Copyright © 2026 Ricardo Danyalgil Junior. Bundled third-party components retain their own licenses.
+[MIT](LICENSE). Copyright © 2026 Ricardo Danyalgil Junior. Bundled third-party components keep their own [licenses](terminal/web/vendor/README.md).
+
+<p align="center"><br /><img src="assets/boterm/icon-grid.svg" width="56" alt="Boterm icon" /></p>
