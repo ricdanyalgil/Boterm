@@ -13,7 +13,7 @@ You do not need to be an experienced Swift developer to contribute. Documentatio
 
 ## Before you start
 
-Ask setup questions and share early ideas in [Discussions](https://github.com/ricdanyalgil/VozTTY/discussions). For reproducible bugs or concrete improvements, use the [issue forms](https://github.com/ricdanyalgil/VozTTY/issues/new/choose). Check existing issues, then open an issue for larger features or architectural changes. The current scope is the macOS VS Code extension and the standalone Mac terminal. Please discuss new platforms, tabs, profiles or cloud transcription before implementing them.
+Ask setup questions and share early ideas in [Discussions](https://github.com/ricdanyalgil/Boterm/discussions). For reproducible bugs or concrete improvements, use the [issue forms](https://github.com/ricdanyalgil/Boterm/issues/new/choose). Check existing issues, then open an issue for larger features or architectural changes. The current scope is the macOS VS Code extension and the standalone Mac terminal. Please discuss new platforms, tabs, profiles or cloud transcription before implementing them.
 
 Keep communication respectful and give other contributors enough context to reproduce your findings.
 
@@ -22,8 +22,8 @@ Keep communication respectful and give other contributors enough context to repr
 Use an Apple Silicon Mac running macOS 26+, Apple's development tools and Node.js 22+.
 
 ```sh
-git clone https://github.com/ricdanyalgil/VozTTY.git
-cd VozTTY
+git clone https://github.com/ricdanyalgil/Boterm.git
+cd Boterm
 npm test
 ./build-helper.sh
 ./terminal/build.sh

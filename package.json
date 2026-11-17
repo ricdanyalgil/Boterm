@@ -115,11 +115,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ricdanyalgil/VozTTY.git"
+    "url": "https://github.com/ricdanyalgil/Boterm.git"
   },
-  "homepage": "https://github.com/ricdanyalgil/VozTTY#readme",
+  "homepage": "https://github.com/ricdanyalgil/Boterm#readme",
   "bugs": {
-    "url": "https://github.com/ricdanyalgil/VozTTY/issues"
+    "url": "https://github.com/ricdanyalgil/Boterm/issues"
   },
   "icon": "assets/voztty-icon.png"
 }

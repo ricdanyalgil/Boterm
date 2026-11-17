@@ -343,7 +343,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
 
     func webView(_ view: WKWebView, decidePolicyFor action: WKNavigationAction) async -> WKNavigationActionPolicy {
         let url = action.request.url
-        if action.navigationType == .linkActivated, url?.absoluteString == "https://github.com/ricdanyalgil/VozTTY" {
+        if action.navigationType == .linkActivated, url?.absoluteString == "https://github.com/ricdanyalgil/Boterm" {
             NSWorkspace.shared.open(url!)
             return .cancel
         }

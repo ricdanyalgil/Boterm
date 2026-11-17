@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ricdanyalgil/VozTTY/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-ff4d2e?style=flat-square&labelColor=0c0d10" alt="Release v0.4.1" /></a>
+  <a href="https://github.com/ricdanyalgil/Boterm/releases/tag/v0.4.1"><img src="https://img.shields.io/badge/release-v0.4.1-ff4d2e?style=flat-square&labelColor=0c0d10" alt="Release v0.4.1" /></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-e8e9ec?style=flat-square&logo=apple&labelColor=0c0d10" alt="macOS 26 ou posterior" />
   <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-e8e9ec?style=flat-square&labelColor=0c0d10" alt="Apple Silicon" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-2e54c4?style=flat-square&labelColor=0c0d10" alt="Licença MIT" /></a>
@@ -24,7 +24,7 @@
 
 Quem manda é você. O Boterm nunca aperta Enter por você, nunca responde a um pedido de aprovação e só fala com você fora do app com permissões que você concedeu e pode revogar.
 
-> O Boterm se chamava **VozTTY** até a 0.2.9. O repositório e a extensão do VS Code mantêm esse nome; o ditado por voz continua aqui.
+> O Boterm se chamava **VozTTY** até a 0.2.9. A extensão do VS Code mantém esse nome; o ditado por voz continua aqui.
 
 <p align="center">
   <img src="assets/boterm/screens/grid-mosaic.png" width="100%" alt="Mosaico do Boterm: nove agentes da equipe de desenvolvimento num projeto, o Orquestrador ativo em laranja e o terminal de Testes aguardando permissão." />
@@ -129,9 +129,9 @@ O texto dos terminais segue sempre o tema do VS Code instalado, e as cores ANSI 
 
 | Pacote | Download | Instalação |
 | :--- | :--- | :--- |
-| **Boterm 0.4.1** | [boterm-0.4.1-darwin-arm64.zip](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/boterm-0.4.1-darwin-arm64.zip) | Extraia e mova o **Boterm.app** para Aplicativos |
-| Extensão VS Code 0.1.3 | [voztty-0.1.3-darwin-arm64.vsix](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/voztty-0.1.3-darwin-arm64.vsix) | Extensões → … → Install from VSIX… |
-| Checksums | [SHA256SUMS.txt](https://github.com/ricdanyalgil/VozTTY/releases/download/v0.4.1/SHA256SUMS.txt) | `shasum -a 256 -c SHA256SUMS.txt` |
+| **Boterm 0.4.1** | [boterm-0.4.1-darwin-arm64.zip](https://github.com/ricdanyalgil/Boterm/releases/download/v0.4.1/boterm-0.4.1-darwin-arm64.zip) | Extraia e mova o **Boterm.app** para Aplicativos |
+| Extensão VS Code 0.1.3 | [voztty-0.1.3-darwin-arm64.vsix](https://github.com/ricdanyalgil/Boterm/releases/download/v0.4.1/voztty-0.1.3-darwin-arm64.vsix) | Extensões → … → Install from VSIX… |
+| Checksums | [SHA256SUMS.txt](https://github.com/ricdanyalgil/Boterm/releases/download/v0.4.1/SHA256SUMS.txt) | `shasum -a 256 -c SHA256SUMS.txt` |
 
 É uma prévia pública, assinada com Developer ID mas **ainda sem notarização da Apple**; o macOS pode pedir aprovação na primeira abertura. Codex, Claude, Gemini (Antigravity `agy`) e OpenCode são instalados e autenticados à parte; o Boterm usa os seus logins e nunca configura chaves de API.
 
@@ -140,8 +140,8 @@ O texto dos terminais segue sempre o tema do VS Code instalado, e as cores ANSI 
 Ferramentas de desenvolvimento da Apple com o SDK do macOS 26, e Node.js 22+ para os testes.
 
 ```sh
-git clone https://github.com/ricdanyalgil/VozTTY.git
-cd VozTTY
+git clone https://github.com/ricdanyalgil/Boterm.git
+cd Boterm
 npm test
 ./terminal/build.sh
 open terminal/Boterm.app
@@ -187,7 +187,7 @@ A extensão do VS Code traz o mesmo ditado aos terminais integrados: instale o V
 
 Relatos de bugs, correções de documentação, retorno sobre acessibilidade e pull requests são bem-vindos. Uma pequena correção de documentação ou um bug reproduzível é um ótimo primeiro passo.
 
-[Guia de contribuição](CONTRIBUTING.md) · [Relatar um bug](https://github.com/ricdanyalgil/VozTTY/issues/new/choose) · [Discussões](https://github.com/ricdanyalgil/VozTTY/discussions) · [Changelog](CHANGELOG.md)
+[Guia de contribuição](CONTRIBUTING.md) · [Relatar um bug](https://github.com/ricdanyalgil/Boterm/issues/new/choose) · [Discussões](https://github.com/ricdanyalgil/Boterm/discussions) · [Changelog](CHANGELOG.md)
 
 Use exemplos sintéticos, nunca gravações, tokens ou transcrições privadas.
 

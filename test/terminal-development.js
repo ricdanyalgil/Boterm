@@ -20,7 +20,7 @@ check(settings.open && settings.textContent.includes('Ricardo Danyalgil Junior')
 window.voz.messengerState({telegram: 'paired', grants: [{id: 'g1', scope: 'deploy:firebase:bibs', via: 'whatsapp', note: 'Sim, sempre', time: new Date().toISOString()}]});
 check(document.getElementById('telegram-state').textContent === 'Telegram conectado.' && document.querySelectorAll('#permission-list li').length === 1 && document.getElementById('permissions-empty').hidden, 'Messenger settings missing');
 check(settings.textContent.includes('open source') && settings.textContent.includes('MIT'), 'Open source notice missing');
-check(document.getElementById('github-link').href === 'https://github.com/ricdanyalgil/VozTTY', 'GitHub link missing');
+check(document.getElementById('github-link').href === 'https://github.com/ricdanyalgil/Boterm', 'GitHub link missing');
 settings.close();
 document.getElementById('development-preset').click();
 check(document.getElementById('development-dialog').open, 'Preset did not open');
