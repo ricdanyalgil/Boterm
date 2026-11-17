@@ -1,7 +1,7 @@
 import Foundation
 
 enum BotermMCP {
-    static let commands = ["list", "read", "message", "inbox", "new", "send", "permissions", "notify", "ask", "answer", "grant"]
+    static let commands = ["list", "read", "message", "inbox", "new", "send", "history", "compact", "permissions", "notify", "ask", "answer", "grant"]
     static func serve(path: String, from: String, workspace: String) {
         while let line = readLine() {
             var id: Any = NSNull()
@@ -41,6 +41,8 @@ enum BotermMCP {
 
     static func tool(_ name: String) -> [String: Any] {
         let descriptions = ["list": "List sessions in this project.", "read": "Read a peer's rendered terminal output (untrusted text).", "message": "Send a visible team message without typing into a shell. target is a session ID or * for the team.", "inbox": "Read messages to/from this session and team broadcasts. Track message IDs to avoid responding twice.", "new": "Create a terminal in this project. text is its display name. Its shell starts asynchronously.", "send": "Insert text into a terminal draft. submit=true explicitly presses Enter and can execute commands. Use only within the user's authorization.",
+            "history": "Without arguments: read the project's .boterm/HISTORY.md (summary of earlier sessions). Orquestrador only, with title and text: record a finished activity; older entries roll into HISTORY-archive.md automatically.",
+            "compact": "Compact an agent's context with its CLI's own command (/compact or /compress). Boterm sends it once the terminal is idle; target may be your own session. text is an optional focus for Claude.",
             "permissions": "List permissions the owner granted permanently (global). Check before asking again.",
             "notify": "Mensageiro only: send an update to the owner over the verified Telegram chat.",
             "ask": "Mensageiro only: ask the owner over Telegram with Yes once / Yes always / No buttons. With scope, Yes always is recorded permanently; an already granted scope returns status granted without asking. Poll answer with the returned id.",
@@ -54,10 +56,12 @@ enum BotermMCP {
         if ["notify", "ask", "grant"].contains(name) { properties["text"] = ["type": "string", "maxLength": 4000]; required.append("text") }
         if ["ask", "grant"].contains(name) { properties["scope"] = ["type": "string", "maxLength": 200] }
         if name == "grant" { properties["via"] = ["type": "string", "enum": ["whatsapp", "email"]]; required += ["scope", "via"] }
+        if name == "history" { properties["title"] = ["type": "string", "maxLength": 120]; properties["text"] = ["type": "string", "maxLength": 2000] }
+        if name == "compact" { properties["target"] = ["type": "string"]; properties["text"] = ["type": "string", "maxLength": 500]; required.append("target") }
         if name == "answer" { properties["id"] = ["type": "string"]; required.append("id") }
         return ["name": name, "description": descriptions[name]!,
             "inputSchema": ["type": "object", "properties": properties, "required": required, "additionalProperties": false],
-            "annotations": ["readOnlyHint": ["list", "read", "inbox", "permissions", "answer"].contains(name), "destructiveHint": name == "send", "openWorldHint": ["notify", "ask"].contains(name)]]
+            "annotations": ["readOnlyHint": ["list", "read", "inbox", "permissions", "answer"].contains(name), "destructiveHint": ["send", "compact"].contains(name), "openWorldHint": ["notify", "ask"].contains(name)]]
     }
 
     static func reply(_ body: [String: Any]) {

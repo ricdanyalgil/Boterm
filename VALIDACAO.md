@@ -273,3 +273,11 @@ Limites: sem novo teste físico de microfone ou leitor de tela; medição móvel
 - npm test: 30/30.
 
 Limites: Telegram não testado ponta a ponta (sem bot configurado neste Mac). Envio e leitura de WhatsApp/email pelo agente não exercitados com modelo real. Nenhuma mensagem enviada para fora.
+
+## Histórico do projeto e compactação — 0.3.3 / build 24 (2026-11-17)
+
+- `test/messenger.unit.swift`: pasta inexistente, título de várias linhas e resumo acima de 2000 caracteres recusados; 12 entradas mantêm HISTORY.md ≤ 8 KB, as mais antigas passam para o arquivo sem perda nem duplicação; um resumo não consegue forjar um título de entrada; comandos de compactação por CLI, sem palpite para agy, OpenCode ou shell.
+- `test/terminal-messenger.js` no socket real (duas execuções seguidas): só a sessão lançada como Orquestrador grava o histórico; a entrada aparece no ficheiro do projeto; leitura pela pasta de projeto da sessão; compactação recusada em shell comum; agendada para um agente Claude, entregue apenas depois de mais de 20 s sem atividade. As verificações passaram a juntar linhas quebradas pelo xterm, para não dependerem da largura.
+- Regressão: preset (8 funções; lápis por foco omitido pelo mesmo motivo do build 23), mosaico e perfis aprovados nos quatro tamanhos; npm test 30/30.
+
+Limites: compactação real com Claude/Codex não exercitada (o teste usa uma shell registrada como Claude). Comandos de compactação de Antigravity e OpenCode não confirmados, por isso recusados. Histórico de um projeto aberto sem o preset não é lido por ninguém automaticamente.

@@ -25,7 +25,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     let web: DropWebView
     private let firstShell = ShellSession()
     var shell: ShellSession { records[activeSessionID]?.shell ?? firstShell }
-    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = "" }
+    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = ""; var directory = ""; var lastOutput = Date(); var lastInput = Date.distantPast; var compacting = false }
     var records: [String: Record] = [:]
     var activeSessionID = ""
     var voiceSessionID = ""
@@ -251,7 +251,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             launched = true
             records[id] = Record(shell: session, workspace: workspace, name: String((body["name"] as? String ?? "Terminal").prefix(80)), role: String((body["role"] as? String ?? "").prefix(40)))
             activeSessionID = id
-            session.output = { [weak self] data in self?.js("window.voz.write(\(Self.json(data.base64EncodedString())), \(Self.json(id)))") }
+            session.output = { [weak self] data in self?.records[id]?.lastOutput = Date(); self?.js("window.voz.write(\(Self.json(data.base64EncodedString())), \(Self.json(id)))") }
             session.ended = { [weak self] in
                 guard let self else { return }
                 if self.voiceSessionID == id { self.dictation.cancel() }
@@ -274,6 +274,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
                 } else {
                     try session.start(executable: "/bin/zsh", arguments: ["-l"], directory: cwd, environment: environment)
                 }
+                records[id]?.directory = cwd
                 if let columns = body["columns"] as? Int, let rows = body["rows"] as? Int { session.resize(columns: columns, rows: rows) }
                 if body["directory"] as? String != nil || initialDirectory != nil {
                     ProjectHistory.remember(cwd)
@@ -285,7 +286,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             if let id = body["session"] as? String, records[id] != nil { activeSessionID = id; voiceState(dictation.state) }
         case "input":
             if let id = body["session"] as? String, let text = body["data"] as? String, text.utf8.count <= 1_048_576 {
-                inputReceived?(text); records[id]?.shell.write(text)
+                inputReceived?(text); records[id]?.lastInput = Date(); records[id]?.shell.write(text)
             }
         case "resize":
             if let id = body["session"] as? String, let cols = body["columns"] as? Int, let rows = body["rows"] as? Int { records[id]?.shell.resize(columns: cols, rows: rows) }

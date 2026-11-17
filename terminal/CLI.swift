@@ -12,7 +12,7 @@ import Darwin
                 boterm list | read [SESSION] | inbox | new NAME
                 boterm message SESSION|'*' TEXT
                 boterm send SESSION TEXT [--submit]
-                boterm permissions
+                boterm permissions | history [TITLE SUMMARY] | compact SESSION [FOCUS]
                 Mensageiro only: boterm notify TEXT | ask TEXT [--scope SCOPE] | answer ID | grant SCOPE whatsapp|email OWNER_REPLY
                 Read $BOTERM_AGENT_GUIDE for team collaboration. IDs come from list.
                 send inserts a draft; only --submit presses Enter. Messages never type into a shell.
@@ -65,6 +65,12 @@ import Darwin
             case "message", "send":
                 guard args.count == 3 || (args[0] == "send" && args.count == 4 && args[3] == "--submit") else { throw ControlError.invalid("Usage: boterm \(args[0]) SESSION TEXT [--submit for send only]") }
                 request["target"] = args[1]; request["text"] = args[2]; request["submit"] = args.count == 4
+            case "history":
+                guard args.count == 1 || args.count == 3 else { throw ControlError.invalid("Usage: boterm history [TITLE SUMMARY]") }
+                if args.count == 3 { request["title"] = args[1]; request["text"] = args[2] }
+            case "compact":
+                guard args.count == 2 || args.count == 3 else { throw ControlError.invalid("Usage: boterm compact SESSION [FOCUS]") }
+                request["target"] = args[1]; if args.count == 3 { request["text"] = args[2] }
             case "permissions": guard args.count == 1 else { throw ControlError.invalid("Unexpected arguments") }
             case "notify": guard args.count == 2 else { throw ControlError.invalid("Usage: boterm notify TEXT") }; request["text"] = args[1]
             case "ask":

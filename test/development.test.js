@@ -10,6 +10,8 @@ test('development roles have distinct responsibilities and coordinator dispatche
   assert.match(prompt, /send submit=true/);
   assert.match(prompt, /Mensagens não ativam um modelo parado/);
   assert.match(prompt, /pelo Mensageiro/);
+  for (const rule of [/leia o histórico do projeto/, /registre-a com history/, /compact nos colegas/, /nunca compacte no meio de uma atividade/]) assert.match(prompt, rule);
+  assert.ok(Buffer.byteLength(prompt) < 15000);
   const messenger = developmentPrompt(7, '');
   assert.equal(developmentRoles[7][0], 'Mensageiro');
   for (const rule of [/Sim, sempre/, /🤖 Boterm:/, /Nunca use cmd\+↑/, /destinatario:<canal>:<contato>/, /permissions/, /Nunca envie segredos/]) assert.match(messenger, rule);

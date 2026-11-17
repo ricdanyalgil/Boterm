@@ -193,6 +193,21 @@ enum ProjectHistory {
                 // Paste stays a draft; Enter is a separate, explicit operation.
                 _ = try await terminal.web.evaluateJavaScript("window.voz.insert(\(TerminalWindow.json(text)), \(TerminalWindow.json(target)), \(submitting))")
                 value = try terminal.postMessage(from: from, to: target, text: submitting ? "[Terminal: submitted input] \(text)" : "[Terminal: inserted draft] \(text)")
+            case "history":
+                let text = request["text"] as? String ?? ""
+                if text.isEmpty { value = SessionLog.read(caller.directory) }
+                else {
+                    guard caller.role == "Orquestrador" else { throw ControlError.invalid("Only the Orquestrador records project history; send your summary to the Orquestrador") }
+                    value = try SessionLog.add(title: request["title"] as? String ?? "", text: text, directory: caller.directory)
+                }
+            case "compact":
+                try checkedTarget()
+                guard let peer = terminal.records[target], let command = SessionLog.compactCommand(agent: peer.agent, focus: String((request["text"] as? String ?? "").prefix(500))) else {
+                    throw ControlError.invalid("No known compaction command for this terminal's agent")
+                }
+                guard !peer.compacting else { throw ControlError.invalid("Compaction already scheduled for this terminal") }
+                terminal.scheduleCompact(target, command: command)
+                value = ["scheduled": true, "command": command]
             case "permissions":
                 value = PermissionStore.all().map(PermissionStore.dictionary)
             case "notify", "ask", "answer", "grant":
@@ -248,10 +263,26 @@ enum ProjectHistory {
         LayoutProfiles.delete(name)
         for terminal in (NSApp.delegate as? AppDelegate)?.terminals ?? [self] { terminal.js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())))") }
     }
+    /// Waits until the agent is quiet (no output for 5 s, no typing for 30 s) so the command lands in an idle prompt.
+    func scheduleCompact(_ id: String, command: String) {
+        records[id]?.compacting = true
+        Task { [weak self] in
+            for _ in 0..<1800 {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, let record = self.records[id] else { return }
+                guard Date().timeIntervalSince(record.lastOutput) > 5, Date().timeIntervalSince(record.lastInput) > 30 else { continue }
+                self.records[id]?.compacting = false
+                self.js("window.voz.insert(\(Self.json(command)), \(Self.json(id)), true)")
+                self.postOwnerMessage(to: id, text: "[Boterm] Compactação enviada: \(command)", sender: "Boterm")
+                return
+            }
+            self?.records[id]?.compacting = false
+        }
+    }
     /// Shown in the recipient's pane and inbox; it never becomes terminal input.
-    func postOwnerMessage(to id: String, text: String) {
+    func postOwnerMessage(to id: String, text: String, sender: String = "Ricardo · Telegram") {
         guard let record = records[id] else { return }
-        let message: [String: Any] = ["id": UUID().uuidString, "from": "owner", "to": id, "fromName": "Ricardo · Telegram", "toName": record.name,
+        let message: [String: Any] = ["id": UUID().uuidString, "from": "owner", "to": id, "fromName": sender, "toName": record.name,
             "workspace": record.workspace, "time": ISO8601DateFormatter().string(from: Date()), "text": String(text.prefix(16000))]
         messages.append(message); if messages.count > 200 { messages.removeFirst() }
         js("window.voz.message(\(Self.json(message)))")

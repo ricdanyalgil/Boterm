@@ -209,3 +209,46 @@ enum LayoutProfiles {
         var profiles = all(defaults: defaults); profiles.removeValue(forKey: name); defaults.set(profiles, forKey: "layoutProfiles")
     }
 }
+
+/// Project memory across sessions: `.boterm/HISTORY.md` stays small enough to read at every start;
+/// older entries roll into `HISTORY-archive.md`, which is only read on demand.
+enum SessionLog {
+    static let limit = 8192
+    static let header = "# Histórico Boterm\n\nResumo das sessões anteriores, mantido pelo Orquestrador com `boterm history`. Entradas antigas ficam em HISTORY-archive.md e só são lidas quando necessário.\n"
+    static func file(_ directory: String) -> URL { URL(fileURLWithPath: directory).appendingPathComponent(".boterm/HISTORY.md") }
+    static func archive(_ directory: String) -> URL { URL(fileURLWithPath: directory).appendingPathComponent(".boterm/HISTORY-archive.md") }
+    static func read(_ directory: String) -> String { (try? String(contentsOf: file(directory), encoding: .utf8)) ?? "" }
+    static func entries(_ text: String) -> [String] {
+        text.components(separatedBy: "\n## ").dropFirst().map { "## " + $0.trimmingCharacters(in: .whitespacesAndNewlines) + "\n" }
+    }
+    @discardableResult static func add(title rawTitle: String, text rawText: String, directory: String, now: Date = Date()) throws -> [String: Int] {
+        let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines), text = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard (1...120).contains(title.count), !title.contains("\n"), (1...2000).contains(text.count) else {
+            throw ControlError.invalid("history needs a one-line title (≤120) and a summary (≤2000 characters); keep details in the archive or the repository")
+        }
+        var isDirectory: ObjCBool = false
+        guard directory.hasPrefix("/"), FileManager.default.fileExists(atPath: directory, isDirectory: &isDirectory), isDirectory.boolValue else {
+            throw ControlError.invalid("This session has no project folder")
+        }
+        let stamp = ISO8601DateFormatter.string(from: now, timeZone: .current, formatOptions: [.withFullDate, .withDashSeparatorInDate, .withSpaceBetweenDateAndTime, .withTime, .withColonSeparatorInTime])
+        var list = entries(read(directory)) + ["## \(stamp.prefix(16)) · \(title)\n\(text.replacingOccurrences(of: "\n## ", with: "\n### "))\n"]
+        var moved: [String] = []
+        while list.count > 1, (header + "\n" + list.joined(separator: "\n")).utf8.count > limit { moved.append(list.removeFirst()) }
+        try FileManager.default.createDirectory(at: file(directory).deletingLastPathComponent(), withIntermediateDirectories: true)
+        if !moved.isEmpty {
+            let old = (try? String(contentsOf: archive(directory), encoding: .utf8)) ?? "# Arquivo do histórico Boterm\n"
+            try (old + "\n" + moved.joined(separator: "\n")).write(to: archive(directory), atomically: true, encoding: .utf8)
+        }
+        try (header + "\n" + list.joined(separator: "\n")).write(to: file(directory), atomically: true, encoding: .utf8)
+        return ["entries": list.count, "archived": moved.count, "bytes": (header + "\n" + list.joined(separator: "\n")).utf8.count]
+    }
+    /// The CLI's own context-compaction command; agents without a known one are refused rather than guessed.
+    static func compactCommand(agent: String, focus: String) -> String? {
+        switch agent {
+        case "claude": return focus.isEmpty ? "/compact" : "/compact " + focus
+        case "codex": return "/compact"
+        case "gemini": return "/compress"
+        default: return nil
+        }
+    }
+}

@@ -1,3 +1,8 @@
+# Boterm 0.3.3 — local build 24, 2026-11-17
+
+- Project history: `.boterm/HISTORY.md` in the project folder, at most 8 KB, read by the Orquestrador before planning. Only the Orquestrador records entries (`boterm history TITLE SUMMARY`); older entries roll into `HISTORY-archive.md`, which is never loaded automatically.
+- Context compaction: `boterm compact SESSION [FOCUS]` sends the agent CLI's own command (`/compact` for Claude and Codex, `/compress` for Gemini CLI) once the terminal has been quiet for 5 s and untouched by typing for 30 s. The Orquestrador records and compacts after each activity finished end to end, never mid-activity.
+
 # Boterm 0.3.2 — local build 23, 2026-11-17
 
 - Sidebar and project tabs update in place: one click selects and shows a terminal even while agents retitle their sessions many times per second.
