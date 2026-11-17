@@ -263,3 +263,13 @@ Limites: sem novo teste físico de microfone ou leitor de tela; medição móvel
 - Barra de título transparente sobre o fundo #090b10, igual ao cabeçalho de projetos. Mantidos controles nativos e aparência escura existente.
 - Build Swift 6 concluído e assinatura Developer ID verificada no bundle de produção e em `/Applications/Boterm.app`. Build 21 preservado em `work/development-check/Boterm-before-build22.app`; nova instância aberta sem encerrar as anteriores.
 - Inspeção visual não concluída: o serviço de controle da interface retornou `Sky Computer Use native pipe startup failed`, inclusive após reiniciar sua sessão. Não foram repetidos testes funcionais ou de microfone para esta alteração de título/aparência.
+
+## Lateral, mosaico livre, perfis e Mensageiro — 0.3.2 / build 23 (2026-11-17)
+
+- Causa do clique perdido na lateral: `renderNavigation` recriava linhas e abas a cada mudança de título dos agentes. Agora reaproveita os nós. Harness: 240 mudanças de título mantêm a mesma linha e o clique mostra o terminal escolhido.
+- Mosaico livre (`test/terminal-mosaic.js`): redimensionar pelo canto e pelas setas, sem sobreposição, mover mantendo o tamanho, duplo clique repõe; perfil capturado, perfil corrompido ignorado e perfil reaplicado. Aprovado em 620×380, 800×600, 1440×900 e 1120×720.
+- Preset (`test/terminal-development.js`, stubs de `launch20-stubs`): oito funções, Mensageiro em Claude por padrão, oito processos com diretório e prompts corretos, configurações do Mensageiro. A verificação de opacidade do lápis por `:focus-within` foi omitida nessa execução: a cópia de teste não fica ativa enquanto o usuário usa o Mac, e o WebKit só aplica foco em janela ativa.
+- Mensageiro no socket real (`test/terminal-messenger.js`): sessão comum e sessão apenas renomeada Mensageiro recusadas em notify/grant; permissions legível por todos; ID desconhecido e canal não verificável recusados; Telegram sem emparelhamento informado. `test/messenger.unit.swift`: normalização, substituição, arquivo 0600, revogação e leitura das respostas.
+- npm test: 30/30.
+
+Limites: Telegram não testado ponta a ponta (sem bot configurado neste Mac). Envio e leitura de WhatsApp/email pelo agente não exercitados com modelo real. Nenhuma mensagem enviada para fora.

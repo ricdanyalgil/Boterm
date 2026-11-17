@@ -70,7 +70,7 @@ Checks terminal control removal, preserved Unicode/punctuation, a real child PTY
 
 ## Integration harness
 
-`test/terminal.integration.swift` is compiled only with `-D VOZ_TEST` and is excluded from the normal app. Compile it with Main, App, PTY, Dictation, LocalControl, ControlActions, TerminalTheme and `native/Vocabulary.swift` (exclude CLI.swift), place that executable in a temporary copy of the built app, and ad hoc sign the copy before running it. Do not replace the installed application with the test executable.
+`test/terminal.integration.swift` is compiled only with `-D VOZ_TEST` and is excluded from the normal app. Compile it with Main, App, PTY, Dictation, LocalControl, ControlActions, Messenger, TerminalTheme and `native/Vocabulary.swift` (exclude CLI.swift), place that executable in a temporary copy of the built app, and ad hoc sign the copy before running it. Do not replace the installed application with the test executable.
 
 The harness requires `VOZ_TEST_RESULT`. Modes:
 
@@ -129,3 +129,24 @@ Build 16 keeps ten recent project folders in local preferences, with four quick 
 The Orchestrator is instructed to maintain `BOTERM_PLAN.md`, assign file ownership, dispatch to ready peer CLI prompts and iterate through implementation, tests, integrations, UX/design, loop review and final evidence. This is model-driven coordination through the existing Boterm tools, not a background job scheduler. Login, trust and tool approvals can require user action. A message alone does not wake a stopped model; the coordinator must check readiness and explicitly submit the next task. Closing the app ends the team. Full autonomous completion across real provider accounts has not been validated.
 
 Terminal accents now include commands, Kotlin/Java/Go/Rust/config files, status words and recognizable diff rows. Only default-colour cells are decorated; ANSI colours, Unicode alignment and full-screen applications retain their own rendering.
+
+## Sidebar selection and free mosaic
+
+Sidebar rows and project tabs are updated in place. Agents retitle their terminals many times per second, and rebuilding the list swallowed clicks; one click on a sidebar row now selects and shows that terminal.
+
+In Mosaico, each terminal occupies cells of a half-column grid. Drag the corner (bottom right) to change width and height, use the arrow keys on the focused corner, or double-click it to restore the default size. Drag the pane title to move a terminal; dense packing fills the gaps. Sizes last for the current window. `test/terminal-mosaic.js` covers resizing, overlap, moving and sidebar selection during title updates.
+
+## Layout profiles
+
+Below Dividir/Mosaico, **Salvar** stores the current arrangement under a name you choose: mode (single, split or mosaic), terminal order, mosaic sizes, split proportions and sidebar width. Choosing a profile rearranges the terminals of the current project that have the same names; it never starts or closes processes. Profiles live in the app preferences and survive restarts. × deletes the selected profile after confirmation. `test/terminal-mosaic.js` covers capture, a broken stored profile and reapplying.
+
+## Mensageiro
+
+The Development preset has an eighth role, Mensageiro (Claude by default, because it must read screenshots). It is the team's only channel to the owner: updates, access, permission and decision requests, waiting for the reply on the same channel.
+
+- **Telegram (verified).** Settings → Configurar Telegram. Copy the BotFather token, click Ler token: it goes from the clipboard straight to the Keychain (`com.danyalgil.boterm.telegram`), is never displayed, and the clipboard is cleared. Send the six-digit code to the bot; only that private chat can answer or grant from then on. `ask` sends Yes once / Yes always / No buttons; free-text and replies to the question also count. Yes always with a scope is recorded by the app itself.
+- **WhatsApp and email** are driven by the agent through computer control, following its role prompt: WhatsApp in the owner's chat with himself, every message prefixed `🤖 Boterm:`, replies read by screenshot, no `cmd+↑`. A permanent permission given there is recorded with `grant SCOPE whatsapp|email 'exact reply'`.
+- **Permissions** are global (`~/Library/Application Support/Boterm/permissions.json`, 0600). Every agent can read them (`permissions`); only a session launched as Mensageiro by the preset can `notify`, `ask`, `answer` or `grant`. A terminal merely named Mensageiro is refused. Settings lists grants with Revogar.
+- Messages to anyone other than the owner need the scope `destinatario:<canal>:<contato>` first.
+
+Not covered: the agents' own CLI approval prompts (Claude/Codex keep those in their own settings), and an idle Mensageiro is not woken automatically by a Telegram answer; it polls `answer`. `test/messenger.unit.swift` covers the store and reply parsing; `test/terminal-messenger.js` runs the CLI on the real socket for the role gate.

@@ -60,7 +60,7 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
   });
   activateSession(id);
   renderConversations();
-  send({type: 'ready', session: id, workspace, name: session.name, agent, directory: launch.directory ?? workspaceDirectories.get(workspace), prompt: launch.prompt, columns: terminal.cols, rows: terminal.rows});
+  send({type: 'ready', session: id, workspace, name: session.name, agent, directory: launch.directory ?? workspaceDirectories.get(workspace), prompt: launch.prompt, role: launch.role, columns: terminal.cols, rows: terminal.rows});
   return id;
 }
 function newWorkspace(name, directory) {
@@ -74,6 +74,7 @@ function activateSession(id, focus = true) {
   activeID = id; activeWorkspace = s.workspace; term = s.term; fit = s.fit;
   send({type: 'activate', session: id});
   renderNavigation(); fitVisible(); if (focus) term.focus();
+  s.host.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
 }
 function fitVisible() {
   const visible = [...sessions.values()].filter(s => s.workspace === activeWorkspace && (split || mosaic || s.id === activeID));
@@ -96,9 +97,23 @@ function updateAttention(session) {
   if (session.attention === attention) return;
   session.attention = attention; session.host.classList.toggle('needs-attention', Boolean(attention)); renderNavigation();
 }
+// Agents retitle their terminals many times per second; replacing a node between mousedown and
+// mouseup swallows the click, so navigation updates existing nodes and rebuilds only on real changes.
+const setIfChanged = (node, key, value) => { if (node[key] !== value) node[key] = value; };
+function sessionRow(s) {
+  if (s.row) return s.row;
+  const row = button('', () => activateSession(s.id));
+  row.classList.add('session-entry'); row.style.setProperty('--session-color', s.color);
+  const task = document.createElement('small'); task.className = 'session-task';
+  row.append(document.createElement('span'), document.createElement('small'), task);
+  movableSession(s, row);
+  return s.row = row;
+}
 function renderNavigation(forceProjects = false) {
   const tabs = document.getElementById('workspaces');
-  if (forceProjects || !tabs.querySelector('input')) {
+  const tabsKey = JSON.stringify([...workspaces, activeWorkspace]);
+  if (forceProjects || (!tabs.querySelector('input') && tabs.dataset.key !== tabsKey)) {
+  tabs.dataset.key = tabsKey;
   tabs.replaceChildren();
   const add = button('＋', () => newWorkspace(), 'Novo projeto');
   for (const [id, name] of [...workspaces].sort(([a], [b]) => Number(a === privateWorkspace) - Number(b === privateWorkspace))) {
@@ -131,23 +146,26 @@ function renderNavigation(forceProjects = false) {
   if (!workspaces.has(privateWorkspace)) tabs.append(add);
   }
   const list = document.getElementById('sessions'), select = document.getElementById('recipient');
-  const recipient = select.value; list.replaceChildren(); select.replaceChildren(new Option('Toda a equipe', '*'));
-  for (const s of sessions.values()) {
-    if (s.workspace !== activeWorkspace) continue;
-    const marks = {codex: '◇', claude: '✳', agy: '✦', gemini: '✦', opencode: '⌘'};
-    const row = button(`${marks[s.agent] || '›_'} ${s.name}`, () => activateSession(s.id), s.title || s.name);
-    row.classList.add('session-entry'); row.style.setProperty('--session-color', s.color);
-    movableSession(s, row);
-    const state = document.createElement('small');
-    state.textContent = s.ended ? 'Encerrado' : s.attention ? `! ${s.attention}` : s.agent ? (s.agentState === 'running' ? '● Em execução' : '○ Pronto') : 'Shell';
-    state.className = s.attention ? 'agent-attention' : s.agentState === 'running' ? 'agent-running' : ''; row.append(state);
-    row.classList.toggle('needs-attention', Boolean(s.attention));
-    if (s.attention) { row.title += ` · Atenção: ${s.attention}`; row.setAttribute('aria-label', `${s.name} · Atenção: ${s.attention}`); }
-    if (s.lastMessage) { const task = document.createElement('small'); task.className = 'session-task'; task.textContent = s.lastMessage; task.title = s.lastMessage; row.append(task); }
-    row.classList.toggle('selected', s.id === activeID); list.append(row);
-    if (s.id !== activeID) select.add(new Option(s.name, s.id));
+  const peers = [...sessions.values()].filter(s => s.workspace === activeWorkspace), rows = peers.map(sessionRow);
+  if (rows.length !== list.children.length || rows.some((row, i) => list.children[i] !== row)) list.replaceChildren(...rows);
+  const marks = {codex: '◇', claude: '✳', agy: '✦', gemini: '✦', opencode: '⌘'};
+  for (const s of peers) {
+    const [label, state, task] = s.row.children;
+    setIfChanged(label, 'textContent', `${marks[s.agent] || '›_'} ${s.name}`);
+    setIfChanged(state, 'textContent', s.ended ? 'Encerrado' : s.attention ? `! ${s.attention}` : s.agent ? (s.agentState === 'running' ? '● Em execução' : '○ Pronto') : 'Shell');
+    setIfChanged(state, 'className', s.attention ? 'agent-attention' : s.agentState === 'running' ? 'agent-running' : '');
+    setIfChanged(task, 'textContent', s.lastMessage || ''); setIfChanged(task, 'title', s.lastMessage || ''); task.hidden = !s.lastMessage;
+    setIfChanged(s.row, 'title', `${s.title || s.name} · arraste para mover; ⌥↑/↓ para reordenar${s.attention ? ` · Atenção: ${s.attention}` : ''}`);
+    s.row.setAttribute('aria-label', s.attention ? `${s.name} · Atenção: ${s.attention}` : s.title || s.name);
+    s.row.classList.toggle('needs-attention', Boolean(s.attention));
+    s.row.classList.toggle('selected', s.id === activeID);
   }
-  if ([...select.options].some(o => o.value === recipient)) select.value = recipient;
+  const recipients = peers.filter(s => s.id !== activeID), recipientsKey = JSON.stringify(recipients.map(s => [s.id, s.name]));
+  if (select.dataset.key !== recipientsKey) {
+    const recipient = select.value; select.dataset.key = recipientsKey;
+    select.replaceChildren(new Option('Toda a equipe', '*'), ...recipients.map(s => new Option(s.name, s.id)));
+    if ([...select.options].some(o => o.value === recipient)) select.value = recipient;
+  }
   const label = document.getElementById('session-label');
   label.textContent = sessions.get(activeID)?.name ?? '';
   label.style.setProperty('--session-color', sessions.get(activeID)?.color ?? sessionColors[0]);

@@ -25,7 +25,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     let web: DropWebView
     private let firstShell = ShellSession()
     var shell: ShellSession { records[activeSessionID]?.shell ?? firstShell }
-    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0 }
+    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = "" }
     var records: [String: Record] = [:]
     var activeSessionID = ""
     var voiceSessionID = ""
@@ -231,9 +231,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
         case "development":
             guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
-                  let providers = body["providers"] as? [String], providers.count == 7,
+                  let providers = body["providers"] as? [String], providers.count == 8,
                   providers.allSatisfy({ ["codex", "claude", "agy", "gemini"].contains($0) }),
-                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 7 <= 32 else {
+                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 8 <= 32 else {
                 js("window.voz.developmentError('Configuração inválida ou limite de terminais atingido.')"); return
             }
             var isDirectory: ObjCBool = false
@@ -249,7 +249,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             let session = launched ? ShellSession() : firstShell
             let initial = !launched
             launched = true
-            records[id] = Record(shell: session, workspace: workspace, name: String((body["name"] as? String ?? "Terminal").prefix(80)))
+            records[id] = Record(shell: session, workspace: workspace, name: String((body["name"] as? String ?? "Terminal").prefix(80)), role: String((body["role"] as? String ?? "").prefix(40)))
             activeSessionID = id
             session.output = { [weak self] data in self?.js("window.voz.write(\(Self.json(data.base64EncodedString())), \(Self.json(id)))") }
             session.ended = { [weak self] in
@@ -296,6 +296,15 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         case "paste": pasteText()
         case "closeSession": if let id = body["session"] as? String { closeSession(id) }
         case "rename": if let id = body["session"] as? String { renameSession(id) }
+        case "layoutProfiles": js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())))")
+        case "saveLayout":
+            if let layout = body["layout"] as? String { saveLayout(layout, suggested: body["name"] as? String ?? "") }
+        case "deleteLayout":
+            if let name = body["name"] as? String { deleteLayout(name) }
+        case "messengerState": (NSApp.delegate as? AppDelegate)?.sendMessengerState(to: self)
+        case "telegramSetup": (NSApp.delegate as? AppDelegate)?.setupTelegram(for: self)
+        case "revokePermission":
+            if let id = body["id"] as? String { try? PermissionStore.revoke(id); (NSApp.delegate as? AppDelegate)?.sendMessengerState(to: self) }
         case "message":
             if let from = body["session"] as? String, let to = body["to"] as? String, let text = body["text"] as? String {
                 do { _ = try postMessage(from: from, to: to, text: text) } catch { self.error(error.localizedDescription) }
@@ -335,6 +344,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var terminals: [TerminalWindow] = []
     var control: LocalControl?
     var agentTimer: Timer?
+    let telegram = TelegramBridge()
     private var cascade = NSPoint.zero
     func applicationDidFinishLaunching(_ notification: Notification) {
         let main = NSMenu()
@@ -378,6 +388,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         agentTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.refreshAgentStates() }
         }
+        connectTelegram()
         newWindow()
         NSApplication.shared.activate(ignoringOtherApps: true)
         #if VOZ_TEST

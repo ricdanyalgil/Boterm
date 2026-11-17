@@ -193,6 +193,27 @@ enum ProjectHistory {
                 // Paste stays a draft; Enter is a separate, explicit operation.
                 _ = try await terminal.web.evaluateJavaScript("window.voz.insert(\(TerminalWindow.json(text)), \(TerminalWindow.json(target)), \(submitting))")
                 value = try terminal.postMessage(from: from, to: target, text: submitting ? "[Terminal: submitted input] \(text)" : "[Terminal: inserted draft] \(text)")
+            case "permissions":
+                value = PermissionStore.all().map(PermissionStore.dictionary)
+            case "notify", "ask", "answer", "grant":
+                guard caller.role == "Mensageiro" else { throw ControlError.invalid("Only the Mensageiro session contacts the owner or records permissions; send your request to the Mensageiro") }
+                let text = request["text"] as? String ?? ""
+                switch command {
+                case "notify":
+                    try await telegram.notify(text); value = ["sent": true]
+                case "ask":
+                    let scope = try (request["scope"] as? String).flatMap { $0.isEmpty ? nil : try PermissionStore.scope($0) }
+                    if let scope, let grant = PermissionStore.granted(scope) { value = ["status": "granted", "grant": PermissionStore.dictionary(grant)] }
+                    else { value = TelegramBridge.dictionary(try await telegram.ask(text, scope: scope, session: from)) }
+                case "answer":
+                    guard let ask = telegram.asks[request["id"] as? String ?? ""], ask.session == from else { throw ControlError.invalid("Unknown request ID") }
+                    value = TelegramBridge.dictionary(ask)
+                default:
+                    guard let via = request["via"] as? String, ["whatsapp", "email"].contains(via), !text.trimmingCharacters(in: .whitespaces).isEmpty else {
+                        throw ControlError.invalid("grant needs via whatsapp|email and the owner's exact reply as text; Telegram answers are recorded automatically")
+                    }
+                    value = PermissionStore.dictionary(try PermissionStore.add(scope: request["scope"] as? String ?? "", note: text, via: via))
+                }
             case "new":
                 let name = String((request["text"] as? String ?? "Agent").prefix(80))
                 guard terminal.records.count < 32 else { throw ControlError.invalid("Maximum 32 sessions per window") }
@@ -201,5 +222,76 @@ enum ProjectHistory {
             }
             return try JSONSerialization.data(withJSONObject: ["result": value], options: [.sortedKeys])
         } catch { return (try? JSONSerialization.data(withJSONObject: ["error": error.localizedDescription])) ?? Data("{}".utf8) }
+    }
+}
+
+@MainActor extension TerminalWindow {
+    func saveLayout(_ layout: String, suggested: String) {
+        guard layout.utf8.count <= 65536, (try? JSONSerialization.jsonObject(with: Data(layout.utf8))) is [String: Any] else { return }
+        let alert = NSAlert(); alert.messageText = "Salvar perfil de layout"
+        alert.informativeText = "Guarda o modo (único, dividir ou mosaico), a ordem e o tamanho de cada terminal pelo nome. Ao aplicar, os terminais existentes são reorganizados; nenhum é criado."
+        let field = NSTextField(string: suggested); field.placeholderString = "Ex.: Equipe completa"; field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        alert.accessoryView = field; alert.addButton(withTitle: "Salvar"); alert.addButton(withTitle: "Cancelar")
+        alert.window.initialFirstResponder = field
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let name = String(field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).prefix(60))
+        guard !name.isEmpty else { return }
+        LayoutProfiles.save(name, layout: layout)
+        for terminal in (NSApp.delegate as? AppDelegate)?.terminals ?? [self] {
+            terminal.js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())), \(Self.json(terminal === self ? name : "")))")
+        }
+    }
+    func deleteLayout(_ name: String) {
+        let alert = NSAlert(); alert.messageText = "Apagar o perfil “\(name)”?"
+        alert.addButton(withTitle: "Apagar"); alert.addButton(withTitle: "Cancelar")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        LayoutProfiles.delete(name)
+        for terminal in (NSApp.delegate as? AppDelegate)?.terminals ?? [self] { terminal.js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())))") }
+    }
+    /// Shown in the recipient's pane and inbox; it never becomes terminal input.
+    func postOwnerMessage(to id: String, text: String) {
+        guard let record = records[id] else { return }
+        let message: [String: Any] = ["id": UUID().uuidString, "from": "owner", "to": id, "fromName": "Ricardo · Telegram", "toName": record.name,
+            "workspace": record.workspace, "time": ISO8601DateFormatter().string(from: Date()), "text": String(text.prefix(16000))]
+        messages.append(message); if messages.count > 200 { messages.removeFirst() }
+        js("window.voz.message(\(Self.json(message)))")
+    }
+}
+
+@MainActor extension AppDelegate {
+    func connectTelegram() {
+        telegram.answered = { [weak self] ask in
+            guard let terminal = self?.terminals.first(where: { $0.records[ask.session] != nil }) else { return }
+            terminal.postOwnerMessage(to: ask.session, text: "Resposta ao pedido \(ask.id): \(ask.reply)" + (ask.choice == "always" ? " · permissão gravada: \(ask.scope ?? "")" : ""))
+        }
+        telegram.ownerMessage = { [weak self] text in
+            for terminal in self?.terminals ?? [] {
+                for (id, record) in terminal.records where record.role == "Mensageiro" { terminal.postOwnerMessage(to: id, text: text) }
+            }
+        }
+        telegram.changed = { [weak self] in self?.terminals.forEach { self?.sendMessengerState(to: $0) } }
+        telegram.start()
+    }
+    func sendMessengerState(to terminal: TerminalWindow) {
+        let state: [String: Any] = ["telegram": telegram.state, "code": telegram.pairingCode ?? "", "grants": PermissionStore.all().map(PermissionStore.dictionary)]
+        terminal.js("window.voz.messengerState(\(TerminalWindow.json(state)))")
+    }
+    /// Follows the approved secret pattern: the token goes from the clipboard to the Keychain unseen, then the clipboard is cleared.
+    func setupTelegram(for terminal: TerminalWindow) {
+        let intro = NSAlert()
+        intro.messageText = "Configurar o Telegram do Mensageiro"
+        intro.informativeText = "1. No Telegram, abra @BotFather, envie /newbot e siga os passos.\n2. Toque em copiar no token que ele devolve.\n3. Volte aqui e clique em Ler token.\n\nO token vai direto para o Keychain deste Mac, não aparece na tela e a área de transferência é limpa. Depois você envia ao seu bot um código de 6 dígitos; só essa conversa poderá responder e conceder permissões."
+        intro.addButton(withTitle: "Ler token"); intro.addButton(withTitle: "Cancelar")
+        guard intro.runModal() == .alertFirstButtonReturn else { return }
+        let token = (NSPasteboard.general.string(forType: .string) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        Task {
+            let ok = await telegram.configure(token: token)
+            if ok { NSPasteboard.general.clearContents() }
+            let result = NSAlert()
+            result.messageText = ok ? "Agora envie ao seu bot: \(telegram.pairingCode ?? "")" : "Token não aceito"
+            result.informativeText = ok ? "Abra a conversa com o bot que você criou e envie esse código. O Boterm confirma por lá quando ficar conectado." : "A área de transferência não tinha um token válido, ou o Telegram o recusou. Nada foi gravado e a área de transferência ficou como estava."
+            result.beginSheetModal(for: terminal.window, completionHandler: nil)
+            sendMessengerState(to: terminal)
+        }
     }
 }

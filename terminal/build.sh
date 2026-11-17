@@ -6,7 +6,7 @@ trap 'rm -rf -- "$stage"' EXIT
 app="$stage/Boterm.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources/bin"
 ../build-helper.sh
-xcrun swiftc -parse-as-library -swift-version 6 -O -target arm64-apple-macos26.0 Main.swift App.swift PTY.swift Dictation.swift LocalControl.swift ControlActions.swift TerminalTheme.swift ../native/Vocabulary.swift -o "$app/Contents/MacOS/Boterm" -framework AppKit -framework WebKit
+xcrun swiftc -parse-as-library -swift-version 6 -O -target arm64-apple-macos26.0 Main.swift App.swift PTY.swift Dictation.swift LocalControl.swift ControlActions.swift Messenger.swift TerminalTheme.swift ../native/Vocabulary.swift -o "$app/Contents/MacOS/Boterm" -framework AppKit -framework WebKit
 xcrun swiftc -parse-as-library -swift-version 6 -O -target arm64-apple-macos26.0 CLI.swift MCP.swift LocalControl.swift -o "$app/Contents/Resources/bin/boterm"
 cp ../docs/AGENT_GUIDE.md "$app/Contents/Resources/AGENT_GUIDE.md"
 cp -R web "$app/Contents/Resources/web"
@@ -22,8 +22,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Boterm</string>
 <key>CFBundleIconFile</key><string>Boterm.icns</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.3.1</string>
-<key>CFBundleVersion</key><string>22</string>
+<key>CFBundleShortVersionString</key><string>0.3.2</string>
+<key>CFBundleVersion</key><string>23</string>
 <key>LSMinimumSystemVersion</key><string>26.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSAppleEventsUsageDescription</key><string>Programs you run in Boterm, such as AI agents, can automate other apps when you allow it.</string>

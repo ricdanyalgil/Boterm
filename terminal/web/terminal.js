@@ -66,6 +66,23 @@ window.voz = {
     document.getElementById('development-error').textContent = '';
     document.getElementById('development-choose-directory').focus();
   },
+  layoutProfiles(profiles, selected) {
+    layoutProfiles = {};
+    for (const [name, json] of Object.entries(profiles || {})) { try { layoutProfiles[name] = JSON.parse(json); } catch {} }
+    renderLayoutProfiles(selected);
+  },
+  messengerState(state) {
+    const labels = {paired: 'Telegram conectado.', pairing: `Telegram: envie ao seu bot a mensagem ${state.code || ''} para concluir.`, token: 'Telegram: token gravado, falta emparelhar.', off: 'Telegram não configurado.'};
+    document.getElementById('telegram-state').textContent = labels[state.telegram] || labels.off;
+    document.getElementById('telegram-setup').textContent = state.telegram === 'paired' ? 'Reconfigurar Telegram…' : 'Configurar Telegram…';
+    const list = document.getElementById('permission-list'), grants = state.grants || [];
+    document.getElementById('permissions-empty').hidden = grants.length > 0;
+    list.replaceChildren(...grants.map(g => {
+      const item = document.createElement('li'), text = document.createElement('span'), scope = document.createElement('code'), note = document.createElement('small');
+      scope.textContent = g.scope; note.textContent = ` · ${g.via} · ${new Date(g.time).toLocaleString()}${g.note ? ' · ' + g.note : ''}`;
+      text.append(scope, note); item.append(text, button('Revogar', () => send({type: 'revokePermission', id: g.id}), `Revogar ${g.scope}`)); return item;
+    }));
+  },
   developmentError(message) { document.getElementById('development-error').textContent = message; },
   newWorkspace,
   activate: activateSession,

@@ -174,3 +174,16 @@ dialog dd { margin: 4px 0 0; }
 
 dialog a { color: #82aaff; text-underline-offset: 3px; }
 dialog a:focus-visible { outline: 2px solid #82aaff; outline-offset: 3px; }
+#sessions small[hidden] { display: none; }
+.mosaic-resize { display: none; position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: nwse-resize; z-index: 5; touch-action: none; }
+#terminal.mosaic .mosaic-resize { display: block; }
+.mosaic-resize::after { content: ''; position: absolute; right: 3px; bottom: 3px; width: 7px; height: 7px; border-right: 2px solid #59627b; border-bottom: 2px solid #59627b; pointer-events: none; }
+.mosaic-resize:hover::after, .mosaic-resize:focus-visible::after { border-color: var(--session-color, #82aaff); }
+.mosaic-resize:focus-visible { outline: none; }
+.layout-profiles { display: flex; gap: 2px; margin-top: 6px; min-width: 0; }
+.layout-profiles select { flex: 1; min-width: 0; font-size: 11px; }
+.layout-profiles button { font-size: 11px; padding: 4px 6px; }
+#permission-list { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 4px; }
+#permission-list li { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+#permission-list code { overflow-wrap: anywhere; }
+#permission-list small { color: #7b829a; }

@@ -12,6 +12,8 @@ import Darwin
                 boterm list | read [SESSION] | inbox | new NAME
                 boterm message SESSION|'*' TEXT
                 boterm send SESSION TEXT [--submit]
+                boterm permissions
+                Mensageiro only: boterm notify TEXT | ask TEXT [--scope SCOPE] | answer ID | grant SCOPE whatsapp|email OWNER_REPLY
                 Read $BOTERM_AGENT_GUIDE for team collaboration. IDs come from list.
                 send inserts a draft; only --submit presses Enter. Messages never type into a shell.
                 """); return
@@ -63,6 +65,15 @@ import Darwin
             case "message", "send":
                 guard args.count == 3 || (args[0] == "send" && args.count == 4 && args[3] == "--submit") else { throw ControlError.invalid("Usage: boterm \(args[0]) SESSION TEXT [--submit for send only]") }
                 request["target"] = args[1]; request["text"] = args[2]; request["submit"] = args.count == 4
+            case "permissions": guard args.count == 1 else { throw ControlError.invalid("Unexpected arguments") }
+            case "notify": guard args.count == 2 else { throw ControlError.invalid("Usage: boterm notify TEXT") }; request["text"] = args[1]
+            case "ask":
+                guard args.count == 2 || (args.count == 4 && args[2] == "--scope") else { throw ControlError.invalid("Usage: boterm ask TEXT [--scope SCOPE]") }
+                request["text"] = args[1]; if args.count == 4 { request["scope"] = args[3] }
+            case "answer": guard args.count == 2 else { throw ControlError.invalid("Usage: boterm answer ID") }; request["id"] = args[1]
+            case "grant":
+                guard args.count == 4 else { throw ControlError.invalid("Usage: boterm grant SCOPE whatsapp|email OWNER_REPLY") }
+                request["scope"] = args[1]; request["via"] = args[2]; request["text"] = args[3]
             default: throw ControlError.invalid("Unknown command; use boterm --help")
             }
             let json = try call(path, request)

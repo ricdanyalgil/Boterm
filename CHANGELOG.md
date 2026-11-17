@@ -1,3 +1,10 @@
+# Boterm 0.3.2 — local build 23, 2026-11-17
+
+- Sidebar and project tabs update in place: one click selects and shows a terminal even while agents retitle their sessions many times per second.
+- Free mosaic: each terminal spans cells of a half-column grid. Drag the corner to change width and height (arrow keys on the focused corner, double click to reset); drag the title to move. Dense packing, no overlap.
+- Layout profiles: save mode, order, mosaic sizes, split proportions and sidebar width under a name; reapply them to the current project's terminals by name. Kept across restarts.
+- Mensageiro, eighth Development role: the team's only channel to the owner over Telegram (verified chat, token in the Keychain), WhatsApp (self chat, screenshots) and email. Permanent permissions are global, listed and revocable in Settings; only a session launched as Mensageiro can notify, ask or grant.
+
 # Boterm 0.3.1 — local build 22, 2026-11-13
 
 - Build 22: match the native title bar to the dark workspace header and use only Boterm as the window title. Project paths no longer replace the title; the version remains in Settings → About.

@@ -30,11 +30,22 @@ function resizeHandle(label, orientation, adjust) {
 }
 function updateSplitLayout(count) {
   const grid = document.getElementById('terminal');
+  const panes = [...grid.children].filter(pane => !pane.hidden);
+  grid.style.gridAutoFlow = grid.style.gridAutoRows = '';
+  for (const pane of panes) pane.style.gridColumn = pane.style.gridRow = '';
   if (mosaic) {
     const balanced = Math.ceil(Math.sqrt(count * grid.clientWidth / Math.max(1, grid.clientHeight) / 1.8));
     const columns = Math.max(1, Math.min(count, balanced, Math.floor(grid.clientWidth / 320)));
-    grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
-    grid.style.gridTemplateRows = `repeat(${Math.max(1, Math.ceil(count / columns))}, minmax(80px, 1fr))`;
+    // Each terminal spans cells of a half-column grid; dense packing refills gaps after a resize or move.
+    const tracks = columns * MOSAIC_CELLS;
+    grid.dataset.tracks = tracks;
+    grid.style.gridTemplateColumns = `repeat(${tracks}, minmax(0, 1fr))`;
+    grid.style.gridTemplateRows = '';
+    grid.style.gridAutoRows = 'minmax(36px, 1fr)'; grid.style.gridAutoFlow = 'row dense';
+    for (const pane of panes) {
+      pane.style.gridColumn = `span ${Math.min(Number(pane.dataset.w) || MOSAIC_CELLS, tracks)}`;
+      pane.style.gridRow = `span ${Number(pane.dataset.h) || MOSAIC_CELLS}`;
+    }
     return;
   }
   const columns = matchMedia('(max-width: 750px)').matches ? 1 : 2;
@@ -47,7 +58,39 @@ function updateSplitLayout(count) {
   });
   grid.style.gridTemplateRows = split ? splitRows.map(size => `minmax(80px, ${size}fr)`).join(' ') : 'minmax(0, 1fr)';
 }
+const MOSAIC_CELLS = 2;
+function mosaicResizer(host) {
+  const corner = document.createElement('div');
+  corner.className = 'mosaic-resize'; corner.tabIndex = 0; corner.setAttribute('role', 'button');
+  corner.setAttribute('aria-label', 'Tamanho no mosaico'); corner.title = 'Arraste para mudar largura e altura · setas no teclado · duplo clique repõe';
+  const span = (w, h) => {
+    const tracks = Number(document.getElementById('terminal').dataset.tracks) || MOSAIC_CELLS;
+    w = clamp(w, 1, tracks); h = clamp(h, 1, 16);
+    if (String(w) === host.dataset.w && String(h) === host.dataset.h) return;
+    host.dataset.w = w; host.dataset.h = h; fitVisible();
+  };
+  const current = () => [Number(host.dataset.w) || MOSAIC_CELLS, Number(host.dataset.h) || MOSAIC_CELLS];
+  corner.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    event.preventDefault(); event.stopPropagation(); corner.setPointerCapture(event.pointerId);
+    const grid = document.getElementById('terminal'), gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+    const [, h] = current(), cellHeight = (host.getBoundingClientRect().height + gap) / h;
+    corner.onpointermove = move => {
+      const rect = host.getBoundingClientRect(), cellWidth = (grid.clientWidth + gap) / (Number(grid.dataset.tracks) || 1);
+      span(Math.round((move.clientX - rect.left + gap) / cellWidth), Math.round((move.clientY - rect.top + gap) / cellHeight));
+    };
+    corner.onpointerup = corner.onlostpointercapture = () => { corner.onpointermove = null; };
+  });
+  corner.addEventListener('dblclick', () => { delete host.dataset.w; delete host.dataset.h; fitVisible(); });
+  corner.addEventListener('keydown', event => {
+    const step = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[event.key];
+    if (!step) return;
+    event.preventDefault(); const [w, h] = current(); span(w + step[0], h + step[1]);
+  });
+  host.append(corner);
+}
 function paneResizers(host) {
+  mosaicResizer(host);
   host.append(resizeHandle('Largura dos terminais', 'vertical', delta => {
     const width = document.getElementById('terminal').clientWidth;
     splitColumns = clamp(splitColumns + delta / width * 100, 15, 85);
