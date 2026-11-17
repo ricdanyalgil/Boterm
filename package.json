@@ -19,7 +19,7 @@
     "onStartupFinished"
   ],
   "scripts": {
-    "test": "node --test test/dictation.test.js test/prompt-rows.test.js test/text-tokens.test.js test/terminal-accents.test.js test/development.test.js test/drop-paths.test.js test/voice-wave.test.js test/vocabulary-command.test.js test/shortcuts.test.js test/terminal-attention.test.js"
+    "test": "node --test test/dictation.test.js test/prompt-rows.test.js test/text-tokens.test.js test/terminal-accents.test.js test/development.test.js test/drop-paths.test.js test/voice-wave.test.js test/vocabulary-command.test.js test/shortcuts.test.js test/terminal-attention.test.js test/dashboard.test.js"
   },
   "contributes": {
     "commands": [

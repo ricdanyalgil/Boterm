@@ -10,6 +10,7 @@
 </head>
 <body>
 <header id="project-bar"><nav id="workspaces" aria-label="Projetos"></nav><div id="project-tools">
+<button id="dashboard-toggle" type="button" title="Painel do projeto" aria-label="Painel do projeto" aria-pressed="false">▦</button>
 <button id="development-preset" type="button" title="Preset de desenvolvimento" aria-label="Preset de desenvolvimento">⌘</button>
 <button id="settings" type="button" title="Configurações" aria-label="Configurações">⚙</button></div></header>
 <div id="workspace-body">
@@ -22,7 +23,9 @@
 </aside>
 <div id="stage">
 <div id="terminal-actions"><span id="session-label"></span><div id="session-controls"><details id="action-menu"><summary title="Ações do terminal" aria-label="Ações do terminal">⋯</summary><div class="action-items"><select id="agent-kind" aria-label="Agente"><option value="codex">◇ Codex</option><option value="claude">✳ Claude</option><option value="agy">✦ Gemini (Antigravity)</option><option value="gemini">✦ Gemini CLI</option><option value="opencode">⌘ OpenCode</option></select><button id="launch-agent" type="button">Iniciar</button><button id="copy-text" type="button">Copiar</button><button id="paste-text" type="button">Colar</button><button id="rename-session" type="button">Renomear</button><button id="close-session" type="button" aria-label="Fechar terminal">×</button></div></details></div></div>
+<div id="history-notice" role="status" hidden><span></span><button class="notice-open" type="button">Abrir painel</button><button class="notice-close" type="button" aria-label="Dispensar">×</button></div>
 <main id="terminal" aria-label="Sessões de terminal"></main>
+<section id="dashboard" aria-label="Painel do projeto" hidden></section>
 <section id="voice-panel" aria-label="Voice dictation" hidden>
   <div class="voice-info">
     <div><strong id="voice-status" role="status">Preparing microphone…</strong><p id="voice-hint">Audio stays on your Mac.</p></div>
@@ -49,7 +52,7 @@
 </details>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações">×</button></form>
 <h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/VozTTY">GitHub · código-fonte do Boterm</a></p>
-<p>Versão 0.3.3 · build 24</p>
+<p>Versão 0.3.4 · build 25</p>
 <p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
 <dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
 <dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>
@@ -65,5 +68,5 @@
 <div id="development-recents" aria-label="Projetos recentes" hidden></div>
 <label>Objetivo<input id="development-objective" maxlength="2000" placeholder="Você também pode explicar ao orquestrador depois."></label>
 <div id="development-roles"></div><p id="development-error" role="alert"></p><button type="submit" class="primary-action">Criar equipe</button></form></dialog>
-<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="text-tokens.js"></script><script src="terminal-accents.js"></script><script src="layout.js"></script><script src="profiles.js"></script><script src="attention.js"></script><script src="workspace.js"></script><script src="development.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
+<script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="text-tokens.js"></script><script src="terminal-accents.js"></script><script src="layout.js"></script><script src="profiles.js"></script><script src="attention.js"></script><script src="workspace.js"></script><script src="dashboard.js"></script><script src="development.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
 </html>

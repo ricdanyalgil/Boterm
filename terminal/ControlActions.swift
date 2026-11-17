@@ -193,6 +193,39 @@ enum ProjectHistory {
                 // Paste stays a draft; Enter is a separate, explicit operation.
                 _ = try await terminal.web.evaluateJavaScript("window.voz.insert(\(TerminalWindow.json(text)), \(TerminalWindow.json(target)), \(submitting))")
                 value = try terminal.postMessage(from: from, to: target, text: submitting ? "[Terminal: submitted input] \(text)" : "[Terminal: inserted draft] \(text)")
+            case "tool":
+                // Claude hook timing: PreToolUse starts a clock, PostToolUse closes it.
+                let name = String((request["name"] as? String ?? "").prefix(200)), id = String((request["id"] as? String ?? "").prefix(100))
+                let key = id.isEmpty ? name : id
+                guard !name.isEmpty else { throw ControlError.invalid("Tool name required") }
+                if request["event"] as? String == "pre" {
+                    terminal.records[from]?.toolStarts[key] = Date()
+                    if let starts = terminal.records[from]?.toolStarts, starts.count > 100 {
+                        terminal.records[from]?.toolStarts = starts.filter { Date().timeIntervalSince($0.value) < 3600 }
+                    }
+                } else {
+                    let started = terminal.records[from]?.toolStarts.removeValue(forKey: key)
+                    // Claude reports duration_ms on PostToolUse; the local clock is the fallback.
+                    let reported = (request["duration"] as? Double ?? 0) / 1000
+                    let seconds = min(reported > 0 ? reported : started.map { Date().timeIntervalSince($0) } ?? 0, 3600)
+                    let category = Telemetry.category(name)
+                    terminal.records[from]?.tools[category, default: ToolUsage()].calls += 1
+                    terminal.records[from]?.tools[category, default: ToolUsage()].seconds += seconds
+                    terminal.usage[workspace, default: [:]][category, default: ToolUsage()].calls += 1
+                    terminal.usage[workspace, default: [:]][category, default: ToolUsage()].seconds += seconds
+                }
+                value = true
+            case "event":
+                let text = (request["text"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                guard let kind = request["kind"] as? String, Telemetry.eventKinds.contains(kind), (1...500).contains(text.count), !text.contains("\n") else {
+                    throw ControlError.invalid("event needs a kind (\(Telemetry.eventKinds.joined(separator: ", "))) and one line of text (≤500)")
+                }
+                let event: [String: Any] = ["id": UUID().uuidString, "workspace": workspace, "session": from, "name": caller.name, "kind": kind, "text": text, "time": ISO8601DateFormatter().string(from: Date())]
+                terminal.events.append(event); if terminal.events.count > 500 { terminal.events.removeFirst() }
+                terminal.js("window.voz.event(\(TerminalWindow.json(event)))")
+                value = event
+            case "events":
+                value = Array(terminal.events.filter { $0["workspace"] as? String == workspace }.suffix(100))
             case "history":
                 let text = request["text"] as? String ?? ""
                 if text.isEmpty { value = SessionLog.read(caller.directory) }

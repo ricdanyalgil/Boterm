@@ -25,11 +25,13 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     let web: DropWebView
     private let firstShell = ShellSession()
     var shell: ShellSession { records[activeSessionID]?.shell ?? firstShell }
-    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = ""; var directory = ""; var lastOutput = Date(); var lastInput = Date.distantPast; var compacting = false }
+    struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = ""; var directory = ""; var lastOutput = Date(); var lastInput = Date.distantPast; var compacting = false; var toolStarts: [String: Date] = [:]; var tools: [String: ToolUsage] = [:] }
     var records: [String: Record] = [:]
     var activeSessionID = ""
     var voiceSessionID = ""
     var messages: [[String: Any]] = []
+    var events: [[String: Any]] = []
+    var usage: [String: [String: ToolUsage]] = [:]
     var controlPath = ""
     private var rootLoaded = false
     private let theme = TerminalTheme.load()
@@ -139,7 +141,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         window.makeKeyAndOrderFront(nil)
     }
 
-    static func json(_ value: Any) -> String {
+    nonisolated static func json(_ value: Any) -> String {
         String(data: try! JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]), encoding: .utf8)!
     }
     func js(_ script: String) { web.evaluateJavaScript(script, completionHandler: nil) }
@@ -297,6 +299,22 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         case "paste": pasteText()
         case "closeSession": if let id = body["session"] as? String { closeSession(id) }
         case "rename": if let id = body["session"] as? String { renameSession(id) }
+        case "dashboard":
+            guard let workspace = body["workspace"] as? String, let since = body["since"] as? String, since.count <= 40 else { return }
+            let requested = body["directory"] as? String ?? ""
+            let directory = ProjectHistory.directory(requested) ?? records.values.first { $0.workspace == workspace && !$0.directory.isEmpty }.flatMap { ProjectHistory.directory($0.directory) }
+            let data: [String: Any] = ["workspace": workspace, "directory": directory ?? "", "usage": Telemetry.dictionary(usage[workspace] ?? [:]),
+                "events": Array(events.filter { $0["workspace"] as? String == workspace }.suffix(60)),
+                "sessions": Dictionary(uniqueKeysWithValues: records.filter { $0.value.workspace == workspace }.map { ($0.key, Telemetry.dictionary($0.value.tools)) })]
+            let base = Self.json(data)
+            Task {
+                // git can take a moment on large repositories; it runs off the main thread and returns JSON text.
+                let extra = await Task.detached { () -> String in
+                    guard let directory else { return "null" }
+                    return Self.json(["code": Telemetry.codeChanges(directory: directory, since: since), "history": Telemetry.history(directory: directory)])
+                }.value
+                self.js("window.voz.dashboard(\(base), \(extra))")
+            }
         case "layoutProfiles": js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())))")
         case "saveLayout":
             if let layout = body["layout"] as? String { saveLayout(layout, suggested: body["name"] as? String ?? "") }

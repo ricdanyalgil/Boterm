@@ -12,6 +12,7 @@ import Darwin
                 boterm list | read [SESSION] | inbox | new NAME
                 boterm message SESSION|'*' TEXT
                 boterm send SESSION TEXT [--submit]
+                boterm event KIND TEXT | events   (KIND: test-fail test-pass fix improvement decision blocker)
                 boterm permissions | history [TITLE SUMMARY] | compact SESSION [FOCUS]
                 Mensageiro only: boterm notify TEXT | ask TEXT [--scope SCOPE] | answer ID | grant SCOPE whatsapp|email OWNER_REPLY
                 Read $BOTERM_AGENT_GUIDE for team collaboration. IDs come from list.
@@ -30,6 +31,15 @@ import Darwin
                 }
             }
             guard let path, let from, let workspace else { throw ControlError.invalid("Run this command inside Boterm") }
+            if args[0] == "tool" {
+                // Claude hook: never print, never fail the tool call.
+                let input = FileHandle.standardInput.readData(ofLength: 1_048_576)
+                if let hook = try? JSONSerialization.jsonObject(with: input) as? [String: Any], let name = hook["tool_name"] as? String {
+                    let event = (hook["hook_event_name"] as? String) == "PreToolUse" ? "pre" : "post"
+                    _ = try? call(path, ["command": "tool", "from": from, "workspace": workspace, "event": event, "name": name, "id": hook["tool_use_id"] as? String ?? "", "duration": hook["duration_ms"] as? Double ?? 0])
+                }
+                return
+            }
             if args[0] == "mcp" { BotermMCP.serve(path: path, from: from, workspace: workspace); return }
             if args[0] == "agent" {
                 guard args.count >= 2, ["codex", "claude", "agy", "gemini", "opencode"].contains(args[1]) else { throw ControlError.invalid("Usage: boterm agent codex|claude|agy|gemini|opencode [ARGS...]") }
@@ -45,7 +55,11 @@ import Darwin
                 } else if kind == "claude" {
                     let config = ["mcpServers": ["boterm": ["command": executable, "args": ["mcp"], "env": ["BOTERM_SOCKET": path, "BOTERM_SESSION": from, "BOTERM_WORKSPACE": workspace]]]] as [String: Any]
                     // Bind the variadic option to its JSON so it cannot consume the initial prompt.
-                    flags = ["--mcp-config=" + String(decoding: try JSONSerialization.data(withJSONObject: config), as: UTF8.self)]
+                    // Hooks time each tool call for the dashboard; they add settings, never replace the user's.
+                    let hook = [["matcher": "mcp__.*|Edit|Write|MultiEdit|NotebookEdit|Bash", "hooks": [["type": "command", "command": "'" + executable.replacingOccurrences(of: "'", with: "'\\''") + "' tool", "timeout": 5]]]]
+                    let settings = ["hooks": ["PreToolUse": hook, "PostToolUse": hook]]
+                    flags = ["--mcp-config=" + String(decoding: try JSONSerialization.data(withJSONObject: config), as: UTF8.self),
+                             "--settings=" + String(decoding: try JSONSerialization.data(withJSONObject: settings), as: UTF8.self)]
                 }
                 _ = try call(path, ["command": "agentState", "from": from, "workspace": workspace, "agent": kind, "state": "running"])
                 // Replace the launcher so the agent keeps the terminal's foreground process group.
@@ -65,6 +79,8 @@ import Darwin
             case "message", "send":
                 guard args.count == 3 || (args[0] == "send" && args.count == 4 && args[3] == "--submit") else { throw ControlError.invalid("Usage: boterm \(args[0]) SESSION TEXT [--submit for send only]") }
                 request["target"] = args[1]; request["text"] = args[2]; request["submit"] = args.count == 4
+            case "event": guard args.count == 3 else { throw ControlError.invalid("Usage: boterm event KIND TEXT") }; request["kind"] = args[1]; request["text"] = args[2]
+            case "events": guard args.count == 1 else { throw ControlError.invalid("Unexpected arguments") }
             case "history":
                 guard args.count == 1 || args.count == 3 else { throw ControlError.invalid("Usage: boterm history [TITLE SUMMARY]") }
                 if args.count == 3 { request["title"] = args[1]; request["text"] = args[2] }

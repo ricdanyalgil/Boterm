@@ -1,6 +1,6 @@
 'use strict';
 const sessions = new Map(), workspaces = new Map();
-const workspaceDirectories = new Map();
+const workspaceDirectories = new Map(), workspaceStarted = new Map();
 let activeID, activeWorkspace, split = false, mosaic = false;
 let nextSessionColor = 0, nextProjectNumber = 2;
 const privateWorkspace = crypto.randomUUID();
@@ -30,7 +30,8 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
     allowProposedApi: true, cursorBlink: true, scrollback: 5000, screenReaderMode: true, theme: BOTERM_THEME});
   const addon = new FitAddon.FitAddon(); terminal.loadAddon(addon); terminal.open(output);
   const accents = terminalAccents(terminal);
-  const session = {id, color, accents, workspace, name: name.slice(0, 80), term: terminal, fit: addon, host, ended: false, agent, agentState: 'idle'};
+  if (!workspaceStarted.has(workspace)) workspaceStarted.set(workspace, new Date());
+  const session = {startedAt: Date.now(), lastOutput: 0, lastInput: 0, id, color, accents, workspace, name: name.slice(0, 80), term: terminal, fit: addon, host, ended: false, agent, agentState: 'idle'};
   sessions.set(id, session);
   const conversation = document.createElement('details'), summary = document.createElement('summary'), log = document.createElement('div');
   conversation.className = 'session-conversation'; conversation.hidden = true;
@@ -40,7 +41,7 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
   terminal.onWriteParsed(() => updateAttention(session));
   movableSession(session, heading);
   paneResizers(host);
-  terminal.onData(data => send({type: 'input', session: id, data}));
+  terminal.onData(data => { session.lastInput = Date.now(); send({type: 'input', session: id, data}); });
   terminal.onResize(({cols, rows}) => send({type: 'resize', session: id, columns: cols, rows}));
   terminal.onTitleChange(title => { session.title = title.slice(0, 100); renderNavigation(); });
   host.addEventListener('mousedown', () => { if (activeID !== id) activateSession(id, false); });
@@ -67,7 +68,9 @@ function newWorkspace(name, directory) {
   if (sessions.size >= 32) throw new Error('Maximum 32 terminals per window');
   const id = crypto.randomUUID(); workspaces.set(id, name || `Projeto ${nextProjectNumber++}`);
   if (directory) workspaceDirectories.set(id, directory);
-  activeWorkspace = id; createSession('Terminal 1', id); return id;
+  activeWorkspace = id; createSession('Terminal 1', id);
+  if (directory) setTimeout(() => requestDashboard(id), 800);
+  return id;
 }
 function activateSession(id, focus = true) {
   const s = sessions.get(id); if (!s) return;

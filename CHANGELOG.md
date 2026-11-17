@@ -1,3 +1,11 @@
+# Boterm 0.3.4 — local build 25, 2026-11-17
+
+- Project dashboard (▦ in the top bar): session time, terminals and agents with live state, code changes from git since the project opened (Boterm's own `.boterm/` excluded), tests that caught failures, fixes and improvements, team actions, MCP time per server and the project history. Clicking an agent opens its terminal.
+- Activity pulse: the colored dot of a terminal producing output pulses in the sidebar, pane titles and dashboard; typing echo does not count. Reduced motion shows a static ring.
+- `boterm event KIND TEXT` / `events` (MCP `event`, `events`): agents record test-fail, test-pass, fix, improvement, decision and blocker facts; role prompts ask for them.
+- Claude agents start with Boterm hooks (`--settings`, added to the user's settings, never replacing them) that report each tool call's `duration_ms`; MCP time is measured for Claude only.
+- Opening a project folder with history shows a one-line notice with the last entry and a shortcut to the dashboard.
+
 # Boterm 0.3.3 — local build 24, 2026-11-17
 
 - Project history: `.boterm/HISTORY.md` in the project folder, at most 8 KB, read by the Orquestrador before planning. Only the Orquestrador records entries (`boterm history TITLE SUMMARY`); older entries roll into `HISTORY-archive.md`, which is never loaded automatically.

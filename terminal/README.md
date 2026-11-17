@@ -156,3 +156,11 @@ Not covered: the agents' own CLI approval prompts (Claude/Codex keep those in th
 `.boterm/HISTORY.md` in the project folder is the team's memory across sessions. The Orquestrador reads it before planning and, after each activity finished end to end, records a short entry with `boterm history 'Title' 'Summary'` (≤2000 characters: outcome, decisions, files, tests, failures, open items). The file stays under 8 KB; older entries move to `.boterm/HISTORY-archive.md`, read only when needed. Only a session launched as Orquestrador by the preset can write; every session reads its own project folder's history. Commit `.boterm/` or ignore it as you prefer.
 
 `boterm compact SESSION [FOCUS]` (MCP `compact`) compacts an agent's context with its own CLI command: `/compact [focus]` for Claude, `/compact` for Codex, `/compress` for Gemini CLI. Antigravity, OpenCode and plain shells are refused rather than guessed. Boterm waits until the terminal has produced no output for 5 s and received no typing for 30 s, then submits it, so the Orquestrador can compact itself at the end of its turn. One pending compaction per terminal; it gives up after 30 minutes.
+
+## Project dashboard
+
+▦ in the top bar replaces the terminals with the project dashboard (the terminals keep running; clicking a terminal or agent returns to it). Cards: session time and live state; code changes since the project opened (`git status`/`diff --numstat HEAD`, read-only with optional locks off, `.boterm/` excluded, 5 s timeout); tests that caught failures, fixes, improvements and blockers reported with `boterm event`; team actions from the message history; MCP time per server; project history. It refreshes every 5 s while open and never replaces nodes under a pressed mouse button.
+
+A terminal is shown as working when it produced output in the last 2.5 s that is not the echo of typing; its dot pulses everywhere it appears. This is an activity signal, not proof that a model is generating.
+
+Claude agents are launched with `--settings` hooks (PreToolUse/PostToolUse for MCP, edit and Bash tools) running `boterm tool`, which reads the hook JSON, sends the tool name and `duration_ms` to the app, prints nothing and always exits 0. Codex, Gemini and other CLIs show no MCP time.

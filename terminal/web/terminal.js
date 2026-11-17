@@ -49,6 +49,8 @@ window.voz = {
     s.agent = name; s.agentState = state; renderNavigation();
   },
   create: createSession,
+  dashboard: receiveDashboard,
+  event: receiveEvent,
   startDevelopment,
   recentProjects(paths) {
     const list = document.getElementById('development-recents');
@@ -106,7 +108,7 @@ window.voz = {
   fit() { fitVisible(); },
   snapshot(id) { return screenText(sessions.get(id)?.term); },
   ended(id) { const s = sessions.get(id); if (s) { s.ended = true; updateAttention(s); renderNavigation(); } },
-  write(base64, id = activeID) { sessions.get(id)?.term.write(Uint8Array.from(atob(base64), c => c.charCodeAt(0))); },
+  write(base64, id = activeID) { const s = sessions.get(id); if (s) s.lastOutput = Date.now(); s?.term.write(Uint8Array.from(atob(base64), c => c.charCodeAt(0))); },
   insert(text, id = activeID, submit = false) {
     const target = sessions.get(id); if (!target) throw new Error("Session closed");
     if (/[\r\n]/.test(text) && !target.term.modes.bracketedPasteMode) throw new Error("Multiline agent input requires bracketed paste");

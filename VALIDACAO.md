@@ -281,3 +281,11 @@ Limites: Telegram não testado ponta a ponta (sem bot configurado neste Mac). En
 - Regressão: preset (8 funções; lápis por foco omitido pelo mesmo motivo do build 23), mosaico e perfis aprovados nos quatro tamanhos; npm test 30/30.
 
 Limites: compactação real com Claude/Codex não exercitada (o teste usa uma shell registrada como Claude). Comandos de compactação de Antigravity e OpenCode não confirmados, por isso recusados. Histórico de um projeto aberto sem o preset não é lido por ninguém automaticamente.
+
+## Painel do projeto — 0.3.4 / build 25 (2026-11-17)
+
+- Contrato dos hooks do Claude confirmado com uma execução real curta (`claude -p` 2.1.326, comando `echo`): `--settings` com hooks é aceite junto das definições do usuário; PreToolUse e PostToolUse trazem `hook_event_name`, `tool_name` e `tool_use_id`, e o PostToolUse traz `duration_ms`, que passou a ser a medida usada.
+- `test/terminal-dashboard.js` no app real: git de um repositório temporário (alterações, commit feito depois da abertura, `.boterm/` excluído), eventos de falha e correção na lateral e no painel, tempo MCP vindo do comando de hook (duas chamadas, 3 s), edição contada, histórico, pulso enquanto há saída e limpeza depois, clique num agente durante a re-renderização abre o terminal, aviso de histórico ao reabrir a pasta. Aprovado nos quatro tamanhos; captura inspecionada, plurais e seletor de perfil corrigidos a partir dela.
+- Unidade: categorias de ferramentas, numstat e git real; `test/dashboard.test.js` para durações, plurais, eco de digitação e totais. npm test 32/32. Regressão de preset, mosaico e Mensageiro aprovada.
+
+Limites: hooks não exercitados dentro de uma sessão real do Boterm com um agente Claude a trabalhar (o teste envia o JSON do hook pelo mesmo comando). Codex e Gemini sem tempo de MCP: os hooks do Codex exigem desligar a verificação de confiança, o que não foi feito.

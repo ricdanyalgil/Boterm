@@ -38,6 +38,21 @@ struct MessengerTests {
         precondition(!current.contains("\n## injetado") && current.contains("### injetado"), "summary could forge an entry heading")
         precondition(SessionLog.compactCommand(agent: "claude", focus: "manter o plano") == "/compact manter o plano" && SessionLog.compactCommand(agent: "codex", focus: "x") == "/compact"
             && SessionLog.compactCommand(agent: "gemini", focus: "") == "/compress" && SessionLog.compactCommand(agent: "agy", focus: "") == nil && SessionLog.compactCommand(agent: "", focus: "") == nil)
+        precondition(Telemetry.category("mcp__github__search_code") == "mcp:github" && Telemetry.category("Bash") == "Bash" && Telemetry.category("mcp__") == "mcp:?")
+        let stat = Telemetry.numstat("3\t1\tsrc/a.ts\n-\t-\timg.png\n10\t0\tREADME.md\nlixo")
+        precondition(stat.added == 13 && stat.removed == 1 && stat.files.count == 3 && stat.files[0]["file"] as? String == "README.md")
+        let repo = project.appendingPathComponent("repo").path
+        try FileManager.default.createDirectory(atPath: repo, withIntermediateDirectories: true)
+        precondition(Telemetry.codeChanges(directory: repo, since: "2000-01-01")["repo"] as? Bool == false)
+        for args in [["init", "-q"], ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "start"]] { precondition(Telemetry.git(repo, args) != nil, "git \(args[0]) failed") }
+        try "um\ndois\n".write(toFile: repo + "/novo.txt", atomically: true, encoding: .utf8)
+        try "x\n".write(toFile: repo + "/b.txt", atomically: true, encoding: .utf8)
+        _ = Telemetry.git(repo, ["add", "b.txt"])
+        try FileManager.default.createDirectory(atPath: repo + "/.boterm", withIntermediateDirectories: true)
+        try "h\n".write(toFile: repo + "/.boterm/HISTORY.md", atomically: true, encoding: .utf8)
+        let code = Telemetry.codeChanges(directory: repo, since: "2000-01-01")
+        precondition(code["repo"] as? Bool == true && code["changed"] as? Int == 2 && code["untracked"] as? Int == 1 && code["added"] as? Int == 1 && (code["commits"] as? [String])?.count == 1, "\(code)")
+        print("PASS: tool categories, numstat parsing and git changes on a real repository")
         print("PASS: project history limit, archive rotation, heading injection and compaction commands")
         print("PASS: permission store (normalize, replace, private file, revoke) and reply parsing")
     }
