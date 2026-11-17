@@ -25,3 +25,12 @@ test('does not invent activity when meter data stops and rejects invalid geometr
   assert.ok(!path.includes('Infinity'));
   assert.deepEqual(bands, []);
 });
+
+test('voice bars quantize levels into whole cells per column', () => {
+  const {voiceBars} = require('../terminal/web/voice-wave');
+  const now = 100000, bars = voiceBars([{at: now - 100, level: 1}, {at: now - 100, level: .2}, {at: now - 19900, level: .5}, {at: now - 30000, level: 1}], now, 10, 7);
+  assert.equal(bars.length, 10);
+  assert.equal(bars[9], 7, 'loudest sample in a column wins');
+  assert.equal(bars[0], 4);
+  assert.equal(bars.filter(Boolean).length, 2, 'old samples are dropped');
+});

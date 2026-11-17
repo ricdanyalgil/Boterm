@@ -49,7 +49,7 @@ field = group.querySelector('input'); field.value = '  '; key(field, 'Enter');
 check(workspaces.get(project) === 'CyberX', 'Empty rename');
 newWorkspace();
 const nav = document.getElementById('workspaces');
-check(nav.lastElementChild.textContent.includes('Private Project') && nav.lastElementChild.previousElementSibling.textContent === '＋', 'Plus must precede Private Project');
+check(nav.lastElementChild.textContent.includes('Private Project') && nav.lastElementChild.previousElementSibling.classList.contains('project-add'), 'Plus must precede Private Project');
 check([...workspaces.values()].includes('Projeto 2'), 'Plus creates numbered project');
 activateSession(initial);
 // Render controlled text without writing to the PTY or executing any command.

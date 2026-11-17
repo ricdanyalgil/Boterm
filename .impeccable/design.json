@@ -1,0 +1,645 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T07:46:15+00:00",
+  "title": "Design System: Boterm",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#0c0d10",
+        "tonalRamp": [
+          "oklch(15% 0.007 271.0)",
+          "oklch(26% 0.007 271.0)",
+          "oklch(38% 0.007 271.0)",
+          "oklch(49% 0.007 271.0)",
+          "oklch(61% 0.007 271.0)",
+          "oklch(72% 0.007 271.0)",
+          "oklch(84% 0.007 271.0)",
+          "oklch(95% 0.007 271.0)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "canonical": "#101217",
+        "tonalRamp": [
+          "oklch(15% 0.011 268.1)",
+          "oklch(26% 0.011 268.1)",
+          "oklch(38% 0.011 268.1)",
+          "oklch(49% 0.011 268.1)",
+          "oklch(61% 0.011 268.1)",
+          "oklch(72% 0.011 268.1)",
+          "oklch(84% 0.011 268.1)",
+          "oklch(95% 0.011 268.1)"
+        ]
+      },
+      "raise": {
+        "role": "neutral",
+        "displayName": "Raise",
+        "canonical": "#161921",
+        "tonalRamp": [
+          "oklch(15% 0.016 268.9)",
+          "oklch(26% 0.016 268.9)",
+          "oklch(38% 0.016 268.9)",
+          "oklch(49% 0.016 268.9)",
+          "oklch(61% 0.016 268.9)",
+          "oklch(72% 0.016 268.9)",
+          "oklch(84% 0.016 268.9)",
+          "oklch(95% 0.016 268.9)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#1f2330",
+        "tonalRamp": [
+          "oklch(15% 0.025 271.3)",
+          "oklch(26% 0.025 271.3)",
+          "oklch(38% 0.025 271.3)",
+          "oklch(49% 0.025 271.3)",
+          "oklch(61% 0.025 271.3)",
+          "oklch(72% 0.025 271.3)",
+          "oklch(84% 0.025 271.3)",
+          "oklch(95% 0.025 271.3)"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Rule Strong",
+        "canonical": "#2c3244",
+        "tonalRamp": [
+          "oklch(15% 0.033 270.2)",
+          "oklch(26% 0.033 270.2)",
+          "oklch(38% 0.033 270.2)",
+          "oklch(49% 0.033 270.2)",
+          "oklch(61% 0.033 270.2)",
+          "oklch(72% 0.033 270.2)",
+          "oklch(84% 0.033 270.2)",
+          "oklch(95% 0.033 270.2)"
+        ]
+      },
+      "construction": {
+        "role": "secondary",
+        "displayName": "Construction Blue",
+        "canonical": "#2e54c4",
+        "tonalRamp": [
+          "oklch(15% 0.180 265.7)",
+          "oklch(26% 0.180 265.7)",
+          "oklch(38% 0.180 265.7)",
+          "oklch(49% 0.180 265.7)",
+          "oklch(61% 0.180 265.7)",
+          "oklch(72% 0.180 265.7)",
+          "oklch(84% 0.180 265.7)",
+          "oklch(95% 0.180 265.7)"
+        ]
+      },
+      "grid-line": {
+        "role": "secondary",
+        "displayName": "Construction Grid (rest)",
+        "canonical": "rgb(46 84 196 / .2)"
+      },
+      "grid-strong": {
+        "role": "secondary",
+        "displayName": "Construction Grid (arranging)",
+        "canonical": "rgb(70 110 230 / .55)"
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Chalk",
+        "canonical": "#e8e9ec",
+        "tonalRamp": [
+          "oklch(15% 0.004 271.4)",
+          "oklch(26% 0.004 271.4)",
+          "oklch(38% 0.004 271.4)",
+          "oklch(49% 0.004 271.4)",
+          "oklch(61% 0.004 271.4)",
+          "oklch(72% 0.004 271.4)",
+          "oklch(84% 0.004 271.4)",
+          "oklch(95% 0.004 271.4)"
+        ]
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Chalk 2",
+        "canonical": "#a7acb8",
+        "tonalRamp": [
+          "oklch(15% 0.018 267.7)",
+          "oklch(26% 0.018 267.7)",
+          "oklch(38% 0.018 267.7)",
+          "oklch(49% 0.018 267.7)",
+          "oklch(61% 0.018 267.7)",
+          "oklch(72% 0.018 267.7)",
+          "oklch(84% 0.018 267.7)",
+          "oklch(95% 0.018 267.7)"
+        ]
+      },
+      "text-3": {
+        "role": "neutral",
+        "displayName": "Chalk 3",
+        "canonical": "#8a90a0",
+        "tonalRamp": [
+          "oklch(15% 0.025 269.3)",
+          "oklch(26% 0.025 269.3)",
+          "oklch(38% 0.025 269.3)",
+          "oklch(49% 0.025 269.3)",
+          "oklch(61% 0.025 269.3)",
+          "oklch(72% 0.025 269.3)",
+          "oklch(84% 0.025 269.3)",
+          "oklch(95% 0.025 269.3)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Signal Orange",
+        "canonical": "#ff4d2e",
+        "tonalRamp": [
+          "oklch(15% 0.219 32.3)",
+          "oklch(26% 0.219 32.3)",
+          "oklch(38% 0.219 32.3)",
+          "oklch(49% 0.219 32.3)",
+          "oklch(61% 0.219 32.3)",
+          "oklch(72% 0.219 32.3)",
+          "oklch(84% 0.219 32.3)",
+          "oklch(95% 0.219 32.3)"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "On Signal",
+        "canonical": "#0c0d10",
+        "tonalRamp": [
+          "oklch(15% 0.007 271.0)",
+          "oklch(26% 0.007 271.0)",
+          "oklch(38% 0.007 271.0)",
+          "oklch(49% 0.007 271.0)",
+          "oklch(61% 0.007 271.0)",
+          "oklch(72% 0.007 271.0)",
+          "oklch(84% 0.007 271.0)",
+          "oklch(95% 0.007 271.0)"
+        ]
+      },
+      "attention": {
+        "role": "tertiary",
+        "displayName": "Attention Amber",
+        "canonical": "#ffc53d",
+        "tonalRamp": [
+          "oklch(15% 0.157 84.1)",
+          "oklch(26% 0.157 84.1)",
+          "oklch(38% 0.157 84.1)",
+          "oklch(49% 0.157 84.1)",
+          "oklch(61% 0.157 84.1)",
+          "oklch(72% 0.157 84.1)",
+          "oklch(84% 0.157 84.1)",
+          "oklch(95% 0.157 84.1)"
+        ]
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Focus Blue",
+        "canonical": "#6f8cff",
+        "tonalRamp": [
+          "oklch(15% 0.172 270.5)",
+          "oklch(26% 0.172 270.5)",
+          "oklch(38% 0.172 270.5)",
+          "oklch(49% 0.172 270.5)",
+          "oklch(61% 0.172 270.5)",
+          "oklch(72% 0.172 270.5)",
+          "oklch(84% 0.172 270.5)",
+          "oklch(95% 0.172 270.5)"
+        ]
+      },
+      "add": {
+        "role": "tertiary",
+        "displayName": "Diff Green",
+        "canonical": "#c3e88d",
+        "tonalRamp": [
+          "oklch(15% 0.124 126.8)",
+          "oklch(26% 0.124 126.8)",
+          "oklch(38% 0.124 126.8)",
+          "oklch(49% 0.124 126.8)",
+          "oklch(61% 0.124 126.8)",
+          "oklch(72% 0.124 126.8)",
+          "oklch(84% 0.124 126.8)",
+          "oklch(95% 0.124 126.8)"
+        ]
+      },
+      "del": {
+        "role": "tertiary",
+        "displayName": "Diff Red",
+        "canonical": "#f07178",
+        "tonalRamp": [
+          "oklch(15% 0.157 18.6)",
+          "oklch(26% 0.157 18.6)",
+          "oklch(38% 0.157 18.6)",
+          "oklch(49% 0.157 18.6)",
+          "oklch(61% 0.157 18.6)",
+          "oklch(72% 0.157 18.6)",
+          "oklch(84% 0.157 18.6)",
+          "oklch(95% 0.157 18.6)"
+        ]
+      },
+      "set-ground": {
+        "role": "neutral",
+        "displayName": "Set Ground",
+        "canonical": "#101012",
+        "tonalRamp": [
+          "oklch(15% 0.004 286.0)",
+          "oklch(26% 0.004 286.0)",
+          "oklch(38% 0.004 286.0)",
+          "oklch(49% 0.004 286.0)",
+          "oklch(61% 0.004 286.0)",
+          "oklch(72% 0.004 286.0)",
+          "oklch(84% 0.004 286.0)",
+          "oklch(95% 0.004 286.0)"
+        ]
+      },
+      "set-panel": {
+        "role": "neutral",
+        "displayName": "Set Panel",
+        "canonical": "#151518",
+        "tonalRamp": [
+          "oklch(15% 0.006 285.8)",
+          "oklch(26% 0.006 285.8)",
+          "oklch(38% 0.006 285.8)",
+          "oklch(49% 0.006 285.8)",
+          "oklch(61% 0.006 285.8)",
+          "oklch(72% 0.006 285.8)",
+          "oklch(84% 0.006 285.8)",
+          "oklch(95% 0.006 285.8)"
+        ]
+      },
+      "set-raise": {
+        "role": "neutral",
+        "displayName": "Set Raise",
+        "canonical": "#1c1c20",
+        "tonalRamp": [
+          "oklch(15% 0.008 285.8)",
+          "oklch(26% 0.008 285.8)",
+          "oklch(38% 0.008 285.8)",
+          "oklch(49% 0.008 285.8)",
+          "oklch(61% 0.008 285.8)",
+          "oklch(72% 0.008 285.8)",
+          "oklch(84% 0.008 285.8)",
+          "oklch(95% 0.008 285.8)"
+        ]
+      },
+      "set-rule": {
+        "role": "neutral",
+        "displayName": "Set Rule",
+        "canonical": "#24252a",
+        "tonalRamp": [
+          "oklch(15% 0.009 276.7)",
+          "oklch(26% 0.009 276.7)",
+          "oklch(38% 0.009 276.7)",
+          "oklch(49% 0.009 276.7)",
+          "oklch(61% 0.009 276.7)",
+          "oklch(72% 0.009 276.7)",
+          "oklch(84% 0.009 276.7)",
+          "oklch(95% 0.009 276.7)"
+        ]
+      },
+      "set-rule-strong": {
+        "role": "neutral",
+        "displayName": "Set Rule Strong",
+        "canonical": "#34363d",
+        "tonalRamp": [
+          "oklch(15% 0.013 273.0)",
+          "oklch(26% 0.013 273.0)",
+          "oklch(38% 0.013 273.0)",
+          "oklch(49% 0.013 273.0)",
+          "oklch(61% 0.013 273.0)",
+          "oklch(72% 0.013 273.0)",
+          "oklch(84% 0.013 273.0)",
+          "oklch(95% 0.013 273.0)"
+        ]
+      },
+      "set-construction": {
+        "role": "neutral",
+        "displayName": "Set Construction Grey",
+        "canonical": "#8a8f98",
+        "tonalRamp": [
+          "oklch(15% 0.015 262.4)",
+          "oklch(26% 0.015 262.4)",
+          "oklch(38% 0.015 262.4)",
+          "oklch(49% 0.015 262.4)",
+          "oklch(61% 0.015 262.4)",
+          "oklch(72% 0.015 262.4)",
+          "oklch(84% 0.015 262.4)",
+          "oklch(95% 0.015 262.4)"
+        ]
+      },
+      "set-text": {
+        "role": "neutral",
+        "displayName": "Set Chalk",
+        "canonical": "#ecebe6",
+        "tonalRamp": [
+          "oklch(15% 0.007 97.4)",
+          "oklch(26% 0.007 97.4)",
+          "oklch(38% 0.007 97.4)",
+          "oklch(49% 0.007 97.4)",
+          "oklch(61% 0.007 97.4)",
+          "oklch(72% 0.007 97.4)",
+          "oklch(84% 0.007 97.4)",
+          "oklch(95% 0.007 97.4)"
+        ]
+      },
+      "set-text-2": {
+        "role": "neutral",
+        "displayName": "Set Chalk 2",
+        "canonical": "#aaaeb5",
+        "tonalRamp": [
+          "oklch(15% 0.011 261.8)",
+          "oklch(26% 0.011 261.8)",
+          "oklch(38% 0.011 261.8)",
+          "oklch(49% 0.011 261.8)",
+          "oklch(61% 0.011 261.8)",
+          "oklch(72% 0.011 261.8)",
+          "oklch(84% 0.011 261.8)",
+          "oklch(95% 0.011 261.8)"
+        ]
+      },
+      "set-text-3": {
+        "role": "neutral",
+        "displayName": "Set Chalk 3",
+        "canonical": "#8d929b",
+        "tonalRamp": [
+          "oklch(15% 0.015 262.4)",
+          "oklch(26% 0.015 262.4)",
+          "oklch(38% 0.015 262.4)",
+          "oklch(49% 0.015 262.4)",
+          "oklch(61% 0.015 262.4)",
+          "oklch(72% 0.015 262.4)",
+          "oklch(84% 0.015 262.4)",
+          "oklch(95% 0.015 262.4)"
+        ]
+      },
+      "set-attention": {
+        "role": "tertiary",
+        "displayName": "Set Attention Amber",
+        "canonical": "#f2b33d",
+        "tonalRamp": [
+          "oklch(15% 0.147 79.0)",
+          "oklch(26% 0.147 79.0)",
+          "oklch(38% 0.147 79.0)",
+          "oklch(49% 0.147 79.0)",
+          "oklch(61% 0.147 79.0)",
+          "oklch(72% 0.147 79.0)",
+          "oklch(84% 0.147 79.0)",
+          "oklch(95% 0.147 79.0)"
+        ]
+      },
+      "set-tally": {
+        "role": "tertiary",
+        "displayName": "Tally Red",
+        "canonical": "#e5322d",
+        "tonalRamp": [
+          "oklch(15% 0.215 27.7)",
+          "oklch(26% 0.215 27.7)",
+          "oklch(38% 0.215 27.7)",
+          "oklch(49% 0.215 27.7)",
+          "oklch(61% 0.215 27.7)",
+          "oklch(72% 0.215 27.7)",
+          "oklch(84% 0.215 27.7)",
+          "oklch(95% 0.215 27.7)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The team count only (64px; 38px in small windows)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Dashboard project name; dialog titles use Saira 400 at 24px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Dashboard section titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "UI default; session and pane names at 500."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Provider, state word, times, table headers."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Paths, file rows, commit list."
+      },
+      "set-display": {
+        "displayName": "Set Display",
+        "purpose": "Set world: team count and uppercase call-sheet headers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 14px 36px rgb(0 0 0 / .5)",
+        "purpose": "The action menu only, so it reads over terminals."
+      },
+      {
+        "name": "pane-frame",
+        "value": "inset 1px 1px 0 color-mix(in srgb, var(--construction) 42%, transparent)",
+        "purpose": "Grid world: each pane draws its top and left frame; the stage closes right and bottom with inset -1px -1px 0."
+      },
+      {
+        "name": "attention-frame",
+        "value": "inset 0 0 0 1px var(--attention)",
+        "purpose": "A pane waiting on the user."
+      },
+      {
+        "name": "dialog-backdrop",
+        "value": "rgb(0 0 0 / .6)",
+        "purpose": "Backdrop behind dialogs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": "150ms ease-out",
+        "purpose": "Background and colour changes on buttons, tabs, headers."
+      },
+      {
+        "name": "chip-pulse-grid",
+        "value": "1.2s ease-in-out infinite, 50% opacity .25",
+        "purpose": "Working session chip, grid world."
+      },
+      {
+        "name": "chip-pulse-set",
+        "value": "1.4s ease-in-out infinite, 50% opacity .25",
+        "purpose": "Lit tally lamp, set world."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; outline 1px session colour, offset 2px",
+        "purpose": "Replaces the pulse under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "dashboard-stack",
+        "value": "max-width: 1000px"
+      },
+      {
+        "name": "small-window",
+        "value": "max-width: 760px, max-height: 520px"
+      },
+      {
+        "name": "compact",
+        "value": "max-width: 750px"
+      },
+      {
+        "name": "pane-no-provider",
+        "value": "container max-width: 300px"
+      },
+      {
+        "name": "pane-no-meta",
+        "value": "container max-width: 200px"
+      }
+    ],
+    "worlds": {
+      "attribute": "data-world on :root, injected at document start from the native 'world' user default",
+      "grid": "default; no attribute",
+      "set": "data-world=\"set\""
+    }
+  },
+  "components": [
+    {
+      "name": "Project Tab",
+      "kind": "nav",
+      "refersTo": "project-tab",
+      "description": "Hairline-separated text cells in the 44px top bar; the selected tab carries a straight 2px bar under its label only.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab ds-selected\">VozTTY</button><button class=\"ds-tab\">Bibs</button><button class=\"ds-tab\">GuardianX</button><button class=\"ds-tab-add\" aria-label=\"Novo projeto\"><svg class=\"icon\" viewBox=\"0 0 16 16\"><path d=\"M8 3v10M3 8h10\"/></svg></button></nav>",
+      "css": ".ds-tabs { display: flex; height: 44px; background: var(--ground, #0c0d10); border-bottom: 1px solid var(--rule, #1f2330); font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-tab { position: relative; height: 44px; padding: 0 14px 0 20px; border: 0; border-right: 1px solid var(--rule, #1f2330); background: transparent; color: var(--text-2, #a7acb8); cursor: pointer; transition: color 150ms ease-out; } .ds-tab:hover { color: var(--text, #e8e9ec); } .ds-tab:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; } .ds-tab.ds-selected { color: var(--text, #e8e9ec); } .ds-tab.ds-selected::after { content: ''; position: absolute; left: 20px; right: 14px; bottom: 0; height: 2px; background: var(--tab-bar, #e8e9ec); } .ds-tab-add { width: 44px; height: 44px; border: 0; border-right: 1px solid var(--rule, #1f2330); background: transparent; color: var(--text-3, #8a90a0); display: grid; place-items: center; cursor: pointer; } .ds-tab-add:hover { background: var(--raise, #161921); color: var(--text, #e8e9ec); } .ds-tab-add svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: square; }"
+    },
+    {
+      "name": "Team Count",
+      "kind": "custom",
+      "refersTo": "display",
+      "description": "The sidebar's large now/max count; click cycles single, mosaic, dashboard.",
+      "html": "<button class=\"ds-count\">8<span class=\"ds-slash\">/</span><span class=\"ds-max\">32</span></button>",
+      "css": ".ds-count { display: block; padding: 22px 20px 2px; border: 0; background: transparent; text-align: left; font: 300 64px/.92 Saira, -apple-system, sans-serif; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text, #e8e9ec); cursor: pointer; } .ds-slash { color: var(--construction, #2e54c4); transition: color 150ms ease-out; } .ds-max { color: var(--text-3, #8a90a0); } .ds-count:hover .ds-slash { color: var(--focus, #6f8cff); } .ds-count:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; }"
+    },
+    {
+      "name": "Session Row",
+      "kind": "custom",
+      "refersTo": "session-row",
+      "description": "Chip, name over provider, state word over tabular time; states come from the one sessionState function.",
+      "html": "<div class=\"ds-rows\"><button class=\"ds-row ds-busy ds-selected\" style=\"--session-color:#82aaff\"><i class=\"ds-chip\"></i><span class=\"ds-txt\"><b>Arquiteto</b><small>Claude</small></span><span class=\"ds-st\"><span class=\"ds-word\">trabalhando</span><time>12:04</time></span></button><button class=\"ds-row ds-attn\" style=\"--session-color:#c3e88d\"><i class=\"ds-chip\"></i><span class=\"ds-txt\"><b>Revisor</b><small>Codex</small></span><span class=\"ds-st\"><span class=\"ds-word\">precisa de você</span><time>03:51</time></span></button><button class=\"ds-row ds-ended\" style=\"--session-color:#ffcb6b\"><i class=\"ds-chip\"></i><span class=\"ds-txt\"><b>Testes</b><small>Gemini</small></span><span class=\"ds-st\"><span class=\"ds-word\">encerrado</span><time>40:10</time></span></button></div>",
+      "css": ".ds-rows { width: 260px; background: var(--ground, #0c0d10); font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-row { display: grid; grid-template-columns: 8px minmax(0,1fr) auto; column-gap: 12px; align-items: center; width: 100%; min-height: 54px; padding: 9px 16px 9px 20px; border: 0; border-bottom: 1px solid var(--rule, #1f2330); background: transparent; text-align: left; color: var(--text-2, #a7acb8); cursor: pointer; transition: background-color 150ms ease-out; } .ds-row:hover, .ds-row.ds-selected { background: var(--raise, #161921); } .ds-row:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; } .ds-txt { display: flex; flex-direction: column; } .ds-txt b { color: var(--text, #e8e9ec); font-weight: 500; } .ds-txt small, .ds-st { font-size: 11px; color: var(--text-3, #8a90a0); } .ds-st { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; } .ds-chip { width: 8px; height: 8px; background: var(--session-color); } .ds-busy .ds-chip { animation: ds-pulse 1.2s ease-in-out infinite; } .ds-busy .ds-word { color: var(--text-2, #a7acb8); } @keyframes ds-pulse { 50% { opacity: .25; } } .ds-attn { background: color-mix(in srgb, var(--attention, #ffc53d) 7%, transparent); } .ds-attn .ds-chip { outline: 1px solid var(--attention, #ffc53d); outline-offset: 2px; } .ds-attn .ds-word { color: var(--attention, #ffc53d); font-weight: 500; } .ds-ended .ds-chip { background: transparent; outline: 1px solid var(--text-3, #8a90a0); outline-offset: -1px; } @media (prefers-reduced-motion: reduce) { .ds-busy .ds-chip { animation: none; outline: 1px solid var(--session-color); outline-offset: 2px; } }"
+    },
+    {
+      "name": "Terminal Pane Header",
+      "kind": "custom",
+      "refersTo": "pane-header",
+      "description": "30px header on panel; in split or mosaic the active pane alone takes the Signal Orange plane.",
+      "html": "<div class=\"ds-panes\"><div class=\"ds-pane ds-active\" style=\"--session-color:#82aaff\"><div class=\"ds-ph\"><i class=\"ds-chip\"></i><b>Arquiteto</b><span>Claude</span><time>6×4 · 12:04</time></div><div class=\"ds-body\"></div></div><div class=\"ds-pane\" style=\"--session-color:#c792ea\"><div class=\"ds-ph\"><i class=\"ds-chip\"></i><b>Front</b><span>Codex</span><time>6×4 · 08:22</time></div><div class=\"ds-body\"></div></div></div>",
+      "css": ".ds-panes { display: grid; grid-template-columns: 1fr 1fr; width: 520px; background-color: var(--ground, #0c0d10); background-image: linear-gradient(to right, rgb(46 84 196 / .2) 1px, transparent 1px), linear-gradient(to bottom, rgb(46 84 196 / .2) 1px, transparent 1px); background-size: 60px 36px; box-shadow: inset -1px -1px 0 color-mix(in srgb, #2e54c4 42%, transparent); font: 12px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-pane { box-shadow: inset 1px 1px 0 color-mix(in srgb, #2e54c4 42%, transparent); background: #0f111a; } .ds-ph { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; background: var(--panel, #101217); color: var(--text-3, #8a90a0); box-shadow: inset 1px 1px 0 color-mix(in srgb, #2e54c4 42%, transparent), inset 0 -1px 0 var(--rule, #1f2330); cursor: grab; transition: background-color 150ms ease-out; } .ds-ph b { color: var(--text, #e8e9ec); font-weight: 500; } .ds-ph time { margin-left: auto; font: 12px Saira, -apple-system, sans-serif; letter-spacing: .02em; font-variant-numeric: tabular-nums; } .ds-ph:hover { color: var(--text-2, #a7acb8); } .ds-active .ds-ph { background: var(--accent, #ff4d2e); color: var(--on-accent, #0c0d10); } .ds-active .ds-ph b { color: var(--on-accent, #0c0d10); } .ds-active .ds-chip { outline: 1px solid var(--on-accent, #0c0d10); } .ds-chip { width: 8px; height: 8px; background: var(--session-color); } .ds-body { height: 110px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Default button: transparent, square, raised on hover.",
+      "html": "<button class=\"ds-btn\">Dividir</button>",
+      "css": ".ds-btn { padding: 6px 10px; min-height: 28px; border: 0; border-radius: 0; background: transparent; color: var(--text-2, #a7acb8); font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-btn:hover { background: var(--raise, #161921); color: var(--text, #e8e9ec); } .ds-btn:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; }"
+    },
+    {
+      "name": "Primary Action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Dialog primary action: full-width chalk fill with ground text.",
+      "html": "<button class=\"ds-primary\">Criar equipe</button>",
+      "css": ".ds-primary { width: 100%; padding: 6px 10px; min-height: 28px; border: 0; border-radius: 0; background: var(--text, #e8e9ec); color: var(--ground, #0c0d10); font: 500 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; cursor: pointer; transition: background-color 150ms ease-out; } .ds-primary:hover { background: #fff; } .ds-primary:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Panel fill, 1px rule-strong border, square, Focus Blue caret and focus outline.",
+      "html": "<input class=\"ds-input\" placeholder=\"Mensagem para a equipe\">",
+      "css": ".ds-input { width: 260px; padding: 6px 8px; border: 1px solid var(--rule-strong, #2c3244); border-radius: 0; background: var(--panel, #101217); color: var(--text, #e8e9ec); caret-color: var(--focus, #6f8cff); font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-input::placeholder { color: var(--text-3, #8a90a0); } .ds-input:focus-visible { outline: 1px solid var(--focus, #6f8cff); outline-offset: -1px; }"
+    },
+    {
+      "name": "Cell Bar",
+      "kind": "custom",
+      "refersTo": "spacing.cell",
+      "description": "Dashboard magnitudes as wrapping rows of 8px cells with 2px gaps: add, del, MCP use.",
+      "html": "<ul class=\"ds-cells\"><li><code>src/workspace.js</code><span class=\"ds-bar\"><i class=\"ds-add\"></i><i class=\"ds-add\"></i><i class=\"ds-add\"></i><i class=\"ds-add\"></i><i class=\"ds-del\"></i><i class=\"ds-del\"></i></span><span class=\"ds-n\">+42 −18</span></li><li><code>boterm.notify</code><span class=\"ds-bar\"><i class=\"ds-use\"></i><i class=\"ds-use\"></i><i class=\"ds-use\"></i></span><span class=\"ds-n\">3</span></li></ul>",
+      "css": ".ds-cells { list-style: none; margin: 0; padding: 0; width: 420px; display: grid; gap: 2px; background: var(--ground, #0c0d10); } .ds-cells li { display: grid; grid-template-columns: minmax(0,160px) minmax(0,1fr) auto; gap: 16px; align-items: center; min-height: 26px; } .ds-cells code { font: 12px ui-monospace, 'SF Mono', Menlo, monospace; color: var(--text-2, #a7acb8); } .ds-bar { display: flex; flex-wrap: wrap; gap: 2px; } .ds-bar i { display: block; width: 8px; height: 8px; } .ds-add { background: var(--add, #c3e88d); } .ds-del { background: var(--del, #f07178); } .ds-use { background: var(--construction, #2e54c4); } .ds-n { font-size: 12px; color: var(--text-3, #8a90a0); font-variant-numeric: tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Construction Grid",
+    "overview": "**Creative North Star: \"The Construction Grid\"**\n\nThe workspace is a construction grid. Terminals snap to whole cells, panes are framed on the construction module, and the grid shows itself where work is being arranged: faint in empty mosaic cells, stronger while a pane is resized or moved. Everything else is near-black ground, hairline rules and chalk text, so the terminals (which keep the user's VS Code theme) own the space.\n\nTwo worlds share one structure. **Grelha construída** (\"grid\", the default) is a Crouwel-style grid specimen: square corners, deep-blue construction lines, one earned orange plane. **Set de rodagem** (\"set\", chosen in Settings → Aparência, persisted natively as the `world` user default and injected as `data-world` at document start) re-skins the same structure as a film set: tally lamps, camera-tape identity bars, condensed call-sheet headers, 3px corners and 10px gutters. The structure is binding in both: project tabs on top, terminals on the left, dictation strip at the bottom.\n\nDensity is operational. The large team count (8/32) heads the sidebar, and clicking it cycles single → mosaic → dashboard. Every agent's state is readable from its row without opening it.",
+    "keyCharacteristics": [
+      "Flat, square and ruled: 1px hairlines divide every region, with no cards and no rounded shell in the grid world.",
+      "One orange plane per screen, and only when more than one terminal is visible.",
+      "Identity colour per session, stable across sidebar, pane header and messages.",
+      "Activity is an opacity pulse. Attention is amber. Nothing glows.",
+      "Magnitudes are drawn as rows of 8px cells, the same module as the grid."
+    ],
+    "rules": [
+      {
+        "name": "The One Plane Rule",
+        "body": "Signal Orange fills exactly one surface, the active pane header, and only when split or mosaic puts more than one terminal on screen. A single-terminal view has no orange at all.",
+        "section": "colors"
+      },
+      {
+        "name": "The Amber Means You Rule",
+        "body": "Amber marks only a session waiting on the user. It is never decoration, warning chrome or emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Borrowed Text Rule",
+        "body": "Terminal text colours and the pane body background (`--terminal-bg`) come from the user's VS Code theme. These tokens style everything around the terminal, never inside it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every number that updates (counts, times, pane w×h, dashboard facts) uses tabular numerals.",
+        "section": "typography"
+      },
+      {
+        "name": "The Set Uppercase Rule",
+        "body": "Uppercase condensed headers (pane names, section titles, dialog titles) belong to the set world's call-sheet language only. The grid world keeps its headers in sentence case.",
+        "section": "typography"
+      },
+      {
+        "name": "The Progressive Controls Rule",
+        "body": "Secondary controls appear when they become relevant. The layout-profile selector exists only when profiles exist, Delete only when one is selected, and Save only after an arrangement action in this project.",
+        "section": "layout"
+      },
+      {
+        "name": "The No Glow Rule",
+        "body": "State is never shown as a halo, glow or coloured shadow. Activity is an opacity pulse of the identity mark (1.2s grid, 1.4s set). Under reduced motion it becomes a static 1px outline in the session colour.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Straight Bar Rule",
+        "body": "A selected project tab or view mode is marked by a straight 2px bar under its label only. The bar is inset to the label's padding, never runs to the cell edges, and is never curved, pill-shaped or filled.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do keep the orange plane for the active pane header in split or mosaic view only.",
+      "Do draw magnitudes and levels as whole cells on the 8px module, never as smooth bars or charts.",
+      "Do derive every state word and state colour from the one session-state function. Do not paraphrase it.",
+      "Do mark selection with the straight 2px under-label bar or a raise step.",
+      "Do let new controls appear only when they become relevant.",
+      "Do ship every font, icon and image in the bundle. The CSP allows no remote assets."
+    ],
+    "donts": [
+      "Don't put a glow, halo or coloured shadow on lamps, chips or panes.",
+      "Don't build hero-metric cards, stat tiles or small uppercase kicker labels over headings on the dashboard. Facts go in a sentence, and magnitudes go in cell rows or the table.",
+      "Don't colour terminal text or the pane body from these tokens. That belongs to the user's VS Code theme.",
+      "Don't round corners in the grid world, and don't use curved, pill or edge-to-edge selection indicators in either world.",
+      "Don't use session identity colours as chrome, or Signal Orange or amber as decoration.",
+      "Don't move the binding structure: tabs on top, terminals left, dictation strip at the bottom."
+    ]
+  }
+}

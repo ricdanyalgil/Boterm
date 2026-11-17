@@ -13,3 +13,5 @@ native/*.app/
 work/
 
 terminal/*.app/
+.impeccable/review/
+.impeccable/questions/

@@ -1,0 +1,124 @@
+{
+  "title": "Escolha o mundo visual do Boterm",
+  "question": "O sorteio atribuiu o Set de rodagem. Fique com ele, escolha uma alternativa ou peça outra mão.",
+  "options": [
+    {
+      "id": "assigned", "kind": "assigned", "kicker": "THE ROLL",
+      "label": "Set de rodagem",
+      "lineage": "folha de serviço, claquete e luz de tally de um set de filmagem",
+      "thesis": "Cada agente é uma câmara em cena: a luz de tally diz quem está a gravar, quem espera e quem chama por você.",
+      "palette": ["#101012", "#ecebe6", "#e5322d", "#f2b33d", "#82aaff", "#8a8f98"],
+      "materials": ["claquete preta com giz", "fita de câmara colorida como identidade", "folha de serviço tabular"],
+      "viewport": "Abas como cabeçalho da folha de serviço; lateral como lista da equipa com fita de cor, função e lâmpada; terminais com título em claquete (CENA/TAKE); ditado embaixo.",
+      "risk": "O vocabulário de cinema vira fantasia se passar dos rótulos de estado, e o vermelho de 'a gravar' disputa com o de erro.",
+      "raised": [
+        {"from": "ikeda-datamatics", "raise": "Todos os tempos e contagens em algarismos tabulares numa coluna fixa, como na folha de serviço."},
+        {"from": "notation-diagram-systems-star-atlas", "raise": "A hierarquia de estado vive numa única escala de tamanho da lâmpada, não em mais caixas."},
+        {"from": "vernacular-ephemera-cassette-j-card", "raise": "Cada lista declara a sua capacidade: 8/32 terminais, histórico 3,1/8 KB."}
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick", "kind": "pick", "kicker": "IMPECCABLE’S PICK",
+      "label": "Faixas de controlo",
+      "lineage": "fitas de progresso de voo nos suportes de um controlador aéreo",
+      "thesis": "Cada terminal é uma faixa no suporte do controlador; a cor do suporte diz o estado e você reordena as faixas à mão.",
+      "palette": ["#16191e", "#d9dde3", "#4f8cff", "#f0c43c", "#5c6370"],
+      "materials": ["faixas em suportes coloridos", "baias de faixas", "marcação a lápis gorduroso"],
+      "viewport": "Lateral como baia de faixas agrupadas em A trabalhar / Precisa de você / Em espera; mosaico com o entalhe de cor de cada faixa; ditado embaixo.",
+      "risk": "Poucos devs conhecem as faixas do controlo aéreo, e é a direção onde um designer cuidadoso aterraria de qualquer forma.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-wayfinding", "kind": "challenger", "catalogId": "wayfinding-cartography-signage-terminal-yellow-wayfinding",
+      "label": "Sinalética amarela", "verdict": "competitive",
+      "lineage": "sinalização amarela de aeroporto",
+      "thesis": "O amarelo existe só para uma coisa: o caminho até o agente que precisa de você.",
+      "palette": ["#0f1012", "#ffd200", "#111111", "#f4f4f2", "#6b7078"],
+      "materials": ["faixas amarelas suspensas", "pictogramas brancos em quadrado preto", "setas presas à borda"],
+      "viewport": "Uma faixa amarela no topo do palco nomeia quem precisa de você e o atalho para lá; tudo o resto em grafite neutro.",
+      "case": "Funde bem: a atenção vira faixa com o atalho do terminal. Ganha em clareza, perde em identificação: é sinalização, não o mundo do dev.",
+      "risk": "Amarelo saturado num app usado o dia todo cansa se aparecer mais do que quando é preciso.",
+      "html": ".impeccable/mocks/decision/challenger-wayfinding.html",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding-hero.webp"
+    },
+    {
+      "id": "challenger-crouwel", "kind": "challenger", "catalogId": "crouwel-grid-specimen",
+      "label": "Grelha construída", "verdict": "competitive",
+      "lineage": "espécimes tipográficos em grelha de Wim Crouwel",
+      "thesis": "O mosaico mostra a sua grelha de construção; os terminais encaixam por células inteiras.",
+      "palette": ["#0c0d10", "#1d3b8f", "#e8e9ec", "#ff4d2e"],
+      "materials": ["grelha de construção em linhas finas", "grotesca neutra pequena", "um plano de cor ganho"],
+      "viewport": "Mosaico sobre uma grelha visível de linhas finas azuis; lateral e abas presas à mesma grelha; um único plano laranja no terminal ativo.",
+      "case": "Funde bem com o mosaico livre e o redimensionamento por célula. Ganha em clareza, perde em identificação: é um mundo de designers.",
+      "risk": "A grelha visível sempre ligada vira ruído; tem de aparecer só ao arrastar.",
+      "html": ".impeccable/mocks/decision/challenger-crouwel.html",
+      "hero": "https://impeccable.style/worlds/cards/crouwel-grid-specimen-hero.webp"
+    },
+    {
+      "id": "challenger-japanese", "kind": "challenger", "catalogId": "japanese-high-density-web",
+      "label": "Densidade japonesa", "verdict": "competitive",
+      "lineage": "portais japoneses de alta densidade",
+      "thesis": "Muito mais estado por ecrã: módulos com fio fino e uma pequena aba de cor por agente.",
+      "palette": ["#111316", "#e6e7ea", "#e0362c", "#2b2f36", "#8b919b"],
+      "materials": ["módulos com fio fino", "abas pequenas por módulo", "gótica compacta"],
+      "viewport": "Painel e lateral como mosaico denso de módulos, cada um com a aba na cor do agente; terminais com cabeçalho mínimo.",
+      "case": "Funde bem no painel; como mundo do app inteiro aperta demais os terminais. Ganha em clareza do painel, perde em identificação.",
+      "risk": "Densidade sem disciplina vira poluição; exige uma escala tipográfica rígida.",
+      "html": ".impeccable/mocks/decision/challenger-japanese.html",
+      "hero": "https://impeccable.style/worlds/cards/japanese-high-density-web-hero.webp"
+    },
+    {
+      "id": "challenger-ikeda", "kind": "challenger", "catalogId": "ikeda-datamatics",
+      "label": "Datamatics", "verdict": "declined",
+      "lineage": "instalações de dados de Ryoji Ikeda",
+      "thesis": "Estado como campo de barras preto e branco.",
+      "palette": ["#000000", "#ffffff"],
+      "materials": ["barras finas", "números monoespaçados"],
+      "viewport": "Colunas de barras por agente.",
+      "case": "Perde nos dois eixos: preto e branco apaga as cores de identidade das sessões, que são compromisso.",
+      "kept": "Algarismos tabulares numa coluna fixa.",
+      "risk": "Ilegível como ferramenta diária.",
+      "hero": "https://impeccable.style/worlds/cards/ikeda-datamatics-hero.webp"
+    },
+    {
+      "id": "challenger-atlas", "kind": "challenger", "catalogId": "notation-diagram-systems-star-atlas",
+      "label": "Atlas estelar", "verdict": "declined",
+      "lineage": "cartas celestes",
+      "thesis": "Atividade como magnitude de estrela.",
+      "palette": ["#0b1530", "#f2f2ec", "#d8452f"],
+      "materials": ["pontos por magnitude", "coordenadas"],
+      "viewport": "Agentes como estrelas num campo.",
+      "case": "Perde nos dois eixos: bonito, mas ninguém supervisiona agentes como quem lê o céu.",
+      "kept": "Uma única escala de tamanho carrega a hierarquia.",
+      "risk": "Decorativo.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-star-atlas-hero.webp"
+    },
+    {
+      "id": "challenger-jcard", "kind": "challenger", "catalogId": "vernacular-ephemera-cassette-j-card",
+      "label": "Capa de cassete", "verdict": "declined",
+      "lineage": "capas de mixtape escritas à mão",
+      "thesis": "Lado A e lado B com tempos medidos.",
+      "palette": ["#f4f1e8", "#2a4fb0", "#c8312b"],
+      "materials": ["esferográfica", "papel pautado"],
+      "viewport": "Lista de faixas por agente.",
+      "case": "Perde nos dois eixos: nostálgico e claro demais para um terminal de trabalho.",
+      "kept": "Cada lista declara a sua capacidade.",
+      "risk": "Fantasia.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card-hero.webp"
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code"},
+  "canon": true,
+  "canonCard": {
+    "kind": "canon", "label": "Padrão da categoria",
+    "thesis": "O que terminais modernos com IA entregam, executado com todo o cuidado.",
+    "palette": ["#0e0f13", "#1a1c22", "#e4e6eb", "#6e8cff"],
+    "materials": ["cinzas neutros", "um acento azul", "cantos arredondados"],
+    "viewport": "Abas, lateral e terminais em cinzas sóbrios com um acento azul.",
+    "risk": "Indistinguível da concorrência por definição.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

@@ -8,7 +8,7 @@ function resizeHandle(label, orientation, adjust) {
   handle.setAttribute('aria-label', label); handle.setAttribute('aria-valuenow', '50'); handle.setAttribute('aria-valuemin', '0'); handle.setAttribute('aria-valuemax', '100'); handle.setAttribute('aria-orientation', orientation);
   handle.title = `${label} · arraste ou use as setas`;
   const apply = delta => {
-    const value = adjust(delta);
+    const value = adjust(delta); markLayoutChanged();
     if (Number.isFinite(value)) handle.setAttribute('aria-valuenow', String(Math.round(value)));
     fitVisible();
   };
@@ -44,8 +44,13 @@ function updateSplitLayout(count) {
     grid.style.gridAutoRows = 'minmax(36px, 1fr)'; grid.style.gridAutoFlow = 'row dense';
     for (const pane of panes) {
       pane.style.gridColumn = `span ${Math.min(Number(pane.dataset.w) || MOSAIC_CELLS, tracks)}`;
-      pane.style.gridRow = `span ${Number(pane.dataset.h) || MOSAIC_CELLS}`;
+      pane.style.gridRow = `span ${Math.max(2, Number(pane.dataset.h) || MOSAIC_CELLS)}`;
     }
+    // The construction grid drawn behind the panes uses the real cell size.
+    requestAnimationFrame(() => {
+      grid.style.setProperty('--cell-w', `${grid.clientWidth / tracks}px`);
+      grid.style.setProperty('--cell-h', getComputedStyle(grid).gridTemplateRows.split(' ')[0] || '36px');
+    });
     return;
   }
   const columns = matchMedia('(max-width: 750px)').matches ? 1 : 2;
@@ -65,23 +70,24 @@ function mosaicResizer(host) {
   corner.setAttribute('aria-label', 'Tamanho no mosaico'); corner.title = 'Arraste para mudar largura e altura · setas no teclado · duplo clique repõe';
   const span = (w, h) => {
     const tracks = Number(document.getElementById('terminal').dataset.tracks) || MOSAIC_CELLS;
-    w = clamp(w, 1, tracks); h = clamp(h, 1, 16);
+    w = clamp(w, 1, tracks); h = clamp(h, 2, 16); // two cells keep at least one terminal row under the header
     if (String(w) === host.dataset.w && String(h) === host.dataset.h) return;
-    host.dataset.w = w; host.dataset.h = h; fitVisible();
+    host.dataset.w = w; host.dataset.h = h; markLayoutChanged(); fitVisible();
   };
   const current = () => [Number(host.dataset.w) || MOSAIC_CELLS, Number(host.dataset.h) || MOSAIC_CELLS];
   corner.addEventListener('pointerdown', event => {
     if (event.button !== 0) return;
     event.preventDefault(); event.stopPropagation(); corner.setPointerCapture(event.pointerId);
+    document.getElementById('terminal').classList.add('arranging');
     const grid = document.getElementById('terminal'), gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
     const [, h] = current(), cellHeight = (host.getBoundingClientRect().height + gap) / h;
     corner.onpointermove = move => {
       const rect = host.getBoundingClientRect(), cellWidth = (grid.clientWidth + gap) / (Number(grid.dataset.tracks) || 1);
       span(Math.round((move.clientX - rect.left + gap) / cellWidth), Math.round((move.clientY - rect.top + gap) / cellHeight));
     };
-    corner.onpointerup = corner.onlostpointercapture = () => { corner.onpointermove = null; };
+    corner.onpointerup = corner.onlostpointercapture = () => { corner.onpointermove = null; document.getElementById('terminal').classList.remove('arranging'); };
   });
-  corner.addEventListener('dblclick', () => { delete host.dataset.w; delete host.dataset.h; fitVisible(); });
+  corner.addEventListener('dblclick', () => { delete host.dataset.w; delete host.dataset.h; markLayoutChanged(); fitVisible(); });
   corner.addEventListener('keydown', event => {
     const step = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[event.key];
     if (!step) return;
@@ -115,6 +121,7 @@ function moveSessionBefore(sourceID, targetID, after = false) {
   const ordered = [...sessions.values()].filter(s => s !== source);
   ordered.splice(ordered.indexOf(target) + Number(after), 0, source);
   sessions.clear(); for (const session of ordered) sessions.set(session.id, session);
+  markLayoutChanged();
   const grid = document.getElementById('terminal');
   for (const session of ordered) grid.append(session.host);
   renderNavigation(); fitVisible();
@@ -124,9 +131,10 @@ function movableSession(session, handle) {
   handle.title = `${session.title || session.name} · arraste para mover; ⌥↑/↓ para reordenar`;
   handle.addEventListener('dragstart', event => {
     draggedSession = session.id; event.dataTransfer.effectAllowed = 'move';
+    document.getElementById('terminal').classList.add('arranging');
     event.dataTransfer.setData('text/x-boterm-session', session.id);
   });
-  handle.addEventListener('dragend', () => { draggedSession = undefined; document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target')); });
+  handle.addEventListener('dragend', () => { draggedSession = undefined; document.getElementById('terminal').classList.remove('arranging'); document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target')); });
   const target = handle.classList.contains('pane-title') ? session.host : handle;
   target.addEventListener('dragover', event => {
     if (!draggedSession || draggedSession === session.id) return;
@@ -152,8 +160,10 @@ function movableSession(session, handle) {
 }
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
+  // The wordmark cell above the sidebar keeps the sidebar's width, so the column reads as one.
+  new ResizeObserver(() => document.documentElement.style.setProperty('--sidebar-w', `${sidebar.offsetWidth}px`)).observe(sidebar);
   sidebar.after(resizeHandle('Largura da lateral', 'vertical', delta => {
-    sidebar.style.width = `${clamp(sidebar.clientWidth + delta, 110, innerWidth * .5)}px`;
+    sidebar.style.width = `${clamp(sidebar.clientWidth + delta, 168, innerWidth * .5)}px`;
     return sidebar.clientWidth / innerWidth * 100;
   }));
 });

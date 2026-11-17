@@ -1,0 +1,83 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Boterm · Set de rodagem</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=JetBrains+Mono&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html,body{width:1440px;height:900px;overflow:hidden;margin:0;background:#101012;color:#ecebe6;font:13px Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}
+.app{display:grid;grid-template-rows:44px 1fr 40px;width:1440px;height:900px}
+.c{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.dim{color:#8a8f98}
+.top{display:flex;align-items:flex-end;padding:0 12px;border-bottom:1px solid #26272c;gap:2px;background:#0b0b0d}
+.tab{padding:0 16px;height:34px;display:flex;align-items:center;font-size:13px;color:#8a8f98;border-radius:6px 6px 0 0}
+.tab.on{background:#101012;color:#ecebe6;box-shadow:inset 0 2px #e5322d}
+.tab.pv{margin-left:18px;opacity:.55;font-style:italic}
+.tools{margin-left:auto;display:flex;gap:18px;color:#8a8f98;font-size:16px;align-self:center;padding-right:6px}
+.mid{display:grid;grid-template-columns:292px 1fr;min-height:0}
+.side{border-right:1px solid #26272c;padding:14px 0;display:flex;flex-direction:column}
+.sh{display:flex;justify-content:space-between;padding:0 16px 10px;font-size:13px;color:#8a8f98}
+.row{display:grid;grid-template-columns:4px 1fr 12px 40px;align-items:center;column-gap:10px;height:50px;padding:0 16px 0 16px;position:relative}
+.row.sel{background:#18181c}
+.tp{width:4px;height:30px;border-radius:2px}
+.nm{font-size:13.5px;line-height:1.25}.nm small{display:block;color:#8a8f98;font-size:11.5px}
+.lamp{width:10px;height:10px;border-radius:50%;border:1.5px solid #4a4d55}
+.r{background:#e5322d;border-color:#e5322d;box-shadow:0 0 8px 2px #e5322d88}
+.a{background:#f2b33d;border-color:#f2b33d;box-shadow:0 0 10px 3px #f2b33d99;width:14px;height:14px}
+.st{font-size:11px;grid-column:2/5;margin-top:-12px;padding-left:0}
+.row .t{font-size:12px;color:#8a8f98;text-align:right}
+.wd{font-size:10.5px;letter-spacing:.1em}
+.lay{margin-top:auto;padding:0 16px;display:flex;gap:6px;color:#8a8f98;font-size:12px}
+.lay span{padding:3px 10px;border:1px solid #26272c;border-radius:5px}.lay .on{color:#ecebe6;background:#18181c}
+.stage{display:grid;grid-template:1fr 1fr/1fr 1fr;gap:10px;padding:10px;min-height:0}
+.pane{background:#0f111a;border:1px solid #26272c;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.pane.need{border-color:#f2b33d}
+.ph{display:flex;align-items:center;gap:10px;height:34px;padding:0 12px 0 0;background:#14151a;border-bottom:1px solid #26272c;font-size:14px}
+.ph .tp{height:34px;width:6px;border-radius:0}
+.ph .tk{color:#8a8f98}.ph .el{margin-left:auto;color:#ecebe6;min-width:64px;text-align:right}
+.term{padding:12px 14px;font:12.5px/1.6 'JetBrains Mono',Menlo,monospace;color:#a6accd;white-space:pre;overflow:hidden}
+.g{color:#c3e88d}.b{color:#82aaff}.y{color:#ffcb6b}.rd{color:#f07178}.m{color:#676e95}
+.ask{border:1px solid #ffcb6b;border-radius:6px;padding:8px 12px;margin-top:8px;color:#ecebe6;background:#ffcb6b14}
+.bar{display:flex;align-items:center;gap:14px;padding:0 16px;border-top:1px solid #26272c;background:#0b0b0d;color:#8a8f98;font-size:12.5px}
+.bar .sp{margin-left:auto}
+select,.btn{font:12.5px Inter,sans-serif;background:#18181c;color:#ecebe6;border:1px solid #2c2d33;border-radius:6px;padding:4px 10px}
+.btn{background:#ecebe6;color:#101012;font-weight:500}
+</style></head><body><div class="app">
+<div class="top"><div class="tab on">boterm</div><div class="tab">the-o</div><div class="tab">bibs</div><div class="tab">+</div><div class="tab pv">Private Project</div>
+<div class="tools"><span>▦</span><span>⌘</span><span>⚙</span></div></div>
+<div class="mid">
+<div class="side"><div class="sh c"><span>Equipa · 8/32</span><span>Sessão 1 h 12 min</span></div>
+<div class="row sel"><i class="tp" style="background:#82aaff"></i><div class="nm">Orquestrador<small>Claude</small></div><i class="lamp r"></i><span class="t">1:12</span></div>
+<div class="row"><i class="tp" style="background:#c3e88d"></i><div class="nm">Desenvolvimento<small>Codex</small></div><i class="lamp r"></i><span class="t">0:48</span></div>
+<div class="row"><i class="tp" style="background:#ffcb6b"></i><div class="nm">Testes<small class="wd c" style="color:#f2b33d">Precisa de você · Claude</small></div><i class="lamp a" style="margin-left:-2px"></i><span class="t">0:31</span></div>
+<div class="row"><i class="tp" style="background:#c792ea"></i><div class="nm">Integrações<small>Gemini · <span class="c wd">Em espera</span></small></div><i class="lamp"></i><span class="t">0:07</span></div>
+<div class="row"><i class="tp" style="background:#89ddff"></i><div class="nm">UX e design<small>Claude</small></div><i class="lamp r"></i><span class="t">0:22</span></div>
+<div class="row"><i class="tp" style="background:#f78c6c"></i><div class="nm">Engenharia de loop<small>Codex · <span class="c wd">Em espera</span></small></div><i class="lamp"></i><span class="t">0:03</span></div>
+<div class="row"><i class="tp" style="background:#f071a2"></i><div class="nm">Resposta e entrega<small>Claude · <span class="c wd">Em espera</span></small></div><i class="lamp"></i><span class="t">0:15</span></div>
+<div class="row"><i class="tp" style="background:#80cbc4"></i><div class="nm">Mensageiro<small>Claude · <span class="c wd">Aguardando Telegram</span></small></div><i class="lamp"></i><span class="t">0:41</span></div>
+<div class="lay c"><span class="on">Mosaico</span><span>Dividir</span></div></div>
+<div class="stage">
+<div class="pane"><div class="ph c"><i class="tp" style="background:#82aaff"></i>Orquestrador<span class="tk">Take 14</span><i class="lamp r"></i><span class="el">1:12:04</span></div>
+<div class="term"><span class="g">●</span> Distribuindo tarefas para a equipe
+<span class="m">  ⎿</span> Desenvolvimento: refatorar parser de áudio
+<span class="m">  ⎿</span> Testes: rodar suíte completa
+<span class="m">  ⎿</span> UX e design: revisar barra de ditado
+<span class="b">❯</span> aguardando relatórios dos agentes…
+<span class="y">⠙</span> Pensando <span class="m">(42s · ↓ 3,1k tokens)</span></div></div>
+<div class="pane"><div class="ph c"><i class="tp" style="background:#c3e88d"></i>Desenvolvimento<span class="tk">Take 09</span><i class="lamp r"></i><span class="el">0:48:31</span></div>
+<div class="term"><span class="b">$</span> codex exec "refatorar parser"
+<span class="g">+ export function parseChunk(buf: Buffer) {</span>
+<span class="g">+   return decode(buf, { lang: 'pt-BR' })</span>
+<span class="rd">- const r = legacyParse(buf)</span>
+<span class="g">✓</span> src/audio/parser.ts  <span class="g">+18</span> <span class="rd">-34</span>
+<span class="y">⠹</span> editando src/audio/index.ts…</div></div>
+<div class="pane need"><div class="ph c"><i class="tp" style="background:#ffcb6b"></i>Testes<span class="tk">Take 21</span><i class="lamp a"></i><span class="el">0:31:17</span></div>
+<div class="term"><span class="g">●</span> Bash(npm test)
+<span class="m">  ⎿</span> aguardando permissão
+<div class="ask">Do you want to run npm test?
+<span class="y">❯ 1. Yes</span>   2. No</div></div></div>
+<div class="pane"><div class="ph c"><i class="tp" style="background:#89ddff"></i>UX e design<span class="tk">Take 06</span><i class="lamp r"></i><span class="el">0:22:50</span></div>
+<div class="term"><span class="g">●</span> Update(ui/dictation-bar.css)
+<span class="m">  ⎿</span> altura 40px, contraste AA
+<span class="g">✓</span> botão "Ditar" com foco visível
+<span class="y">⠼</span> gerando variações <span class="m">(12s)</span></div></div>
+</div></div>
+<div class="bar"><span>Fale em vez de digitar · ⌃⌥V para começar</span><span class="sp"></span><select><option>Português (Brasil)</option></select><span class="btn">Ditar</span></div>
+</div></body></html>

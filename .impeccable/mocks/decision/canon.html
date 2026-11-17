@@ -1,0 +1,84 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Boterm</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:#0e0f13;color:#e4e6eb;font:13px/1.4 system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+.mono{font:12px/1.55 ui-monospace,"SF Mono",Menlo,monospace}
+.top{height:40px;display:flex;align-items:center;padding:0 12px 0 84px;gap:4px;background:#0e0f13;border-bottom:1px solid #24262e;position:relative}
+.top:before{content:"";position:absolute;left:14px;top:14px;width:12px;height:12px;border-radius:50%;background:#ff5f57;box-shadow:20px 0 #febc2e,40px 0 #28c840}
+.tab{height:28px;padding:0 12px;display:flex;align-items:center;border-radius:6px;color:#8b8f98}
+.tab.on{background:#24262e;color:#e4e6eb;box-shadow:inset 0 -2px #6e8cff}
+.tab.mut{opacity:.55;margin-left:8px}
+.sp{flex:1}.ic{width:28px;height:28px;display:grid;place-items:center;color:#8b8f98;border-radius:6px;font-size:14px}
+.mid{flex:1;display:flex;min-height:0}
+.side{width:248px;background:#14151a;border-right:1px solid #24262e;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.sh{display:flex;justify-content:space-between;padding:0 8px 8px;color:#8b8f98;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.it{height:34px;display:flex;align-items:center;gap:10px;padding:0 8px;border-radius:6px}
+.it.sel{background:#1f2230;box-shadow:inset 0 0 0 1px #6e8cff}
+.d{width:8px;height:8px;border-radius:50%;flex:none}
+.it small{margin-left:auto;color:#8b8f98;font-size:11px}
+.it .n{display:block;line-height:1.2}.it .p{display:block;color:#8b8f98;font-size:11px;line-height:1.2}
+.badge{margin-left:auto;background:#3a2a0c;color:#ffcb6b;border:1px solid #6b4d12;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600}
+.stage{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{height:40px;display:flex;align-items:center;padding:0 12px;gap:12px;color:#8b8f98;border-bottom:1px solid #24262e}
+.seg{display:flex;border:1px solid #24262e;border-radius:6px;overflow:hidden}.seg span{padding:3px 10px}.seg .a{background:#24262e;color:#e4e6eb}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;padding:8px;background:#0e0f13;min-height:0}
+.pane{background:#0f111a;border:1px solid #24262e;border-radius:6px;display:flex;flex-direction:column;overflow:hidden}
+.pane.need{border-color:#ffcb6b;box-shadow:0 0 0 1px #ffcb6b55}
+.ph{height:32px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#1a1c22;border-bottom:1px solid #24262e}
+.ph b{font-weight:600}.ph span.r{margin-left:auto;color:#8b8f98;font-size:11px}
+.tx{padding:10px 12px;color:#a6accd;white-space:pre;overflow:hidden}
+.g{color:#c3e88d}.b{color:#82aaff}.y{color:#ffcb6b}.r{color:#f07178}.m{color:#676e95}
+.vo{height:44px;background:#1a1c22;border-top:1px solid #24262e;display:flex;align-items:center;padding:0 12px;gap:12px;color:#8b8f98}
+.sel2{background:#24262e;border:1px solid #2f323c;border-radius:6px;padding:4px 10px;color:#e4e6eb}
+.btn{background:#6e8cff;color:#0e0f13;border-radius:6px;padding:5px 14px;font-weight:600}
+</style>
+<div class="top"><div class="tab on">boterm</div><div class="tab">the-o</div><div class="tab">bibs</div><div class="tab">+</div><div class="tab mut">Private Project</div><div class="sp"></div><div class="ic">▦</div><div class="ic">⌘</div><div class="ic">⚙</div></div>
+<div class="mid">
+<div class="side"><div class="sh"><span>Terminais</span><span>8/32</span></div>
+<div class="it sel"><i class="d" style="background:#82aaff"></i><span><span class="n">Orquestrador</span><span class="p">Claude · trabalhando</span></span></div>
+<div class="it"><i class="d" style="background:#c3e88d"></i><span><span class="n">Desenvolvimento</span><span class="p">Codex · trabalhando</span></span></div>
+<div class="it"><i class="d" style="background:#ffcb6b"></i><span><span class="n">Testes</span><span class="p">Claude · aguarda você</span></span><span class="badge">1</span></div>
+<div class="it"><i class="d" style="background:#c792ea;opacity:.5"></i><span><span class="n">Integrações</span><span class="p">Gemini · em espera</span></span></div>
+<div class="it"><i class="d" style="background:#89ddff"></i><span><span class="n">UX e design</span><span class="p">Claude · trabalhando</span></span></div>
+<div class="it"><i class="d" style="background:#f78c6c;opacity:.5"></i><span><span class="n">Engenharia de loop</span><span class="p">Codex · em espera</span></span></div>
+<div class="it"><i class="d" style="background:#f071a2;opacity:.5"></i><span><span class="n">Resposta e entrega</span><span class="p">Claude · em espera</span></span></div>
+<div class="it"><i class="d" style="background:#80cbc4"></i><span><span class="n">Mensageiro</span><span class="p">Claude · resposta no Telegram</span></span></div>
+</div>
+<div class="stage"><div class="bar"><span>boterm</span><span>·</span><span>1 h 12 min</span><span class="sp"></span><div class="seg"><span>Dividir</span><span class="a">Mosaico</span></div></div>
+<div class="grid">
+<div class="pane"><div class="ph"><i class="d" style="background:#82aaff"></i><b>Orquestrador</b><span class="r">Claude</span></div><div class="tx mono"><span class="g">●</span> Delegando tarefas à equipa
+<span class="m">$</span> git status -sb
+<span class="b">## main...origin/main</span>
+ <span class="y">M</span> src/pty/session.ts
+ <span class="y">M</span> src/ui/Sidebar.tsx
+<span class="g">✓</span> Desenvolvimento: refatorar PTY
+<span class="g">✓</span> UX e design: revisar sidebar
+<span class="y">…</span> Testes aguarda permissão
+<span class="b">❯</span> a coordenar 4 agentes_</div></div>
+<div class="pane"><div class="ph"><i class="d" style="background:#c3e88d"></i><b>Desenvolvimento</b><span class="r">Codex</span></div><div class="tx mono"><span class="b">codex</span> editando src/pty/session.ts
+<span class="g">+ export function attach(id: string) {</span>
+<span class="g">+   return pool.get(id)?.resume();</span>
+<span class="g">+ }</span>
+<span class="r">- const s = pool[id];</span>
+<span class="r">- if (!s) throw new Error("nope");</span>
+<span class="g">✓</span> tsc --noEmit  <span class="m">0 erros</span>
+<span class="y">…</span> aplicando patch 3/5_</div></div>
+<div class="pane need"><div class="ph"><i class="d" style="background:#ffcb6b"></i><b>Testes</b><span class="badge" style="margin-left:6px">Precisa de você</span><span class="r">Claude</span></div><div class="tx mono"><span class="g">●</span> Vou rodar a suíte de testes
+<span class="m">⎿</span> Bash(npm test)
+
+ Do you want to run <span class="y">npm test</span>?
+ <span class="b">❯ 1. Yes</span>
+   2. No
+
+<span class="m">Esc para cancelar</span></div></div>
+<div class="pane"><div class="ph"><i class="d" style="background:#89ddff"></i><b>UX e design</b><span class="r">Claude</span></div><div class="tx mono"><span class="g">●</span> Ajustando espaçamento da barra lateral
+<span class="m">⎿</span> Update(src/ui/Sidebar.tsx)
+   <span class="r">-  padding: 10px 6px;</span>
+   <span class="g">+  padding: 8px;</span>
+   <span class="g">+  border-radius: 6px;</span>
+<span class="g">✓</span> contraste AA verificado
+<span class="b">❯</span> próxima: estados de foco_</div></div>
+</div></div></div>
+<div class="vo"><span>🎙 Fale em vez de digitar · ⌃⌥V para começar</span><span class="sp"></span><span class="sel2">Português (Brasil) ▾</span><span class="btn">Ditar</span></div>
+</html>

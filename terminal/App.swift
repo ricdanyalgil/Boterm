@@ -59,6 +59,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         self.initialDirectory = directory
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
+        // The visual world chosen in Settings applies before the first paint.
+        let world = ["grid", "set"].contains(UserDefaults.standard.string(forKey: "world") ?? "") ? UserDefaults.standard.string(forKey: "world")! : "grid"
+        config.userContentController.addUserScript(WKUserScript(source: "document.documentElement.dataset.world = \(Self.json(world));", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         if let directory {
             config.userContentController.addUserScript(WKUserScript(source: "window.botermInitialDirectory = \(Self.json(directory));", injectionTime: .atDocumentStart, forMainFrameOnly: true))
         }
@@ -315,6 +318,10 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
                 }.value
                 self.js("window.voz.dashboard(\(base), \(extra))")
             }
+        case "setWorld":
+            guard let world = body["world"] as? String, ["grid", "set"].contains(world) else { return }
+            UserDefaults.standard.set(world, forKey: "world")
+            for terminal in (NSApp.delegate as? AppDelegate)?.terminals ?? [] where terminal !== self { terminal.js("window.voz.world(\(Self.json(world)))") }
         case "layoutProfiles": js("window.voz.layoutProfiles(\(Self.json(LayoutProfiles.all())))")
         case "saveLayout":
             if let layout = body["layout"] as? String { saveLayout(layout, suggested: body["name"] as? String ?? "") }

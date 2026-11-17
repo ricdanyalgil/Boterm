@@ -29,8 +29,8 @@ const text = panel.textContent;
 check(text.includes('1 falha apanhada') && text.includes('1 correção'), 'Quality events missing');
 check(text.includes('3 s') && text.includes('2 chamadas') && text.includes('github'), 'MCP time missing');
 check(text.includes('1 arquivo alterado') && text.includes('1 commit nesta sessão'), 'Code changes missing');
-check(/Histórico do projeto1/.test(text) && text.includes('Login'), 'History missing');
-check(panel.querySelectorAll('.dash-agent').length === 2 && text.includes('1 edição'), 'Agents or tool counts missing');
+check(text.includes('1 entrada em .boterm/HISTORY.md') && text.includes('Login'), 'History missing');
+check(panel.querySelectorAll('.dash-agent').length === 2 && [...panel.querySelectorAll('.dash-agent')].find(r => r.textContent.includes('Orquestrador')).querySelector('.col-edits').textContent === '1', 'Agents or tool counts missing');
 
 // Live activity: output pulses the dot; typing echo does not.
 window.voz.insert('for i in $(seq 1 40); do echo tick; sleep 0.1; done', shell, true);

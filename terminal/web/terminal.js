@@ -9,6 +9,7 @@ const pauseButton = document.getElementById('voice-pause');
 const stopButton = document.getElementById('voice-stop');
 const voiceEnvelope = document.getElementById('voice-envelope');
 const pauseMarks = document.getElementById('voice-pauses');
+const voiceBarGroup = document.getElementById('voice-bars');
 let voiceSamples = [], voicePauses = [], waveFrame, lastWaveDraw = 0;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 function drawVoiceWave(now = performance.now()) {
@@ -16,6 +17,9 @@ function drawVoiceWave(now = performance.now()) {
   voicePauses = voicePauses.filter(pause => (pause.end ?? now) >= now - 20000);
   const {path, bands} = voiceWave(voiceSamples, voicePauses, now);
   voiceEnvelope.setAttribute('d', path);
+  // Bars snap to the same cell grammar as the mosaic: 80 columns × 7 cells over the last 20 s.
+  const bars = voiceBars(voiceSamples, now), width = 1000 / bars.length;
+  voiceBarGroup.innerHTML = bars.map((cells, i) => Array.from({length: cells}, (_, c) => `<rect x="${(i * width + 1).toFixed(1)}" y="${32 - (c + 1) * 4.4 + 2.2}" width="${(width - 2).toFixed(1)}" height="3.4"/><rect x="${(i * width + 1).toFixed(1)}" y="${32 + c * 4.4 - 1.2}" width="${(width - 2).toFixed(1)}" height="3.4"/>`).join('')).join('');
   // Geometry comes only from finite local timestamps, never transcript or CLI text.
   pauseMarks.innerHTML = bands.map(band => `<rect x="${band.x}" y="0" width="${Math.max(2, band.width)}" height="64"/><line x1="${band.x}" y1="0" x2="${band.x}" y2="64"/>${band.width > 48 ? `<text x="${band.x + 8}" y="14">PAUSE</text>` : ''}`).join('');
 }
@@ -49,6 +53,7 @@ window.voz = {
     s.agent = name; s.agentState = state; renderNavigation();
   },
   create: createSession,
+  world: setWorld,
   dashboard: receiveDashboard,
   event: receiveEvent,
   startDevelopment,
@@ -72,6 +77,7 @@ window.voz = {
     layoutProfiles = {};
     for (const [name, json] of Object.entries(profiles || {})) { try { layoutProfiles[name] = JSON.parse(json); } catch {} }
     renderLayoutProfiles(selected);
+    if (selected) markLayoutSaved();
   },
   messengerState(state) {
     const labels = {paired: 'Telegram conectado.', pairing: `Telegram: envie ao seu bot a mensagem ${state.code || ''} para concluir.`, token: 'Telegram: token gravado, falta emparelhar.', off: 'Telegram não configurado.'};
@@ -105,7 +111,7 @@ window.voz = {
     const element = document.activeElement;
     if (element?.matches('input')) element.select(); else term.selectAll();
   },
-  fit() { fitVisible(); },
+  fit() { resizeGrace(); fitVisible(); },
   snapshot(id) { return screenText(sessions.get(id)?.term); },
   ended(id) { const s = sessions.get(id); if (s) { s.ended = true; updateAttention(s); renderNavigation(); } },
   write(base64, id = activeID) { const s = sessions.get(id); if (s) s.lastOutput = Date.now(); s?.term.write(Uint8Array.from(atob(base64), c => c.charCodeAt(0))); },
@@ -176,7 +182,7 @@ window.voz = {
   },
   screen() { return screenText(term); }
 };
-new ResizeObserver(fitVisible).observe(document.getElementById('terminal'));
+new ResizeObserver(() => { resizeGrace(); fitVisible(); }).observe(document.getElementById('stage'));
 newWorkspace(window.botermInitialDirectory?.split('/').pop() || 'Projeto 1', window.botermInitialDirectory);
 workspaces.set(privateWorkspace, 'Private Project');
 renderNavigation();

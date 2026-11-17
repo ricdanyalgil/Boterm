@@ -12,6 +12,8 @@ test('dashboard formats durations and separates output from typing echo', () => 
   assert.equal(sessionBusy({lastOutput: now - 1000, lastInput: now - 1100}, now), false, 'echo of typing is not work');
   assert.equal(sessionBusy({lastOutput: now - 5000, lastInput: 0}, now), false, 'quiet terminal is idle');
   assert.equal(sessionBusy({lastOutput: now - 100, lastInput: 0, ended: true}, now), false);
+  assert.equal(sessionBusy({lastOutput: now - 1000, lastInput: 0, lastResize: now - 1500}, now), false, 'redraw after resize is not work');
+  assert.equal(sessionBusy({lastOutput: now - 100, lastInput: 0, lastResize: now - 3000}, now), true);
 });
 test('tool totals split edits, shell commands and MCP time', () => {
   assert.deepEqual(toolTotals({Edit: {calls: 3, seconds: 1}, Write: {calls: 1, seconds: 0}, Bash: {calls: 4, seconds: 9}, 'mcp:github': {calls: 2, seconds: 12.5}, 'mcp:boterm': {calls: 1, seconds: .5}}),

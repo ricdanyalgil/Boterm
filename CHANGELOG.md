@@ -1,3 +1,14 @@
+# Boterm 0.4.0 — local build 26, 2026-11-17
+
+- Redesign through the Impeccable design process (PRODUCT.md, a direction round with six sketched worlds, a direction contract, two inspection rounds, an independent finish review). The chosen world is Grelha construída: square cells on a blue construction grid, hairline rules, one orange plane on the active terminal's header, Saira for display and figures.
+- The large count heading the sidebar (8/32) cycles through single view, mosaic and dashboard. Rows show identity chip, role, provider, state and time, and keep the attention reason ("Pede: …").
+- Mosaic: panes framed on the construction module. The grid shows in empty cells and strengthens while you resize or move; pane headers show the live size in cells and the time. Panes keep at least two cells of height.
+- Dashboard redesigned as a team table, code and MCP magnitudes drawn as rows of cells, a quality timeline and the project history. No hero-metric cards.
+- Layout profiles are progressive: the selector appears only when profiles exist, and "Salvar layout" only after you change the arrangement.
+- Second world, Set de rodagem (Settings → Aparência): tally lamps without halos, camera-tape identity bars, condensed call-sheet headings. The choice persists across launches.
+- Drawn SVG icons replace text glyphs. Voice levels are drawn as grid cells. The selected project and view mode are marked by a straight bar under the label only.
+- Activity ignores the redraw that follows a resize. New app icon: `>_` built cell by cell, chalk on near-black, one orange cursor cell.
+
 # Boterm 0.3.4 — local build 25, 2026-11-17
 
 - Project dashboard (▦ in the top bar): session time, terminals and agents with live state, code changes from git since the project opened (Boterm's own `.boterm/` excluded), tests that caught failures, fixes and improvements, team actions, MCP time per server and the project history. Clicking an agent opens its terminal.

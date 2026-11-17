@@ -289,3 +289,13 @@ Limites: compactação real com Claude/Codex não exercitada (o teste usa uma sh
 - Unidade: categorias de ferramentas, numstat e git real; `test/dashboard.test.js` para durações, plurais, eco de digitação e totais. npm test 32/32. Regressão de preset, mosaico e Mensageiro aprovada.
 
 Limites: hooks não exercitados dentro de uma sessão real do Boterm com um agente Claude a trabalhar (o teste envia o JSON do hook pelo mesmo comando). Codex e Gemini sem tempo de MCP: os hooks do Codex exigem desligar a verificação de confiança, o que não foi feito.
+
+## Redesenho Grelha construída — 0.4.0 / build 26 (2026-11-17)
+
+- Processo Impeccable: PRODUCT.md por entrevista (dois públicos, estrutura vinculante), sorteio de direção com seis esboços HTML numa página de decisão, escolha do Ricardo (Grelha construída, com Set de rodagem como alternativa e duas correções nomeadas), contrato de direção em `.impeccable/surfaces/terminal-web-index-html.md`.
+- Inspeção em dois passes com capturas nativas a 1440×900 e 620×420 dos dois mundos, mosaico e painel (`.impeccable/review/`). Corrigidos a partir delas: fundo preto do xterm abaixo da última linha, nomes cortados em painéis estreitos (container queries), legenda do contador, lâmpadas do painel, terminal com uma célula de altura (agora mínimo de duas), contraste do terceiro nível de texto e rótulos de 10 px.
+- Revisão final independente: disposição `fix` com seis correções materiais (botão Salvar sempre visível, lateral e painel com estados diferentes, fronteiras dos painéis ilegíveis, janela mínima, glifos no lugar de ícones, ícone em verde menta), todas aplicadas; a regressão das conversas apanhou a perda do motivo de atenção na lateral, reposto.
+- Harnesses nativos aprovados: personalização, conversas, mosaico, preset (lápis por foco omitido, janela de teste inativa), Mensageiro (uma falha de tempo em três execuções, passou duas vezes seguidas), painel. npm test 33/33. Detetor Impeccable sem achados mecânicos fora da grelha de construção (assinatura do contrato) e das legendas de 11 px.
+- Uma fixture inicial criou terminais com tipo de agente e lançou Codex e Claude reais no app de teste; ficaram no ecrã de confiança da pasta e terminaram com o app de teste, sem tarefa. A fixture passou a usar shells.
+
+Limites: a faixa nativa de ditado (microfone e Ditar) e o painel de voz durante a gravação não foram capturados. Sem teste físico de microfone.

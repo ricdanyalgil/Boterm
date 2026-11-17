@@ -169,6 +169,10 @@ extension TerminalWindow {
                 }
                 result["sizes"] = sizes
                 if let path = env["VOZ_TEST_SNAPSHOT"] {
+                    if let width = Double(env["VOZ_TEST_SNAPSHOT_WIDTH"] ?? ""), let height = Double(env["VOZ_TEST_SNAPSHOT_HEIGHT"] ?? "") {
+                        window.setContentSize(NSSize(width: width, height: height)); js("window.voz.fit()")
+                        try await Task.sleep(for: .milliseconds(900))
+                    }
                     try await Task.sleep(for: .milliseconds(300))
                     let image = try await web.takeSnapshot(configuration: nil)
                     guard let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { throw VoiceTestError.message("Snapshot failed") }

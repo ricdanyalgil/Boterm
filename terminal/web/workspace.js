@@ -11,6 +11,13 @@ function button(text, action, label = text) {
   b.type = 'button'; b.textContent = text; b.title = label; b.setAttribute('aria-label', label);
   b.addEventListener('click', action); return b;
 }
+const providerNames = {codex: 'Codex', claude: 'Claude', agy: 'Gemini', gemini: 'Gemini CLI', opencode: 'OpenCode'};
+/** A drawn icon from the sprite in index.html; never a text glyph. */
+function icon(name) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  svg.setAttribute('class', 'icon'); svg.setAttribute('aria-hidden', 'true'); use.setAttribute('href', `#i-${name}`); svg.append(use); return svg;
+}
+function span(className, text = '') { const node = document.createElement('span'); node.className = className; node.textContent = text; return node; }
 function screenText(terminal, limit = 262144) {
   if (!terminal) throw new Error('Session not found');
   const b = terminal.buffer.active;
@@ -25,7 +32,9 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
   host.className = 'terminal-pane'; host.setAttribute('aria-label', name);
   document.getElementById('terminal').append(host);
   const heading = document.createElement('div'), output = document.createElement('div');
-  heading.className = 'pane-title'; heading.textContent = name; output.className = 'terminal-content'; host.append(heading, output);
+  heading.className = 'pane-title'; output.className = 'terminal-content';
+  heading.append(span('chip'), span('pane-name', name.slice(0, 80)), span('pane-provider'), span('pane-meta'));
+  host.append(heading, output);
   const terminal = new Terminal({fontFamily: 'Menlo, Monaco, monospace', fontSize: 14, lineHeight: 1.25,
     allowProposedApi: true, cursorBlink: true, scrollback: 5000, screenReaderMode: true, theme: BOTERM_THEME});
   const addon = new FitAddon.FitAddon(); terminal.loadAddon(addon); terminal.open(output);
@@ -42,7 +51,7 @@ function createSession(name = 'Terminal', workspace = activeWorkspace, agent = '
   movableSession(session, heading);
   paneResizers(host);
   terminal.onData(data => { session.lastInput = Date.now(); send({type: 'input', session: id, data}); });
-  terminal.onResize(({cols, rows}) => send({type: 'resize', session: id, columns: cols, rows}));
+  terminal.onResize(({cols, rows}) => { session.lastResize = Date.now(); send({type: 'resize', session: id, columns: cols, rows}); });
   terminal.onTitleChange(title => { session.title = title.slice(0, 100); renderNavigation(); });
   host.addEventListener('mousedown', () => { if (activeID !== id) activateSession(id, false); });
   terminal.attachCustomKeyEventHandler(event => {
@@ -91,6 +100,7 @@ function fitVisible() {
     s.host.querySelector('.session-conversation-log').setAttribute('aria-live', s.id === activeID ? 'polite' : 'off');
   }
   updateSplitLayout(visible.length);
+  if (typeof updateLayoutDirty === 'function') updateLayoutDirty();
   requestAnimationFrame(() => { for (const s of visible) { if (s.host.clientWidth > 30 && s.host.clientHeight > 30) s.fit.fit(); } });
 }
 function updateAttention(session) {
@@ -108,7 +118,9 @@ function sessionRow(s) {
   const row = button('', () => activateSession(s.id));
   row.classList.add('session-entry'); row.style.setProperty('--session-color', s.color);
   const task = document.createElement('small'); task.className = 'session-task';
-  row.append(document.createElement('span'), document.createElement('small'), task);
+  const text = span('row-text'), state = span('row-state');
+  text.append(span('row-name'), span('row-provider')); state.append(span('row-word'), span('row-time'));
+  row.append(span('chip'), text, state, task);
   movableSession(s, row);
   return s.row = row;
 }
@@ -118,10 +130,10 @@ function renderNavigation(forceProjects = false) {
   if (forceProjects || (!tabs.querySelector('input') && tabs.dataset.key !== tabsKey)) {
   tabs.dataset.key = tabsKey;
   tabs.replaceChildren();
-  const add = button('＋', () => newWorkspace(), 'Novo projeto');
+  const add = button('', () => newWorkspace(), 'Novo projeto'); add.classList.add('project-add'); add.append(icon('plus'));
   for (const [id, name] of [...workspaces].sort(([a], [b]) => Number(a === privateWorkspace) - Number(b === privateWorkspace))) {
     if (id === privateWorkspace) tabs.append(add);
-    const group = document.createElement('div'); group.className = 'project-tab';
+    const group = document.createElement('div'); group.className = 'project-tab'; group.classList.toggle('private', id === privateWorkspace);
     const tab = button(name, () => {
       const session = [...sessions.values()].find(s => s.workspace === id);
       if (session) activateSession(session.id);
@@ -143,7 +155,7 @@ function renderNavigation(forceProjects = false) {
       field.addEventListener('blur', () => finish(true));
     };
     tab.classList.toggle('selected', id === activeWorkspace); tab.setAttribute('aria-current', String(id === activeWorkspace));
-    const pencil = button('✎', edit, `Renomear projeto ${name}`); pencil.className = 'project-edit'; pencil.setAttribute('aria-label', pencil.title);
+    const pencil = button('', edit, `Renomear projeto ${name}`); pencil.className = 'project-edit'; pencil.append(icon('edit'));
     group.append(tab, pencil); tabs.append(group);
   }
   if (!workspaces.has(privateWorkspace)) tabs.append(add);
@@ -151,13 +163,13 @@ function renderNavigation(forceProjects = false) {
   const list = document.getElementById('sessions'), select = document.getElementById('recipient');
   const peers = [...sessions.values()].filter(s => s.workspace === activeWorkspace), rows = peers.map(sessionRow);
   if (rows.length !== list.children.length || rows.some((row, i) => list.children[i] !== row)) list.replaceChildren(...rows);
-  const marks = {codex: '◇', claude: '✳', agy: '✦', gemini: '✦', opencode: '⌘'};
   for (const s of peers) {
-    const [label, state, task] = s.row.children;
-    setIfChanged(label, 'textContent', `${marks[s.agent] || '›_'} ${s.name}`);
-    setIfChanged(state, 'textContent', s.ended ? 'Encerrado' : s.attention ? `! ${s.attention}` : s.agent ? (s.agentState === 'running' ? '● Em execução' : '○ Pronto') : 'Shell');
-    setIfChanged(state, 'className', s.attention ? 'agent-attention' : s.agentState === 'running' ? 'agent-running' : '');
-    setIfChanged(task, 'textContent', s.lastMessage || ''); setIfChanged(task, 'title', s.lastMessage || ''); task.hidden = !s.lastMessage;
+    const task = s.row.querySelector('.session-task');
+    setIfChanged(s.row.querySelector('.row-name'), 'textContent', s.name);
+    setIfChanged(s.row.querySelector('.row-provider'), 'textContent', providerNames[s.agent] || 'Shell');
+    setIfChanged(s.host.querySelector('.pane-provider'), 'textContent', providerNames[s.agent] || 'Shell');
+    const note = s.attention ? `Pede: ${s.attention}` : s.lastMessage || '';
+    setIfChanged(task, 'textContent', note); setIfChanged(task, 'title', note); task.hidden = !note;
     setIfChanged(s.row, 'title', `${s.title || s.name} · arraste para mover; ⌥↑/↓ para reordenar${s.attention ? ` · Atenção: ${s.attention}` : ''}`);
     s.row.setAttribute('aria-label', s.attention ? `${s.name} · Atenção: ${s.attention}` : s.title || s.name);
     s.row.classList.toggle('needs-attention', Boolean(s.attention));
@@ -169,6 +181,11 @@ function renderNavigation(forceProjects = false) {
     select.replaceChildren(new Option('Toda a equipe', '*'), ...recipients.map(s => new Option(s.name, s.id)));
     if ([...select.options].some(o => o.value === recipient)) select.value = recipient;
   }
+  const count = document.getElementById('team-count');
+  setIfChanged(count.querySelector('.count-now'), 'textContent', String(peers.length));
+  count.setAttribute('aria-label', `${peers.length} de 32 terminais. Clique para alternar entre vista única, mosaico e painel`);
+  count.title = 'Alternar: vista única → mosaico → painel';
+  if (typeof updateLiveState === 'function') updateLiveState();
   const label = document.getElementById('session-label');
   label.textContent = sessions.get(activeID)?.name ?? '';
   label.style.setProperty('--session-color', sessions.get(activeID)?.color ?? sessionColors[0]);
@@ -180,7 +197,7 @@ function renameWorkspace(id, name) {
 }
 function renameSession(id, name) {
   const s = sessions.get(id); if (!s || !name.trim()) return;
-  s.name = name.trim().slice(0, 80); s.host.querySelector('.pane-title').textContent = s.name; s.host.setAttribute('aria-label', s.name); renderNavigation(); renderConversations();
+  s.name = name.trim().slice(0, 80); s.host.querySelector('.pane-name').textContent = s.name; s.host.setAttribute('aria-label', s.name); renderNavigation(); renderConversations();
 }
 function removeSession(id) {
   const s = sessions.get(id); if (!s) return;
@@ -231,11 +248,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('launch-agent').onclick = () => { const kind = document.getElementById('agent-kind').value; createSession({codex: 'Codex', claude: 'Claude', agy: 'Gemini (Antigravity)', gemini: 'Gemini CLI', opencode: 'OpenCode'}[kind], activeWorkspace, kind); };
   document.getElementById('new-session').onclick = () => createSession(`Terminal ${sessions.size + 1}`);
   document.getElementById('split').onclick = () => {
-    split = !split; mosaic = false;
+    split = !split; mosaic = false; markLayoutChanged();
     if (split && [...sessions.values()].filter(s => s.workspace === activeWorkspace).length === 1) createSession('Terminal 2');
     fitVisible();
   };
-  document.getElementById('mosaic').onclick = () => { mosaic = !mosaic; split = false; fitVisible(); };
+  document.getElementById('mosaic').onclick = () => { mosaic = !mosaic; split = false; markLayoutChanged(); fitVisible(); };
   document.getElementById('copy-text').onclick = () => window.voz.copy();
   document.getElementById('paste-text').onclick = () => send({type: 'paste'});
   document.getElementById('rename-session').onclick = () => send({type: 'rename', session: activeID});

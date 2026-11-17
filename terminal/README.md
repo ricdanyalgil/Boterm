@@ -164,3 +164,9 @@ Not covered: the agents' own CLI approval prompts (Claude/Codex keep those in th
 A terminal is shown as working when it produced output in the last 2.5 s that is not the echo of typing; its dot pulses everywhere it appears. This is an activity signal, not proof that a model is generating.
 
 Claude agents are launched with `--settings` hooks (PreToolUse/PostToolUse for MCP, edit and Bash tools) running `boterm tool`, which reads the hook JSON, sends the tool name and `duration_ms` to the app, prints nothing and always exits 0. Codex, Gemini and other CLIs show no MCP time.
+
+## Visual worlds (build 26)
+
+Two worlds share one structure, chosen in Settings → Aparência and kept in preferences (`world`). **Grelha construída** (default): near-black ground, hairline rules, a blue construction grid visible in empty mosaic cells and while arranging, square identity chips that pulse while a terminal produces output, one orange plane on the active terminal's header, Saira for the count, headings and figures. **Set de rodagem**: tally lamps (red rolling, amber needs you, hollow standby, no halos), camera-tape identity bars, Barlow Condensed headings. Product context lives in `PRODUCT.md`; the direction contract in `.impeccable/surfaces/`; design tokens in `DESIGN.md`. Fonts are bundled under `web/fonts` (OFL, see README there).
+
+Clicking the large count (e.g. 8/32) cycles single view → mosaic → dashboard. "Salvar layout" appears only after an arrangement action in the current project; the profile selector appears once a profile exists.

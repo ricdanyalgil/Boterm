@@ -24,13 +24,24 @@ function applyLayout(layout) {
   const others = [...sessions.values()].filter(s => s.workspace !== activeWorkspace);
   sessions.clear(); for (const s of [...order, ...others]) sessions.set(s.id, s);
   const grid = document.getElementById('terminal'); for (const s of sessions.values()) grid.append(s.host);
-  renderNavigation(); fitVisible();
+  renderNavigation(); fitVisible(); markLayoutSaved();
+}
+// Progressive disclosure: profiles show only when some exist; Save only when the arrangement changed.
+// Only arrangement actions (mode, resize, move) count as a change; new terminals do not.
+const arrangedWorkspaces = new Set();
+function markLayoutChanged() { if (typeof activeWorkspace !== 'undefined') arrangedWorkspaces.add(activeWorkspace); updateLayoutDirty(); }
+function markLayoutSaved() { arrangedWorkspaces.delete(activeWorkspace); updateLayoutDirty(); }
+function updateLayoutDirty() {
+  const save = document.getElementById('layout-save'); if (!save) return;
+  save.hidden = !arrangedWorkspaces.has(activeWorkspace);
 }
 function renderLayoutProfiles(selected = document.getElementById('layout-profile').value) {
   const select = document.getElementById('layout-profile');
-  select.replaceChildren(new Option('Perfil de layout…', ''), ...Object.keys(layoutProfiles).sort().map(name => new Option(name, name)));
+  const names = Object.keys(layoutProfiles).sort();
+  select.replaceChildren(new Option('Perfis de layout', ''), ...names.map(name => new Option(name, name)));
   select.value = layoutProfiles[selected] ? selected : '';
-  document.getElementById('layout-delete').disabled = !select.value;
+  select.hidden = !names.length;
+  document.getElementById('layout-delete').hidden = !select.value;
 }
 if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
   const select = document.getElementById('layout-profile');
