@@ -199,18 +199,21 @@ input::placeholder { color: var(--text-3); }
 .voice-info, .voice-actions { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .voice-info { grid-column: 1; grid-row: 1; }
 #voice-status { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text); }
-#voice-hint, .voice-scale { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#voice-hint { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 #voice-time { color: var(--text-3); }
 /* One row: status · live waveform line · actions. */
 .voice-history { grid-column: 2; grid-row: 1; min-width: 0; }
-#voice-wave { display: block; width: 100%; height: 28px; }
-#voice-envelope { fill: var(--construction); fill-opacity: .14; stroke: var(--construction); stroke-width: 1.25; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-:root:not([data-world="set"]) #voice-envelope { fill: var(--focus); stroke: var(--focus); }
+/* Capped and centred: stretched wider, the lobes flatten into stripes and stop reading as a voice. */
+#voice-wave { display: block; width: 100%; max-width: 560px; height: 28px; margin-inline: auto; }
+/* Spectral ribbons: three translucent lobes that mix where they cross (screen blend, no glow). */
+#voice-wave { --voice-a: var(--focus); --voice-b: #4fd3ff; --voice-c: #ff5fa8; isolation: isolate; }
+:root[data-world="set"] #voice-wave { --voice-a: #c9ccd2; --voice-b: #8a8f98; --voice-c: #5d626b; }
+.voice-ribbon { fill-opacity: .42; stroke-width: 1; stroke-opacity: .9; vector-effect: non-scaling-stroke; stroke-linejoin: round; mix-blend-mode: screen; transition: fill .2s ease-out, stroke .2s ease-out; }
+.voice-ribbon:nth-of-type(1) { fill: var(--voice-a); stroke: var(--voice-a); }
+.voice-ribbon:nth-of-type(2) { fill: var(--voice-b); stroke: var(--voice-b); }
+.voice-ribbon:nth-of-type(3) { fill: var(--voice-c); stroke: var(--voice-c); }
+#voice-panel:is([data-state="paused"], [data-state="pausing"], [data-state="preparing"]) .voice-ribbon { fill: var(--text-3); stroke: var(--text-3); }
 .wave-baseline { stroke: var(--rule); stroke-width: 1; }
-.wave-now { stroke: var(--text-3); stroke-width: 1; }
-#voice-pauses rect { fill: var(--text-3); fill-opacity: .08; }
-#voice-pauses line { stroke: var(--text-3); stroke-dasharray: 2 4; }
-#voice-pauses text { display: none; }
 .voice-actions { grid-column: 3; grid-row: 1; gap: 2px; }
 .voice-actions button { color: var(--text-2); }
 #voice-stop { color: var(--text); }

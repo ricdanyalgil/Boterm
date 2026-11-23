@@ -151,7 +151,7 @@ A near-black, blue-ruled ground with chalk text, one hot orange, and amber reser
 - **Signal Orange** (accent): the background of the active terminal's header in split or mosaic view. No other use. In the set world the accent becomes chalk and the active pane is marked by a session-tinted border and a raised header instead.
 
 ### Secondary
-- **Construction Blue** (construction, grid-line, grid-strong): the mosaic's construction grid, the pane frame (`--frame`, construction at 42%), the slash in the team count and MCP usage cells. The voice waveform uses Focus Blue in the grid world and construction grey in the set world. In the set world construction turns neutral grey and the grid is not drawn.
+- **Construction Blue** (construction, grid-line, grid-strong): the mosaic's construction grid, the pane frame (`--frame`, construction at 42%), the slash in the team count and MCP usage cells. The voice ribbons use Focus Blue, Voice Cyan #4fd3ff and Voice Magenta #ff5fa8 in the grid world (only there, never as chrome), and three neutral greys in the set world. In the set world construction turns neutral grey and the grid is not drawn.
 - **Focus Blue** (focus): focus outlines, resize-handle hover, drop targets, links, text selection.
 
 ### Tertiary
@@ -251,7 +251,7 @@ Panel fill, 1px rule-strong border, square, caret in Focus Blue. Focus is a 1px 
 The header is the project name, its path in mono and one facts sentence (session time · n/32 terminais · n trabalhando · n precisam de você). Below it come the team table (40px rows, rules only, state colours as in the sidebar), then code and MCP magnitudes drawn as wrapping rows of 8px cells with 2px gaps (add green, del red, MCP in Construction Blue), then a quality timeline (time, kind, event) and the history list. Each section has a title and one plain sentence.
 
 ### Voice panel
-One 37px row on panel above the native dictation strip: status and tabular time at the left, the last 20 seconds of microphone level as a continuous waveform line in the middle (1.25px stroke with a 14% fill, mirrored around the baseline), and Pausar / Parar e inserir / Cancelar at the right. Pauses are faint bands with a dashed edge. Since build 28 it is a line, not cells: the user asked for the earlier line back, because the cell bars read as a block of squares and made the panel two rows tall.
+One 37px row on panel above the native dictation strip: status and tabular time at the left, a live spectral wave in the middle (capped at 560px and centred), and Pausar / Parar e inserir / Cancelar at the right. Since build 31 the wave is three lobed sine ribbons, Siri-like, at the user's request: Focus Blue, Voice Cyan and Voice Magenta at 42% fill with a 1px stroke, `mix-blend-mode: screen` so they mix where they cross. They taper to the baseline at both ends, and their height follows the live level (rises fast, falls slowly). Silence is a thin living line; pause and preparing turn them text-3 and still. Reduced motion holds the phase and keeps only the height. There is no glow: colour mixing replaces it. The 20-second history and pause bands are gone; the status text carries the pause.
 
 ### Development dialog and role profiles
 The team view lists one hairline row per role: a checkbox and name (unchecked rows drop to text-3 and disable their CLI select), a text-3 source marker only when the role differs from Boterm's ("editada", "nova", "deste projeto", "nova · projeto"), an edit pencil that appears on row hover or focus, and the CLI select. "Todos / Nenhum" sit on the section heading's line. "Nova função" closes the list, and "Funções apagadas (n)" appears only when something is deleted. The submit label counts the choice: Criar equipe, Abrir com n agentes, or Abrir só o projeto.
@@ -262,7 +262,7 @@ Editing replaces the team view inside the same dialog (no second modal); "‹ Eq
 
 ### Do:
 - **Do** keep the orange plane for the active pane header in split or mosaic view only.
-- **Do** draw magnitudes as whole cells on the 8px module, never as smooth bars or charts. The voice waveform is the one exception: it is a live signal, drawn as a line.
+- **Do** draw magnitudes as whole cells on the 8px module, never as smooth bars or charts. The voice wave is the one exception: it is a live signal, drawn as spectral ribbons.
 - **Do** derive every state word and state colour from the one session-state function. Do not paraphrase it.
 - **Do** mark selection with the straight 2px under-label bar or a raise step.
 - **Do** let new controls appear only when they become relevant.

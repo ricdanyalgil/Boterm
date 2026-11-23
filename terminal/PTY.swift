@@ -8,6 +8,8 @@ final class ShellSession {
     private let writer = DispatchQueue(label: "com.danyalgil.voztty.pty-input")
     var output: ((Data) -> Void)?
     var ended: (() -> Void)?
+    /// The process group in the foreground of this terminal: the shell itself, or the program it is running.
+    var foregroundPID: pid_t { guard let master else { return 0 }; return max(0, tcgetpgrp(master.fileDescriptor)) }
 
     func start(executable: String, arguments: [String], directory: String, environment: [String: String] = [:]) throws {
         var env = ProcessInfo.processInfo.environment

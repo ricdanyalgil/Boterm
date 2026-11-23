@@ -169,6 +169,17 @@ enum RoleProfiles {
                     terminal.js("window.voz.agent(\(TerminalWindow.json(id)), \(TerminalWindow.json(record.agent)), 'idle')")
                 }
             }
+            // Agents started by hand in a plain shell never report themselves; read the terminal's foreground program,
+            // so the sidebar says "em espera" instead of "parado" while that agent waits for the user.
+            for (id, record) in terminal.records where record.agentPID == 0 {
+                let foreground = record.shell.foregroundPID
+                var name = [CChar](repeating: 0, count: 64)
+                let program = foreground > 0 && foreground != record.shell.pid && proc_name(foreground, &name, 64) > 0 ? String(cString: name) : ""
+                let agent = ["claude", "codex", "gemini", "agy", "opencode"].contains(program) ? program : ""
+                guard agent != record.agent else { continue }
+                terminal.records[id]?.agent = agent
+                terminal.js("window.voz.agent(\(TerminalWindow.json(id)), \(TerminalWindow.json(agent)), 'idle')")
+            }
         }
     }
 

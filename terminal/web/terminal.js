@@ -7,20 +7,21 @@ const voiceHint = document.getElementById('voice-hint');
 const voiceTime = document.getElementById('voice-time');
 const pauseButton = document.getElementById('voice-pause');
 const stopButton = document.getElementById('voice-stop');
-const voiceEnvelope = document.getElementById('voice-envelope');
-const pauseMarks = document.getElementById('voice-pauses');
-let voiceSamples = [], voicePauses = [], waveFrame, lastWaveDraw = 0;
+const voiceRibbons = [...document.querySelectorAll('.voice-ribbon')];
+// The meter arrives at 10 Hz; the drawn level rises fast and falls slowly, like a voice meter.
+let voiceTarget = 0, voiceLevel = 0, lastMeter = 0, waveFrame;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 function drawVoiceWave(now = performance.now()) {
-  voiceSamples = voiceSamples.filter(sample => sample.at >= now - 20000).slice(-220);
-  voicePauses = voicePauses.filter(pause => (pause.end ?? now) >= now - 20000);
-  const {path, bands} = voiceWave(voiceSamples, voicePauses, now);
-  voiceEnvelope.setAttribute('d', path);
-  // Geometry comes only from finite local timestamps, never transcript or CLI text.
-  pauseMarks.innerHTML = bands.map(band => `<rect x="${band.x}" y="0" width="${Math.max(2, band.width)}" height="64"/><line x1="${band.x}" y1="0" x2="${band.x}" y2="64"/>${band.width > 48 ? `<text x="${band.x + 8}" y="14">PAUSE</text>` : ''}`).join('');
+  // Meter silence is not voice: without a fresh reading the ribbons settle to the baseline.
+  const target = now - lastMeter < 400 ? voiceTarget : 0;
+  voiceLevel += (target - voiceLevel) * (target > voiceLevel ? 0.45 : 0.12);
+  // Reduced motion keeps the height feedback but holds the ribbons still.
+  voiceWave(voiceLevel, reducedMotion.matches ? 0 : now).forEach((d, i) => voiceRibbons[i]?.setAttribute('d', d));
 }
 function animateVoiceWave(now) {
-  if (now - lastWaveDraw >= 33) { drawVoiceWave(now); lastWaveDraw = now; }
+  drawVoiceWave(now);
+  // A pause settles to a still line, then the loop sleeps until recording resumes.
+  if (voicePanel.dataset.state === 'paused' && voiceLevel < 0.002) { waveFrame = undefined; return; }
   waveFrame = requestAnimationFrame(animateVoiceWave);
 }
 const cancelButton = document.getElementById('voice-cancel');
@@ -128,18 +129,11 @@ window.voz = {
   focus() { term.focus(); },
   state(state, lang = 'en-US') {
     const now = performance.now();
-    if (state === 'preparing' || state === 'idle') { voiceSamples = []; voicePauses = []; }
-    if (state === 'paused') {
-      voiceSamples.push({at: now, level: 0});
-      voicePauses.push({start: now});
-    }
-    if (state === 'recording' && voicePauses.at(-1)?.end === undefined && voicePauses.length) {
-      voicePauses.at(-1).end = now;
-      voiceSamples.push({at: now, level: 0});
-    }
+    if (state !== 'recording') voiceTarget = 0;
+    if (state === 'preparing' || state === 'idle') voiceLevel = 0;
     if (waveFrame !== undefined) cancelAnimationFrame(waveFrame);
     waveFrame = undefined;
-    if (['recording', 'pausing', 'paused', 'resuming'].includes(state) && !reducedMotion.matches) waveFrame = requestAnimationFrame(animateVoiceWave);
+    if (['recording', 'pausing', 'paused', 'resuming', 'stopping'].includes(state)) waveFrame = requestAnimationFrame(animateVoiceWave);
     document.body.dataset.dictating = String(state !== 'idle');
     voicePanel.hidden = state === 'idle';
     voicePanel.dataset.state = state;
@@ -171,8 +165,7 @@ window.voz = {
   meter(level, seconds) {
     if (voicePanel.dataset.state !== 'recording' || !Number.isFinite(level) || !Number.isFinite(seconds)) return;
     const value = Math.max(0, Math.min(1, level));
-    voiceSamples.push({at: performance.now(), level: value});
-    drawVoiceWave();
+    voiceTarget = value; lastMeter = performance.now();
     const total = Math.max(0, Math.floor(seconds));
     voiceTime.textContent = `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
   },
