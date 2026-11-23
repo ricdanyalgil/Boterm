@@ -76,7 +76,9 @@ final class VoiceEngine: NSObject, AVAudioRecorderDelegate {
                         guard let self, let recorder = self.recorder else { return }
                         guard !self.paused else { continue }
                         recorder.updateMeters()
-                        let level = min(1, max(0, (Double(recorder.averagePower(forChannel: 0)) + 55) / 55))
+                        // Built-in mic: a quiet room reads -60…-67 dB, soft speech about -50, normal speech -40…-25.
+                        // The old (dB+55)/55 scale drew soft speech at ~1 px, so the wave looked muted.
+                        let level = min(1, max(0, (Double(recorder.averagePower(forChannel: 0)) + 60) / 40))
                         emit("level", metadata: ["value": String(level), "seconds": String(recorder.currentTime)])
                     }
                 }

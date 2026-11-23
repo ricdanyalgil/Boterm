@@ -23,7 +23,7 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIconFile</key><string>Boterm.icns</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>0.4.1</string>
-<key>CFBundleVersion</key><string>28</string>
+<key>CFBundleVersion</key><string>29</string>
 <key>LSMinimumSystemVersion</key><string>26.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSAppleEventsUsageDescription</key><string>Programs you run in Boterm, such as AI agents, can automate other apps when you allow it.</string>
