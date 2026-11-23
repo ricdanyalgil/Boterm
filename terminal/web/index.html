@@ -54,12 +54,14 @@
     <button id="voice-stop" type="button">Stop &amp; insert</button>
     <button id="voice-cancel" type="button">Cancel</button>
   </div>
-  <div class="voice-history" aria-label="Live microphone level">
+  <div class="voice-history" aria-label="Recent microphone intensity, last 20 seconds, with pauses marked">
     <svg id="voice-wave" viewBox="0 0 1000 64" preserveAspectRatio="none" aria-hidden="true">
       <line x1="0" y1="32" x2="1000" y2="32" class="wave-baseline" />
+      <g id="voice-pauses"></g>
       <path class="voice-ribbon" d="M0,32 L1000,32" />
       <path class="voice-ribbon" d="M0,32 L1000,32" />
       <path class="voice-ribbon" d="M0,32 L1000,32" />
+      <line x1="999" y1="3" x2="999" y2="61" class="wave-now" />
     </svg>
   </div>
 </section>

@@ -203,7 +203,8 @@ input::placeholder { color: var(--text-3); }
 #voice-time { color: var(--text-3); }
 /* One row: status · live waveform line · actions. */
 .voice-history { grid-column: 2; grid-row: 1; min-width: 0; }
-/* Capped and centred: stretched wider, the lobes flatten into stripes and stop reading as a voice. */
+/* Capped and centred: stretched wider, the lobes flatten into stripes and stop reading as a voice.
+   The strip is a 20 s history: oldest at the left, now at the right edge. */
 #voice-wave { display: block; width: 100%; max-width: 560px; height: 28px; margin-inline: auto; }
 /* Spectral ribbons: three translucent lobes that mix where they cross (screen blend, no glow). */
 #voice-wave { --voice-a: var(--focus); --voice-b: #4fd3ff; --voice-c: #ff5fa8; isolation: isolate; }
@@ -212,8 +213,12 @@ input::placeholder { color: var(--text-3); }
 .voice-ribbon:nth-of-type(1) { fill: var(--voice-a); stroke: var(--voice-a); }
 .voice-ribbon:nth-of-type(2) { fill: var(--voice-b); stroke: var(--voice-b); }
 .voice-ribbon:nth-of-type(3) { fill: var(--voice-c); stroke: var(--voice-c); }
-#voice-panel:is([data-state="paused"], [data-state="pausing"], [data-state="preparing"]) .voice-ribbon { fill: var(--text-3); stroke: var(--text-3); }
+/* Only "preparing" greys the ribbons; in a pause the history keeps its colour and the band marks the gap. */
+#voice-panel[data-state="preparing"] .voice-ribbon { fill: var(--text-3); stroke: var(--text-3); }
 .wave-baseline { stroke: var(--rule); stroke-width: 1; }
+.wave-now { stroke: var(--text-3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+#voice-pauses rect { fill: var(--text-3); fill-opacity: .1; }
+#voice-pauses line { stroke: var(--text-3); stroke-dasharray: 2 4; vector-effect: non-scaling-stroke; }
 .voice-actions { grid-column: 3; grid-row: 1; gap: 2px; }
 .voice-actions button { color: var(--text-2); }
 #voice-stop { color: var(--text); }
