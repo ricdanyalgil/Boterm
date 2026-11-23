@@ -27,6 +27,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     var shell: ShellSession { records[activeSessionID]?.shell ?? firstShell }
     struct Record { let shell: ShellSession; let workspace: String; var name: String; var agent = ""; var state = "idle"; var agentPID: Int32 = 0; var role = ""; var directory = ""; var lastOutput = Date(); var lastInput = Date.distantPast; var compacting = false; var toolStarts: [String: Date] = [:]; var tools: [String: ToolUsage] = [:] }
     var records: [String: Record] = [:]
+    private var pendingOutput: [String: Data] = [:], outputFlushScheduled = false
     var activeSessionID = ""
     var voiceSessionID = ""
     var messages: [[String: Any]] = []
@@ -147,7 +148,25 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
     nonisolated static func json(_ value: Any) -> String {
         String(data: try! JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]), encoding: .utf8)!
     }
-    func js(_ script: String) { web.evaluateJavaScript(script, completionHandler: nil) }
+    /// Any other call into the page first delivers buffered terminal output, so nothing overtakes it (for example "ended").
+    func js(_ script: String) { flushOutput(); web.evaluateJavaScript(script, completionHandler: nil) }
+    /// PTY reads from all sessions are joined and sent once per ~8 ms instead of one script per read;
+    /// agent TUIs write many small frames, and nine of them streaming at once flooded the page.
+    func queueOutput(_ id: String, _ data: Data) {
+        pendingOutput[id, default: Data()].append(data)
+        guard !outputFlushScheduled else { return }
+        outputFlushScheduled = true
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(8))
+            self?.flushOutput()
+        }
+    }
+    private func flushOutput() {
+        outputFlushScheduled = false
+        guard !pendingOutput.isEmpty else { return }
+        let batch = pendingOutput; pendingOutput.removeAll(keepingCapacity: true)
+        web.evaluateJavaScript(batch.map { "window.voz.write(\(Self.json($0.value.base64EncodedString())), \(Self.json($0.key)))" }.joined(separator: ";"), completionHandler: nil)
+    }
     func error(_ message: String) { status.stringValue = message; status.toolTip = message }
 
     private func recover(_ text: String, reason: String) {
@@ -218,6 +237,19 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         switch type {
         case "recentProjects":
             js("window.voz.recentProjects(\(Self.json(ProjectHistory.paths())))")
+            // Which roles (and CLIs) the last opening used; "" means the role stays closed.
+            if let saved = RoleProfiles.validChoice(UserDefaults.standard.dictionary(forKey: "developmentChoice")) { js("window.voz.developmentChoice(\(Self.json(saved)))") }
+        case "developmentChoice":
+            guard let choice = RoleProfiles.validChoice(body["choice"]) else { return }
+            UserDefaults.standard.set(choice, forKey: "developmentChoice")
+        case "roleProfiles":
+            js("window.voz.roleProfiles(\(Self.json(RoleProfiles.payload(body["directory"] as? String ?? ""))))")
+        case "saveRoleProfiles":
+            let directory = body["directory"] as? String ?? ""
+            do {
+                try RoleProfiles.save(body["data"] as? String ?? "", scope: body["scope"] as? String ?? "", directory: directory)
+                js("window.voz.roleProfiles(\(Self.json(RoleProfiles.payload(directory))))")
+            } catch { js("window.voz.roleProfilesError('Não foi possível guardar o perfil. Verifique a pasta do projeto e tente de novo.')") }
         case "chooseDevelopmentDirectory":
             guard window.attachedSheet == nil else { return }
             let panel = NSOpenPanel()
@@ -236,9 +268,9 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
         case "development":
             guard let directory = body["directory"] as? String, directory.hasPrefix("/"),
-                  let providers = body["providers"] as? [String], providers.count == 9,
-                  providers.allSatisfy({ ["codex", "claude", "agy", "gemini"].contains($0) }),
-                  let objective = body["objective"] as? String, objective.count <= 2000, records.count + 9 <= 32 else {
+                  let providers = RoleProfiles.validChoice(body["providers"]),
+                  let objective = body["objective"] as? String, objective.count <= 2000,
+                  records.count + max(1, providers.values.filter({ !$0.isEmpty }).count) <= 32 else {
                 js("window.voz.developmentError('Configuração inválida ou limite de terminais atingido.')"); return
             }
             var isDirectory: ObjCBool = false
@@ -247,7 +279,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             }
             // Rules the Qualidade role learned in earlier sessions; the page appends them to each role's prompt with a cap.
             let roles = (try? String(contentsOfFile: directory + "/.boterm/ROLES.md", encoding: .utf8)).map { String($0.prefix(8000)) } ?? ""
-            js("window.voz.startDevelopment(\(Self.json(["directory": directory, "objective": objective, "providers": providers, "roles": roles])))")
+            js("window.voz.startDevelopment(\(Self.json(["directory": directory, "objective": objective, "providers": providers, "roles": roles, "profiles": RoleProfiles.payload(directory)])))")
         case "ready":
             guard let id = body["session"] as? String, UUID(uuidString: id) != nil,
                   let workspace = body["workspace"] as? String, UUID(uuidString: workspace) != nil,
@@ -258,7 +290,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             launched = true
             records[id] = Record(shell: session, workspace: workspace, name: String((body["name"] as? String ?? "Terminal").prefix(80)), role: String((body["role"] as? String ?? "").prefix(40)))
             activeSessionID = id
-            session.output = { [weak self] data in self?.records[id]?.lastOutput = Date(); self?.js("window.voz.write(\(Self.json(data.base64EncodedString())), \(Self.json(id)))") }
+            session.output = { [weak self] data in self?.records[id]?.lastOutput = Date(); self?.queueOutput(id, data) }
             session.ended = { [weak self] in
                 guard let self else { return }
                 if self.voiceSessionID == id { self.dictation.cancel() }

@@ -20,10 +20,25 @@ test('decorates Unicode cell positions, preserves ANSI and cleans up listeners/m
     registerDecoration(options) { drawn.push(options); return {dispose() { options.disposed = true; }}; }
   };
   for (const event of ['onWriteParsed', 'onScroll', 'onResize']) terminal[event] = callback => { events[event] = callback; return {dispose() { disposedListeners++; }}; };
-  const accents = terminalAccents(terminal); events.onWriteParsed();
+  const accents = terminalAccents(terminal); accents.refresh();
   assert.deepEqual(drawn.map(d => [d.x, d.width, d.foregroundColor]), [[5, 5, '#ffcc00']]);
-  terminal.buffer.active.type = 'alternate'; events.onWriteParsed();
+  terminal.buffer.active.type = 'alternate'; accents.refresh();
   assert.equal(drawn[0].disposed, true); assert.equal(markers[0].disposed, true);
   assert.equal(drawn.length, 1);
   accents.dispose(); assert.equal(disposedListeners, 3);
+});
+
+test('accents wait for output to settle and refresh at least once a second while it streams', t => {
+  t.mock.timers.enable({apis: ['setTimeout', 'Date']});
+  const events = {}; let refreshes = 0;
+  const terminal = {rows: 0, buffer: {active: {type: 'alternate'}}, options: {theme: {}}};
+  for (const event of ['onWriteParsed', 'onScroll', 'onResize']) terminal[event] = callback => { events[event] = callback; return {dispose() {}}; };
+  terminal.buffer.active = {get type() { refreshes++; return 'alternate'; }};
+  const accents = terminalAccents(terminal);
+  for (let i = 0; i < 100; i++) events.onScroll();
+  assert.equal(refreshes, 0, 'no synchronous refresh per scrolled line');
+  t.mock.timers.tick(300); assert.equal(refreshes, 1, 'one refresh after output settles');
+  for (let ms = 0; ms < 1000; ms += 50) { events.onWriteParsed(); t.mock.timers.tick(50); }
+  assert.ok(refreshes >= 2, 'a continuous stream still refreshes within a second');
+  accents.dispose();
 });

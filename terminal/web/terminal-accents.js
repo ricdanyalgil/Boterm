@@ -49,7 +49,15 @@ function terminalAccents(terminal) {
       }
     }
   }
-  const listeners = [terminal.onWriteParsed(refresh), terminal.onScroll(refresh), terminal.onResize(refresh)];
-  return {refresh, dispose() { for (const listener of listeners) listener.dispose(); clear(); }};
+  // Each decoration change makes xterm repaint the whole viewport, and onScroll fires once per scrolled line, so
+  // refreshing on every event doubled the cost of nine streaming panes. Colour once output settles (300 ms),
+  // and at most once a second while it keeps streaming.
+  let quiet, since = 0;
+  const schedule = () => {
+    const now = Date.now(); since ||= now; clearTimeout(quiet);
+    quiet = setTimeout(() => { since = 0; refresh(); }, Math.max(0, Math.min(300, since + 1000 - now)));
+  };
+  const listeners = [terminal.onWriteParsed(schedule), terminal.onScroll(schedule), terminal.onResize(schedule)];
+  return {refresh, dispose() { clearTimeout(quiet); for (const listener of listeners) listener.dispose(); clear(); }};
 }
 if (typeof module !== 'undefined') module.exports = terminalAccents;

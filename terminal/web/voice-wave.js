@@ -13,14 +13,4 @@ function voiceWave(samples, pauses, now) {
     .map(p => ({x: x(p.start), width: x(p.end ?? now) - x(p.start)}));
   return {path: `M${upper.join(' L')} L${lower.length ? lower.join(' L') : '1000,32'} L${first},32 Z`, bands};
 }
-/** Grid-style levels: the last 20 s in fixed columns, each column filled with whole cells. */
-function voiceBars(samples, now, columns = 80, cells = 7) {
-  const levels = Array(columns).fill(0);
-  for (const sample of samples) {
-    if (!Number.isFinite(sample.at) || !Number.isFinite(sample.level) || sample.at < now - 20000 || sample.at > now) continue;
-    const column = Math.min(columns - 1, Math.floor((sample.at - now + 20000) / 20000 * columns));
-    levels[column] = Math.max(levels[column], Math.max(0, Math.min(1, sample.level)));
-  }
-  return levels.map(level => level > 0 ? Math.max(1, Math.round(level * cells)) : 0);
-}
-if (typeof module !== 'undefined') { module.exports = voiceWave; module.exports.voiceBars = voiceBars; }
+if (typeof module !== 'undefined') module.exports = voiceWave;

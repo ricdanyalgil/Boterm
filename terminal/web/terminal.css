@@ -194,18 +194,18 @@ input::placeholder { color: var(--text-3); }
 #team-text { flex: 1; min-width: 0; }
 #recipient { max-width: 180px; }
 
-/* Voice panel: levels drawn as cells, like the mosaic. */
-#voice-panel { flex: none; display: grid; grid-template-columns: auto minmax(80px, 1fr) auto; align-items: center; gap: 0 12px; padding: 8px 16px; border-top: 1px solid var(--rule); background: var(--panel); color: var(--text-2); font: 11px var(--ui); }
+/* Voice panel: one row, status · live waveform line · actions. */
+#voice-panel { flex: none; display: grid; grid-template-columns: auto minmax(80px, 1fr) auto; align-items: center; gap: 0 16px; padding: 4px 16px; border-top: 1px solid var(--rule); background: var(--panel); color: var(--text-2); font: 11px var(--ui); }
 .voice-info, .voice-actions { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .voice-info { grid-column: 1; grid-row: 1; }
 #voice-status { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text); }
 #voice-hint, .voice-scale { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 #voice-time { color: var(--text-3); }
-.voice-history { grid-column: 1 / -1; grid-row: 2; min-width: 0; padding-top: 6px; }
-#voice-wave { display: block; width: 100%; height: 46px; }
-#voice-envelope { display: none; }
-#voice-bars rect { fill: var(--construction); }
-:root:not([data-world="set"]) #voice-bars rect { fill: var(--focus); }
+/* One row: status · live waveform line · actions. */
+.voice-history { grid-column: 2; grid-row: 1; min-width: 0; }
+#voice-wave { display: block; width: 100%; height: 28px; }
+#voice-envelope { fill: var(--construction); fill-opacity: .14; stroke: var(--construction); stroke-width: 1.25; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+:root:not([data-world="set"]) #voice-envelope { fill: var(--focus); stroke: var(--focus); }
 .wave-baseline { stroke: var(--rule); stroke-width: 1; }
 .wave-now { stroke: var(--text-3); stroke-width: 1; }
 #voice-pauses rect { fill: var(--text-3); fill-opacity: .08; }
@@ -235,9 +235,61 @@ dialog a { color: var(--focus); text-underline-offset: 3px; }
 #development-recents { margin-top: 10px; }
 #development-recents p { margin: 0 0 6px; font-size: 12px; }
 #development-recents button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin: 0 6px 6px 0; border: 1px solid var(--rule); }
-#development-roles label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0; color: var(--text); }
+#development-team { margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
+.team-head { display: flex; align-items: center; justify-content: space-between; }
+#development-team-title { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.team-quick { display: flex; gap: 2px; }
+.team-quick button { min-height: 20px; padding: 0 8px; line-height: 20px; color: var(--text-2); font-size: 12px; }
+.team-quick button:hover { color: var(--text); background: var(--rule); }
+#development-roles { margin-top: 6px; border-top: 1px solid var(--rule); }
+.role-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.role-row label { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; color: var(--text); cursor: pointer; }
+#development-form .role-row input { flex: none; display: inline-block; width: auto; margin: 0; accent-color: var(--focus); }
+.role-row:has(input:not(:checked)) label { color: var(--text-3); }
+.role-row select:disabled { opacity: .35; }
+.team-hint { margin: 8px 0 0; color: var(--text-3); font-size: 12px; }
+.role-row label .role-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.role-source { flex: none; color: var(--text-3); font-size: 11px; }
+.role-edit { display: grid; place-items: center; width: 28px; padding: 0; color: var(--text-3); opacity: 0; }
+.role-row:hover .role-edit, .role-edit:focus-visible { opacity: 1; }
+@media (hover: none) { .role-edit { opacity: 1; } }
+.role-edit:hover { color: var(--text); background: var(--raise); }
+.role-new { display: flex; align-items: center; gap: 8px; margin-top: 4px; padding-left: 0; color: var(--text-2); }
+.role-new:hover { color: var(--text); }
+#development-deleted, #role-history { margin-top: 8px; font-size: 12px; }
+#development-deleted summary, #role-history summary { display: flex; align-items: center; gap: 8px; min-height: 28px; list-style: none; color: var(--text-3); cursor: pointer; }
+#development-deleted summary::-webkit-details-marker, #role-history summary::-webkit-details-marker { display: none; }
+#development-deleted summary::before, #role-history summary::before { content: ''; width: 5px; height: 5px; border-right: 1.4px solid; border-bottom: 1.4px solid; transform: rotate(-45deg); transition: transform 150ms ease-out; }
+#development-deleted[open] summary::before, #role-history[open] summary::before { transform: rotate(45deg); }
+#development-deleted summary:hover, #role-history summary:hover { color: var(--text); }
+.deleted-row, #role-history li { display: flex; align-items: center; gap: 12px; min-height: 32px; border-bottom: 1px solid var(--rule); }
+.deleted-row .role-name { flex: 1; color: var(--text-2); }
+#role-history ol { margin: 6px 0 0; padding: 0; list-style: none; }
+#role-history time { color: var(--text-3); font-variant-numeric: tabular-nums; }
+#role-history .history-note { flex: 1; color: var(--text-2); }
+#role-editor { display: none; }
+#development-dialog.editing #role-editor { display: block; }
+#development-dialog.editing #development-title, #development-dialog.editing .team-intro, #development-dialog.editing #development-form { display: none; }
+.role-back { display: flex; align-items: center; gap: 6px; margin: -8px 0 10px -10px; color: var(--text-3); font-size: 12px; }
+.role-back .icon { transform: rotate(180deg); }
+.role-back:hover { color: var(--text); }
+.role-scope { display: flex; gap: 18px; flex-wrap: wrap; }
+.role-scope label { display: flex; align-items: center; gap: 6px; color: var(--text); cursor: pointer; }
+.role-scope input { accent-color: var(--focus); }
+.role-scope label:has(input:disabled) { color: var(--text-3); cursor: default; }
+#role-editor > label { display: block; margin: 16px 0 6px; }
+#role-editor input:not([type]), #role-editor textarea { display: block; box-sizing: border-box; width: 100%; }
+#role-editor textarea { resize: vertical; min-height: 72px; background: var(--panel); border: 1px solid var(--rule-strong); border-radius: var(--radius); padding: 6px 8px; color: var(--text); font: 13px/1.5 var(--ui); caret-color: var(--focus); }
+#role-editor input:disabled { color: var(--text-3); }
+#role-error { margin: 10px 0 0; color: var(--text-2); font-size: 12px; }
+.role-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.role-actions button { color: var(--text-2); }
+.role-danger:hover { color: var(--del); background: transparent; }
 #development-error { color: var(--del); }
-.primary-action { width: 100%; margin-top: 8px; background: var(--text); color: var(--ground); font-weight: 500; }
+/* The main action stays in view however long the role list grows. */
+.dialog-foot { position: sticky; bottom: -28px; margin: 12px -28px -28px; padding: 0 28px 28px; background: var(--panel); border-top: 1px solid var(--rule); }
+.dialog-foot p:empty { display: none; }
+.primary-action { width: 100%; margin-top: 12px; background: var(--text); color: var(--ground); font-weight: 500; }
 .primary-action:hover { background: #fff; color: var(--ground); }
 #permission-list { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 4px; }
 #permission-list li { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }

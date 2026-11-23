@@ -37,6 +37,37 @@ enum ProjectHistory {
     }
 }
 
+/// Agent role profiles: one global file and an optional per-project copy in .boterm/roles.json. The page owns the schema and its caps.
+enum RoleProfiles {
+    static let limit = 512 * 1024
+    static var global: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Boterm/roles.json") }
+    static func project(_ directory: String) -> URL? {
+        ProjectHistory.directory(directory).map { URL(fileURLWithPath: $0).appendingPathComponent(".boterm/roles.json") }
+    }
+    static func read(_ url: URL?) -> String {
+        guard let url, let data = try? Data(contentsOf: url), data.count <= limit else { return "" }
+        return String(decoding: data, as: UTF8.self)
+    }
+    static func payload(_ directory: String) -> [String: String] {
+        ["global": read(global), "project": read(project(directory)), "directory": ProjectHistory.directory(directory) ?? ""]
+    }
+    static func save(_ text: String, scope: String, directory: String) throws {
+        let data = Data(text.utf8)
+        guard data.count <= limit, (try? JSONSerialization.jsonObject(with: data)) is [String: Any],
+              let url = scope == "global" ? global : scope == "project" ? project(directory) : nil else { throw CocoaError(.fileWriteInvalidFileName) }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try data.write(to: url, options: .atomic)
+    }
+    /// Role id -> CLI ("" = closed), plus "id:cli" for the CLI remembered while a role is unchecked.
+    static func validChoice(_ value: Any?) -> [String: String]? {
+        guard let choice = value as? [String: String], choice.count <= 200 else { return nil }
+        let ok = choice.allSatisfy { key, cli in
+            key.range(of: "^[a-z0-9-]{1,40}(:cli)?$", options: .regularExpression) != nil && ["", "codex", "claude", "agy", "gemini"].contains(cli)
+        }
+        return ok ? choice : nil
+    }
+}
+
 @MainActor extension TerminalWindow {
     func saveHistory(sessionID: String? = nil) async throws -> URL {
         guard let text = try await web.callAsyncJavaScript("return await window.voz.historySnapshot(sessionID);", arguments: ["sessionID": sessionID as Any? ?? NSNull()], in: nil, contentWorld: .page) as? String,

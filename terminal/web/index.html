@@ -56,7 +56,6 @@
   </div>
   <div class="voice-history" aria-label="Recent microphone intensity, last 20 seconds, with pauses marked">
     <svg id="voice-wave" viewBox="0 0 1000 64" preserveAspectRatio="none" aria-hidden="true">
-      <g id="voice-bars"></g>
       <line x1="0" y1="32" x2="1000" y2="32" class="wave-baseline" />
       <path id="voice-envelope" d="M0,32 L1000,32" />
       <g id="voice-pauses"></g>
@@ -71,7 +70,7 @@
 </details>
 <dialog id="settings-dialog" aria-labelledby="settings-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar configurações"><svg class="icon"><use href="#i-close"/></svg></button></form>
 <h2 id="settings-title">Sobre o Boterm</h2><p>Desenvolvido por Ricardo Danyalgil Junior.</p><p>Software open source · licença MIT.</p><p><a id="github-link" href="https://github.com/ricdanyalgil/Boterm">GitHub · código-fonte do Boterm</a></p>
-<p>Versão 0.4.1 · build 27</p>
+<p>Versão 0.4.1 · build 28</p>
 <p>Terminal local com projetos, ditado e colaboração entre agentes.</p>
 <dl><dt>Equipe</dt><dd>Sessões deste projeto compartilham mensagens e saída com a equipe. Outros projetos ficam separados.</dd>
 <dt>Privacidade</dt><dd>O ditado é transcrito no Mac. Os agentes usam as contas e permissões dos respectivos provedores.</dd>
@@ -82,11 +81,27 @@
 <dt>Permissões gravadas</dt><dd><p id="permissions-empty">Nenhuma permissão gravada.</p><ul id="permission-list"></ul></dd>
 <dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini (Antigravity) por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
 <dialog id="development-dialog" aria-labelledby="development-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar preset"><svg class="icon"><use href="#i-close"/></svg></button></form>
-<h2 id="development-title">Desenvolvimento</h2><p>Uma equipe para planejar, implementar, testar e revisar o software.</p>
+<h2 id="development-title">Desenvolvimento</h2><p class="team-intro">Uma equipe para planejar, implementar, testar e revisar o software.</p>
 <form id="development-form"><label for="development-directory">Pasta do projeto</label>
 <div class="directory-picker"><input id="development-directory" required placeholder="/Users/…/meu-software" autocomplete="off"><button id="development-choose-directory" type="button">Selecionar pasta…</button></div>
 <div id="development-recents" aria-label="Projetos recentes" hidden></div>
 <label>Objetivo<input id="development-objective" maxlength="2000" placeholder="Você também pode explicar ao orquestrador depois."></label>
-<div id="development-roles"></div><p id="development-error" role="alert"></p><button type="submit" class="primary-action">Criar equipe</button></form></dialog>
+<fieldset id="development-team" aria-labelledby="development-team-title"><div class="team-head"><span id="development-team-title">Agentes a abrir</span><span class="team-quick"><button id="development-all" type="button">Todos</button><button id="development-none" type="button">Nenhum</button></span></div>
+<div id="development-roles"></div><button id="role-new" type="button" class="role-new"><svg class="icon"><use href="#i-plus"/></svg>Nova função</button>
+<details id="development-deleted" hidden><summary></summary><div></div></details>
+<p class="team-hint">Sem nenhum agente abre só um terminal na pasta. A escolha fica guardada.</p></fieldset><div class="dialog-foot"><p id="development-error" role="alert"></p><button id="development-submit" type="submit" class="primary-action">Criar equipe</button></div></form>
+<section id="role-editor" aria-labelledby="role-editor-title">
+<button id="role-back" type="button" class="role-back"><svg class="icon"><use href="#i-chevron"/></svg>Equipe</button>
+<h2 id="role-editor-title">Função</h2>
+<div class="role-scope" role="radiogroup" aria-label="Onde guardar"><label><input type="radio" name="role-scope" id="role-scope-global" value="global"> Todos os projetos</label><label><input type="radio" name="role-scope" id="role-scope-project" value="project"> Só este projeto</label></div>
+<p id="role-scope-hint" class="team-hint">Escolha a pasta do projeto para guardar uma cópia só dele.</p>
+<label for="role-name">Nome</label><input id="role-name" maxlength="40" autocomplete="off">
+<label for="role-instructions">Instruções</label><textarea id="role-instructions" rows="6" maxlength="4000"></textarea>
+<label for="role-skills">Skills e instruções extra</label><textarea id="role-skills" rows="4" maxlength="4000" placeholder="Uma por linha: skills a usar, ficheiros a ler, comandos de verificação."></textarea>
+<p class="team-hint">As regras de segurança e coordenação do Boterm são fixas e vêm sempre antes destas.</p>
+<details id="role-history" hidden><summary></summary><ol></ol></details>
+<div class="role-actions"><button id="role-delete" type="button" class="role-danger">Apagar função</button><button id="role-reset" type="button">Repor original</button></div>
+<div class="dialog-foot"><p id="role-error" role="alert"></p><button id="role-save" type="button" class="primary-action">Guardar</button></div>
+</section></dialog>
 <script src="vendor/xterm.js"></script><script src="vendor/addon-fit.js"></script><script src="theme.js"></script><script src="shortcuts.js"></script><script src="text-tokens.js"></script><script src="terminal-accents.js"></script><script src="layout.js"></script><script src="profiles.js"></script><script src="attention.js"></script><script src="workspace.js"></script><script src="dashboard.js"></script><script src="development.js"></script><script src="drop-paths.js"></script><script src="voice-wave.js"></script><script src="terminal.js"></script></body>
 </html>
