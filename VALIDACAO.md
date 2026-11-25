@@ -306,3 +306,10 @@ Limites: a faixa nativa de ditado (microfone e Ditar) e o painel de voz durante 
 - No app real, com um `.boterm/ROLES.md` provisório em /tmp (removido no fim): o Testes recebeu a sua regra e a de Todos, o Desenvolvimento só a de Todos, a secção inexistente não chegou a nenhum prompt e a Qualidade foi lançada. O harness do preset lançou nove processos, e o do painel passou.
 
 Limites: ciclo real com modelos (revisão da Qualidade e nova equipe a nascer com as regras) não exercitado.
+
+## Cibersegurança — 0.5.1 / build 38 (2026-11-25)
+
+- `test/development.test.js` (7/7): dez funções; Cibersegurança logo depois de Testes; o prompt traz IDOR/BOLA com dois usuários e dois tenants, escalada horizontal e vertical, mass assignment, SQL e NoSQL, XSS, SSRF, blue team, `.boterm/SECURITY.md`, CWE, a prova por teste que falha antes e passa depois, os limites (nunca produção nem terceiros) e a proibição de copiar segredos; o Orquestrador pede o modelo de ameaça antes de implementar e não passa à Engenharia de loop sem o parecer; Desenvolvimento, Testes, Loop e Entrega referem a segurança; editar o perfil não remove as regras fixas e "repor" devolve a lista; a lista cabe nos 4000 caracteres do editor.
+- Harness nativo `VOZ_TEST_MODE=customize` com `test/terminal-development.js` e os stubs de `launch20-stubs`, numa cópia ad hoc do build 38: passou. Dez seletores, Cibersegurança e Qualidade em Claude por omissão, uma escolha guardada sem `seguranca` abre-a marcada, dez processos na pasta certa com o prompt de cada função. A escolha de equipa real (`developmentChoice`) foi guardada antes e reposta depois.
+- Limites: ciclo real com modelos (revisão de um diff e bloqueio por achado) não exercitado.
+

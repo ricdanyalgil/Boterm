@@ -85,13 +85,14 @@ Dite com o reconhecimento de fala da Apple, no próprio Mac (pt-BR, pt-PT, en-US
 
 ## A equipe de desenvolvimento
 
-Um clique (⌘ na barra superior) abre nove funções, cada uma no seu terminal com o provedor que você escolher:
+Um clique (⌘ na barra superior) abre dez funções, cada uma no seu terminal com o provedor que você escolher:
 
 | Função | O que faz |
 | :--- | :--- |
 | **Orquestrador** | Planeja com o histórico do projeto, distribui a posse dos arquivos, mantém o `BOTERM_PLAN.md` e confere resultados reais |
 | **Desenvolvimento** | Escreve o código |
 | **Testes** | Escreve e roda testes, registra as falhas encontradas |
+| **Cibersegurança** | Red team e blue team: prova IDOR, escalada de privilégio, injeção e XSS com testes locais em cada diff testado, revisa dependências e todo documento que sai do projeto; achados críticos e altos bloqueiam o ciclo |
 | **Integrações** | APIs, serviços e sistemas externos |
 | **UX e design** | Interface e interação |
 | **Engenharia de loop** | Mantém o ciclo de desenvolvimento andando |
@@ -100,6 +101,8 @@ Um clique (⌘ na barra superior) abre nove funções, cada uma no seu terminal 
 | **Mensageiro** | O único canal com você fora do Boterm: Telegram (token no Keychain), WhatsApp ou email |
 
 O Mensageiro espera a sua resposta e registra permissões permanentes, listadas e revogáveis em Ajustes. Nenhuma outra função fala com você fora do app.
+
+O Orquestrador conduz implementação → testes → Cibersegurança → integrações → UX → loop. Nada chega à Engenharia de loop sem o parecer de segurança, achados críticos e altos voltam ao Desenvolvimento com um teste que os reproduz, e nenhum README, changelog, relatório ou anexo sai sem revisão de segurança. A lista de verificação (código, dependências e segredos, documentos que saem) são as skills editáveis da função.
 
 ## Agentes conversam entre si
 

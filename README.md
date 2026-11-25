@@ -86,13 +86,14 @@ Dictate with Apple's on-device speech recognition (pt-BR, pt-PT, en-US). The tex
 
 ## The development team
 
-One click (⌘ in the top bar) launches nine roles, each in its own terminal with the provider you pick:
+One click (⌘ in the top bar) launches ten roles, each in its own terminal with the provider you pick:
 
 | Role | What it does |
 | :--- | :--- |
 | **Orquestrador** | Plans with the project history, assigns file ownership, keeps `BOTERM_PLAN.md`, checks real results |
 | **Desenvolvimento** | Writes the code |
 | **Testes** | Writes and runs tests, records failures caught |
+| **Cibersegurança** | Red and blue team: proves IDOR, privilege escalation, injection and XSS with local tests on each tested diff, reviews dependencies and every document that leaves the project; critical and high findings block the cycle |
 | **Integrações** | APIs, services and external systems |
 | **UX e design** | Interface and interaction |
 | **Engenharia de loop** | Keeps the development cycle moving |
@@ -101,6 +102,8 @@ One click (⌘ in the top bar) launches nine roles, each in its own terminal wit
 | **Mensageiro** | Your only channel outside Boterm: Telegram (token in the Keychain), WhatsApp or email |
 
 The Mensageiro waits for your answer and records permanent permissions, listed and revocable in Settings. No other role can message you outside the app.
+
+The Orquestrador runs implementation → tests → Cibersegurança → integrations → UX → loop. Nothing reaches Engenharia de loop without the security verdict, critical and high findings go back to Desenvolvimento with a test that reproduces them, and no README, changelog, report or attachment leaves without a security read. Its checklist (code, dependencies and secrets, outgoing documents) is the role's editable skills.
 
 ## Agents talk to each other
 

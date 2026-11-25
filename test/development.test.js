@@ -5,8 +5,8 @@ const roles = effectiveRoles(), byId = id => roles.find(r => r.id === id);
 const prompt = (id, objective = '', notes = '', team = roles) => developmentPrompt(byId(id), objective, notes, team);
 
 test('development roles have distinct responsibilities and coordinator dispatches through existing peers', () => {
-  assert.equal(roles.length, 9);
-  assert.equal(new Set(roles.map(r => r.name)).size, 9);
+  assert.equal(roles.length, 10);
+  assert.equal(new Set(roles.map(r => r.name)).size, 10);
   const lead = prompt('orquestrador', 'Corrigir o software sem publicar');
   assert.match(lead, /Corrigir o software sem publicar/);
   for (const rule of [/BOTERM_PLAN.md/, /send submit=true/, /Mensagens não ativam um modelo parado/, /pelo Mensageiro/, /revisão desse ciclo/, /leia o histórico do projeto/, /registre-a com history/, /compact nos colegas/, /nunca compacte no meio de uma atividade/]) assert.match(lead, rule);
@@ -31,6 +31,31 @@ test('a partial team adapts prompts: no Orquestrador means the user assigns work
   assert.match(lead, /não foram abertas: Testes, .*Mensageiro/);
   assert.match(prompt('orquestrador', '', '', [byId('orquestrador')]), /Você está sozinho/);
   assert.doesNotMatch(prompt('orquestrador'), /não foram abertas/);
+});
+
+test('Cibersegurança reviews each tested diff and outgoing documents, and the Orquestrador waits for it', () => {
+  const ids = roles.map(r => r.id);
+  assert.equal(ids.indexOf('seguranca'), ids.indexOf('testes') + 1, 'security comes right after tests');
+  const security = prompt('seguranca');
+  for (const rule of [/Não implemente funcionalidades/, /nunca contra produção, sistemas reais ou de terceiros/, /Nunca copie o valor de um segredo/, /event blocker/, /falha antes da correção e passa depois/, /aprovado com ressalvas/, /atribuição explícita/, /\/security-review/, /gitleaks/, /Documentos que saem/, /IDOR\/BOLA/, /dois usuários e dois tenants/, /escalada horizontal e vertical/, /mass assignment/, /SQL e NoSQL/, /XSS/, /SSRF/, /Blue team/, /\.boterm\/SECURITY\.md/, /CWE/]) assert.match(security, rule);
+  assert.match(prompt('seguranca', '', '', [byId('seguranca')]), /Nunca copie o valor[\s\S]*Não há Orquestrador[\s\S]*Aguarde o pedido de revisão/);
+  const lead = prompt('orquestrador');
+  for (const rule of [/testes → cibersegurança → integrações/, /nada segue para a Engenharia de loop sem o parecer dela/, /nenhum documento sai do projeto/]) assert.match(lead, rule);
+  assert.match(prompt('loop'), /achados da Cibersegurança/);
+  assert.match(prompt('entrega'), /parecer da Cibersegurança/);
+  assert.match(prompt('desenvolvimento'), /autorização no servidor em todo acesso por ID/);
+  assert.match(prompt('testes'), /outro tenant/);
+  assert.match(lead, /modelo de ameaça antes de distribuir/);
+  assert.ok(byId('seguranca').skills.length <= 4000, 'the editor keeps the whole checklist');
+  assert.match(prompt('orquestrador', '', '', [byId('orquestrador'), byId('desenvolvimento')]), /não foram abertas: Testes, Cibersegurança,/);
+  // The checklist is an editable skill: a global edit replaces it, reset brings it back.
+  const global = parseProfiles('');
+  editProfile(global, 'seguranca', 'save', {instructions: 'Só OWASP.', skills: 'semgrep'}, 1);
+  const edited = effectiveRoles(global).find(r => r.id === 'seguranca');
+  assert.equal(edited.skills, 'semgrep');
+  assert.match(developmentPrompt(edited, ''), /Nunca copie o valor de um segredo/, 'fixed rules survive edits');
+  editProfile(global, 'seguranca', 'reset', {}, 2);
+  assert.match(effectiveRoles(global).find(r => r.id === 'seguranca').skills, /security-review/);
 });
 
 test('Qualidade reviews cycles and learned role rules reach the next team with caps', () => {

@@ -173,7 +173,7 @@ Clicking the large count (e.g. 8/32) cycles single view → mosaic → dashboard
 
 ## Qualidade and learned role rules (build 27)
 
-The Development preset has nine roles; Qualidade is the eighth, before Mensageiro. After the Orquestrador records an activity in the history, it asks Qualidade to review the cycle. Qualidade keeps `.boterm/ROLES.md`, for example:
+The Development preset has ten roles (Cibersegurança, after Testes, since 2026-11-25); Qualidade comes just before Mensageiro. After the Orquestrador records an activity in the history, it asks Qualidade to review the cycle. Qualidade keeps `.boterm/ROLES.md`, for example:
 
 ```markdown
 ## Todos
