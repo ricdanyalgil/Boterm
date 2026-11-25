@@ -156,7 +156,12 @@ function renderNavigation(forceProjects = false) {
     };
     tab.classList.toggle('selected', id === activeWorkspace); tab.setAttribute('aria-current', String(id === activeWorkspace));
     const pencil = button('', edit, `Renomear projeto ${name}`); pencil.className = 'project-edit'; pencil.append(icon('edit'));
-    group.append(tab, pencil); tabs.append(group);
+    group.append(tab, pencil);
+    if (id !== privateWorkspace) {
+      const close = button('', () => send({type: 'closeWorkspace', workspace: id}), `Fechar projeto ${name}`);
+      close.className = 'project-edit project-close'; close.append(icon('close')); group.append(close);
+    }
+    tabs.append(group);
   }
   if (!workspaces.has(privateWorkspace)) tabs.append(add);
   }
@@ -203,11 +208,27 @@ function removeSession(id) {
   const s = sessions.get(id); if (!s) return;
   s.accents.dispose(); s.term.dispose(); s.host.remove(); sessions.delete(id);
   const next = [...sessions.values()].find(other => other.workspace === s.workspace);
-  if (!next && s.workspace !== privateWorkspace) { workspaces.delete(s.workspace); workspaceDirectories.delete(s.workspace); }
+  if (!next && s.workspace !== privateWorkspace) { workspaces.delete(s.workspace); workspaceDirectories.delete(s.workspace); workspaceStarted.delete(s.workspace); }
+  if (ensureProject()) return;
   if (id === activeID) {
     const target = next || sessions.values().next().value;
     if (target) activateSession(target.id); else newWorkspace();
   } else { renderNavigation(); fitVisible(); }
+}
+/** The bar always keeps one project; closing the last one starts a fresh "Projeto 1". */
+function ensureProject() {
+  if ([...workspaces.keys()].some(w => w !== privateWorkspace)) return false;
+  nextProjectNumber = 1; newWorkspace(); return true;
+}
+function removeWorkspace(id) {
+  if (id === privateWorkspace || !workspaces.has(id)) return;
+  for (const s of [...sessions.values()].filter(s => s.workspace === id)) { s.accents.dispose(); s.term.dispose(); s.host.remove(); sessions.delete(s.id); }
+  workspaces.delete(id); workspaceDirectories.delete(id); workspaceStarted.delete(id);
+  if (ensureProject()) return;
+  if (sessions.has(activeID)) { renderNavigation(); fitVisible(); return; }
+  const project = [...workspaces.keys()].find(w => w !== privateWorkspace);
+  const target = [...sessions.values()].find(s => s.workspace === project);
+  if (target) activateSession(target.id); else { activeWorkspace = project; createSession('Terminal 1', project); }
 }
 function showMessage(message) {
   const sender = sessions.get(message.from), recipient = sessions.get(message.to);

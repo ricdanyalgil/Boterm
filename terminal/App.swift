@@ -363,6 +363,10 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             if let name = body["name"] as? String { deleteLayout(name) }
         case "messengerState": (NSApp.delegate as? AppDelegate)?.sendMessengerState(to: self)
         case "telegramSetup": (NSApp.delegate as? AppDelegate)?.setupTelegram(for: self)
+        case "pairPhone": (NSApp.delegate as? AppDelegate)?.pairPhone()
+        case "managePhones": (NSApp.delegate as? AppDelegate)?.managePhones()
+        case "closeWorkspace":
+            if let id = body["workspace"] as? String, UUID(uuidString: id) != nil { closeWorkspace(id) }
         case "revokePermission":
             if let id = body["id"] as? String { try? PermissionStore.revoke(id); (NSApp.delegate as? AppDelegate)?.sendMessengerState(to: self) }
         case "message":
@@ -405,6 +409,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var control: LocalControl?
     var agentTimer: Timer?
     let telegram = TelegramBridge()
+    let mobile = MobileBridge()
     private var cascade = NSPoint.zero
     func applicationDidFinishLaunching(_ notification: Notification) {
         let main = NSMenu()
@@ -414,6 +419,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vocabularyItem.target = self
         let controlItem = appMenu.addItem(withTitle: pt ? "Permitir controle do computador…" : "Allow Computer Control…", action: #selector(allowComputerControl), keyEquivalent: "")
         controlItem.target = self
+        appMenu.addItem(.separator())
+        appMenu.addItem(withTitle: pt ? "Conectar celular…" : "Connect Phone…", action: #selector(pairPhone), keyEquivalent: "").target = self
+        appMenu.addItem(withTitle: pt ? "Celulares conectados…" : "Connected Phones…", action: #selector(managePhones), keyEquivalent: "").target = self
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Quit Boterm", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
@@ -449,6 +457,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in self?.refreshAgentStates() }
         }
         connectTelegram()
+        connectMobile()
         newWindow()
         NSApplication.shared.activate(ignoringOtherApps: true)
         #if VOZ_TEST

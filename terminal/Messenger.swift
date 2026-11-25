@@ -8,7 +8,7 @@ enum PermissionStore {
 
     static func scope(_ raw: String) throws -> String {
         let value = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !value.isEmpty, value.count <= 200, !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
+        guard !value.isEmpty, value.count <= 200, !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) || mobileHidden($0) }) else {
             throw ControlError.invalid("Invalid scope (1–200 characters, one line)")
         }
         return value
@@ -55,7 +55,7 @@ enum TelegramKeychain {
 
 /// Telegram as the verified channel to the owner: only the paired private chat can answer or grant.
 @MainActor final class TelegramBridge {
-    struct Ask { let id: String; let session: String; let text: String; let scope: String?; var messageID = 0; var status = "pending"; var choice = ""; var reply = ""; var answeredAt = "" }
+    struct Ask { let id: String; let session: String; let text: String; let scope: String?; var messageID = 0; var status = "pending"; var choice = ""; var reply = ""; var answeredAt = ""; var created = ISO8601DateFormatter().string(from: Date()) }
     private(set) var asks: [String: Ask] = [:]
     private var askOrder: [String] = []
     private var token: String? = TelegramKeychain.read()
@@ -100,8 +100,15 @@ enum TelegramKeychain {
         }
     }
 
+    /// Mirrors to the phone app; Telegram is used only when paired. Fails only when neither channel reaches the owner.
+    var mobileNote: ((String) -> Void)?
+    var mobilePaired: () -> Bool = { false }
+
     func notify(_ text: String) async throws {
-        _ = try await send(text)
+        guard !text.isEmpty, text.utf8.count <= 4000 else { throw ControlError.invalid("Mensagem vazia ou acima de 4000 bytes") }
+        if mobilePaired() { mobileNote?(text) }
+        if owner != nil { _ = try await send(text) }
+        else if !mobilePaired() { _ = try await send(text) }
     }
 
     func ask(_ text: String, scope: String?, session: String) async throws -> Ask {
@@ -110,10 +117,12 @@ enum TelegramKeychain {
         if scope != nil { buttons.append(["text": "Sim, sempre", "callback_data": "a:\(id):always"]) }
         buttons.append(["text": "Não", "callback_data": "a:\(id):no"])
         let body = scope.map { "\(text)\n\nPermissão: \($0)" } ?? text
+        guard !text.isEmpty, text.utf8.count <= 4000 else { throw ControlError.invalid("Mensagem vazia ou acima de 4000 bytes") }
         var ask = Ask(id: id, session: session, text: text, scope: scope)
-        ask.messageID = try await send(body, keyboard: [buttons])
+        if owner != nil || !mobilePaired() { ask.messageID = try await send(body, keyboard: [buttons]) }
         asks[id] = ask; askOrder.append(id)
         if askOrder.count > 100 { asks.removeValue(forKey: askOrder.removeFirst()) }
+        changed?()
         return ask
     }
 
@@ -130,11 +139,24 @@ enum TelegramKeychain {
         return "text"
     }
 
-    private func answer(_ id: String, choice: String, reply: String) {
+    /// An answer given in the Boterm phone app; the Telegram copy, if any, loses its buttons.
+    func answerFromApp(_ id: String, choice: String, device: String) -> Bool {
+        guard asks[id]?.status == "pending", choice != "always" || asks[id]?.scope != nil, let label = ["once": "Sim, uma vez", "always": "Sim, sempre", "no": "Não"][choice] else { return false }
+        answer(id, choice: choice, reply: label, via: "app")
+        if let owner, let message = asks[id]?.messageID, message > 0 {
+            Task {
+                _ = try? await call("editMessageReplyMarkup", ["chat_id": owner, "message_id": message, "reply_markup": ["inline_keyboard": [[[String: String]]]()]])
+                _ = try? await send("→ \(label) (no celular \(device))", replyTo: message)
+            }
+        }
+        return true
+    }
+
+    private func answer(_ id: String, choice: String, reply: String, via: String = "telegram") {
         guard var ask = asks[id], ask.status == "pending" else { return }
         ask.status = "answered"; ask.choice = choice; ask.reply = String(reply.prefix(4000))
         ask.answeredAt = ISO8601DateFormatter().string(from: Date())
-        if choice == "always", let scope = ask.scope { _ = try? PermissionStore.add(scope: scope, note: ask.text, via: "telegram") }
+        if choice == "always", let scope = ask.scope { _ = try? PermissionStore.add(scope: scope, note: ask.text, via: via) }
         asks[id] = ask; answered?(ask); changed?()
     }
 

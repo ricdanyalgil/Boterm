@@ -29,7 +29,7 @@ pauseButton.addEventListener('click', () => send({type: 'pauseVoice'}));
 stopButton.addEventListener('click', () => send({type: 'voice'}));
 window.voz = {
   async historySnapshot(sessionID) {
-    const selected = [...sessions.values()].filter(s => !sessionID || s.id === sessionID);
+    const selected = [...sessions.values()].filter(s => !sessionID || s.id === sessionID || s.workspace === sessionID);
     if (!selected.length) throw new Error('Session not found');
     await Promise.all(selected.map(s => new Promise(resolve => s.term.write('', resolve))));
     const projects = new Set(selected.map(s => s.workspace));
@@ -91,6 +91,7 @@ window.voz = {
   newWorkspace,
   activate: activateSession,
   remove: removeSession,
+  removeWorkspace,
   rename: renameSession,
   message: showMessage,
   copy() {
@@ -109,6 +110,9 @@ window.voz = {
   },
   fit() { resizeGrace(); fitVisible(); },
   snapshot(id) { return screenText(sessions.get(id)?.term); },
+  mobileState() {
+    return [...sessions.values()].map(s => ({id: s.id, project: workspaces.get(s.workspace) || '', attention: s.attention || '', ended: s.ended, color: s.color}));
+  },
   ended(id) { const s = sessions.get(id); if (s) { s.ended = true; updateAttention(s); renderNavigation(); } },
   write(base64, id = activeID) { const s = sessions.get(id); if (s) s.lastOutput = Date.now(); s?.term.write(Uint8Array.from(atob(base64), c => c.charCodeAt(0))); },
   insert(text, id = activeID, submit = false) {

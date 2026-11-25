@@ -117,6 +117,19 @@ enum RoleProfiles {
         }
     }
 
+    func closeWorkspace(_ workspace: String) {
+        let ids = records.filter { $0.value.workspace == workspace }.map(\.key)
+        Task {
+            if !ids.isEmpty { guard await confirmHistoryClose(sessionID: workspace) else { return } }
+            for id in ids {
+                guard let record = records.removeValue(forKey: id) else { continue }
+                if voiceSessionID == id, dictation.state != .idle { cancelVoice() }
+                record.shell.close()
+            }
+            js("window.voz.removeWorkspace(\(Self.json(workspace)))")
+        }
+    }
+
     func renameSession(_ id: String) {
         guard let record = records[id] else { return }
         let alert = NSAlert(); alert.messageText = tr("Rename terminal", "Renomear terminal")

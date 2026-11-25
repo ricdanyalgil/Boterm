@@ -245,6 +245,8 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
   document.addEventListener('keydown', event => { if (event.key === 'Escape') actions.open = false; });
   $('settings').onclick = () => { send({type: 'messengerState'}); $('settings-dialog').showModal(); };
   $('telegram-setup').onclick = () => send({type: 'telegramSetup'});
+  $('phone-pair').onclick = $('phone-pair-settings').onclick = () => { $('settings-dialog').close(); send({type: 'pairPhone'}); };
+  $('phone-manage').onclick = () => { $('settings-dialog').close(); send({type: 'managePhones'}); };
   $('development-preset').onclick = () => {
     $('development-error').textContent = ''; closeEditor();
     $('development-dialog').showModal();
