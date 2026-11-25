@@ -60,7 +60,7 @@ test('Cibersegurança reviews each tested diff and outgoing documents, and the O
 
 test('Qualidade reviews cycles and learned role rules reach the next team with caps', () => {
   const quality = prompt('qualidade');
-  for (const rule of [/Não implemente o objetivo/, /\.boterm\/ROLES\.md/, /documentação de mudança/, /harness/, /skills/, /event improvement/, /Nunca escreva segredos/, /atribuição explícita/]) assert.match(quality, rule);
+  for (const rule of [/Não implemente o objetivo/, /\.boterm\/ROLES\.md/, /documentação de mudança/, /harness/, /skills/, /event improvement/, /Nunca escreva segredos/, /atribuição explícita/, /Avalie cada função que participou/, /instruções e skills/, /valerem já nesta sessão/]) assert.match(quality, rule);
   const notes = '# Notas\nignorado\n## Todos\nRode npm test antes de reportar.\n## Testes\nAnexe o comando exato.\n' + 'x'.repeat(3000) + '\n## Desconhecida\nNão deve aparecer.\n';
   const withRoles = prompt('testes', '', notes);
   assert.match(withRoles, /Rode npm test antes de reportar\./);
@@ -70,6 +70,7 @@ test('Qualidade reviews cycles and learned role rules reach the next team with c
   assert.ok(withRoles.length - prompt('testes').length < 2700, 'role notes are capped');
   assert.equal(projectRoleNotes('', 'Testes'), '');
   assert.equal(prompt('orquestrador', '', '## Outra\nnada'), prompt('orquestrador'));
+  assert.match(prompt('orquestrador'), /avaliação de cada função que participou[\s\S]*regras novas que a Qualidade enviou/);
   for (const role of roles) assert.ok(Buffer.byteLength(prompt(role.id, 'x'.repeat(2000), notes)) < 15000);
 });
 

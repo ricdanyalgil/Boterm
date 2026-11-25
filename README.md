@@ -98,7 +98,7 @@ One click (⌘ in the top bar) launches ten roles, each in its own terminal with
 | **UX e design** | Interface and interaction |
 | **Engenharia de loop** | Keeps the development cycle moving |
 | **Resposta e entrega** | Wraps up and delivers |
-| **Qualidade** | Reviews each finished cycle and keeps the learned rules in `.boterm/ROLES.md` |
+| **Qualidade** | After every finished activity, reviews the cycle, evaluates each role that took part and improves its instructions and skills in `.boterm/ROLES.md`, sending the new rules to each colleague at once |
 | **Mensageiro** | Your only channel outside Boterm: Telegram (token in the Keychain), WhatsApp or email |
 
 The Mensageiro waits for your answer and records permanent permissions, listed and revocable in Settings. No other role can message you outside the app.

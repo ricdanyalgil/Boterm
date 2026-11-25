@@ -1,3 +1,8 @@
+# Boterm 0.5.3 — build 40, 2026-11-25
+
+- Qualidade now reviews every finished activity, not only the end of the work, and evaluates each role that took part: it reads that role's terminal and the cycle's events, notes what it repeated, got wrong or was corrected on, and what check or tool it lacked, then updates that role's section in `.boterm/ROLES.md` with instructions and skills (step-by-step procedures, this project's verification commands, pitfalls found).
+- Learned rules apply in the current session too: Qualidade sends each colleague its new or changed rules by message, and the Orquestrador waits for that verdict and keeps those rules in the compaction focus.
+
 # Boterm 0.5.2 — build 39, 2026-11-25
 
 - Mensageiro keeps the owner updated on the phone. With the Boterm phone app paired, `notify` and `ask` reach the app (with a push) first, and Telegram too when paired; `notify` now returns `via`, the channels that got it. WhatsApp and email stay as fallbacks when neither is paired.
