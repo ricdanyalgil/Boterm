@@ -1,7 +1,7 @@
 // Design capture fixture: a realistic eight-agent team. Set SCENE ('mosaic' | 'dashboard') and WORLD before this file.
 const now = Date.now(), first = activeID;
 setWorld(typeof WORLD === 'undefined' ? 'grid' : WORLD);
-renameWorkspace(activeWorkspace, 'boterm'); workspaces.set(crypto.randomUUID(), 'the-o'); workspaces.set(crypto.randomUUID(), 'bibs'); renderNavigation(true);
+renameWorkspace(activeWorkspace, 'boterm'); workspaces.set(crypto.randomUUID(), 'site'); workspaces.set(crypto.randomUUID(), 'docs'); renderNavigation(true);
 const team = [['Orquestrador', 'claude', 'busy', 72], ['Desenvolvimento', 'codex', 'busy', 48], ['Testes', 'claude', 'attention', 31], ['Integrações', 'gemini', 'idle', 7],
   ['UX e design', 'claude', 'busy', 22], ['Engenharia de loop', 'codex', 'idle', 3], ['Resposta e entrega', 'claude', 'idle', 15], ['Mensageiro', 'claude', 'idle', 41]];
 const text = {
@@ -31,7 +31,7 @@ activateSession(ids[0]); mosaic = true; split = false; fitVisible(); renderNavig
 const ev = (session, kind, text, ago) => receiveEvent({id: crypto.randomUUID(), workspace: activeWorkspace, session: ids[session], name: team[session][0], kind, text, time: new Date(now - ago * 60000).toISOString()});
 ev(2, 'test-fail', 'login.test.ts: token expirava antes da renovação', 38); ev(1, 'fix', 'renova o token 60 s antes de expirar', 30); ev(2, 'test-pass', 'login.test.ts e session.test.ts', 26); ev(4, 'improvement', 'espaçamento da lateral no módulo de 24 px', 12); ev(2, 'test-fail', 'api/session.test.ts: 401 sem cabeçalho', 4);
 requestDashboard = () => {}; // the fixture's data stands in for the app's
-receiveDashboard({workspace: activeWorkspace, directory: '/Users/ricardo/Softwares/boterm', usage: {'mcp:github': {calls: 21, seconds: 160}, 'mcp:boterm': {calls: 14, seconds: 52}, 'mcp:playwright': {calls: 3, seconds: 38}},
+receiveDashboard({workspace: activeWorkspace, directory: '/Users/dev/projetos/boterm', usage: {'mcp:github': {calls: 21, seconds: 160}, 'mcp:boterm': {calls: 14, seconds: 52}, 'mcp:playwright': {calls: 3, seconds: 38}},
   events: dashboardData.get(activeWorkspace)?.events, sessions: {[ids[0]]: {Edit: {calls: 2, seconds: 1}, 'mcp:boterm': {calls: 9, seconds: 30}}, [ids[1]]: {Edit: {calls: 14, seconds: 6}, Bash: {calls: 9, seconds: 40}}, [ids[2]]: {Bash: {calls: 6, seconds: 90}}, [ids[4]]: {Edit: {calls: 5, seconds: 2}, 'mcp:github': {calls: 21, seconds: 160}}}},
   {code: {repo: true, branch: 'main', changed: 14, untracked: 2, added: 412, removed: 96, commits: ['a1c9e02 Renova token antes de expirar', '7f3b2d1 Testes de sessão', 'c04e9aa Espaçamento da lateral'],
     files: [{file: 'src/auth/login.ts', added: 120, removed: 30}, {file: 'src/api/session.ts', added: 88, removed: 12}, {file: 'test/login.test.ts', added: 64, removed: 0}, {file: 'src/ui/Sidebar.css', added: 22, removed: 31}, {file: 'src/auth/token.ts', added: 18, removed: 4}]},
@@ -41,5 +41,8 @@ if (typeof SCENE !== 'undefined' && SCENE === 'dashboard') openDashboard();
 updateLiveState();
 // Let the shells finish printing their first prompt, so idle reads as idle.
 await new Promise(r => setTimeout(r, 3500));
+// Then replace whatever the real shells printed: their prompt carries the user and Mac name, which must never be captured.
+const prompt = '\x1b[2m(base)\x1b[0m dev@boterm boterm % ';
+team.forEach(([name], i) => { const t = sessions.get(ids[i]).term; t.reset(); t.write((text[name] || '') + prompt); });
 const waiting = sessions.get(ids[2]); waiting.attention = 'Confirmação solicitada'; waiting.host.classList.add('needs-attention'); renderNavigation();
 return {scene: typeof SCENE === 'undefined' ? 'mosaic' : SCENE, world: document.documentElement.dataset.world};
