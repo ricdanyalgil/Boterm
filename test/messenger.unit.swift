@@ -55,5 +55,20 @@ struct MessengerTests {
         print("PASS: tool categories, numstat parsing and git changes on a real repository")
         print("PASS: project history limit, archive rotation, heading injection and compaction commands")
         print("PASS: permission store (normalize, replace, private file, revoke) and reply parsing")
+        // Phone paired, no Telegram (the owner's setup): notify reaches the phone app and reports it.
+        let bridge = TelegramBridge(); var notes: [String] = []
+        bridge.mobilePaired = { true }; bridge.mobileNote = { notes.append($0) }
+        if bridge.owner == nil {
+            _ = Task { @MainActor in
+                try await bridge.notify("site · Testes: 12/12")
+                precondition(notes == ["site · Testes: 12/12"] && bridge.channels == ["celular"], "paired phone must get the update")
+                bridge.mobilePaired = { false }
+                do { try await bridge.notify("x"); preconditionFailure("no channel must fail") } catch {}
+                precondition(bridge.channels.isEmpty && notes.count == 1)
+                print("PASS: notify goes to the paired phone and reports via; fails with no channel")
+                exit(0)
+            }
+            RunLoop.main.run(until: Date().addingTimeInterval(5)); preconditionFailure("notify timed out")
+        }
     }
 }

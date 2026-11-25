@@ -149,7 +149,7 @@ The Development preset has an eighth role, Mensageiro (Claude by default, becaus
 - **Permissions** are global (`~/Library/Application Support/Boterm/permissions.json`, 0600). Every agent can read them (`permissions`); only a session launched as Mensageiro by the preset can `notify`, `ask`, `answer` or `grant`. A terminal merely named Mensageiro is refused. Settings lists grants with Revogar.
 - Messages to anyone other than the owner need the scope `destinatario:<canal>:<contato>` first.
 
-Not covered: the agents' own CLI approval prompts (Claude/Codex keep those in their own settings), and an idle Mensageiro is not woken automatically by a Telegram answer; it polls `answer`. `test/messenger.unit.swift` covers the store and reply parsing; `test/terminal-messenger.js` runs the CLI on the real socket for the role gate.
+Not covered: the agents' own CLI approval prompts (Claude/Codex keep those in their own settings), and an idle Mensageiro is not woken automatically by a Telegram answer; it polls `answer`. `test/messenger.unit.swift` covers the store, reply parsing and notify reaching the paired phone app; `test/terminal-messenger.js` runs the CLI on the real socket for the role gate.
 
 ## Project history and compaction
 
