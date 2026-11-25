@@ -1,3 +1,9 @@
+# Boterm 0.5.2 — build 39, 2026-11-25
+
+- Mensageiro keeps the owner updated on the phone. With the Boterm phone app paired, `notify` and `ask` reach the app (with a push) first, and Telegram too when paired; `notify` now returns `via`, the channels that got it. WhatsApp and email stay as fallbacks when neither is paired.
+- The Mensageiro role ships editable skills: report every milestone (plan, activity started and finished, a test that caught a failure and its fix, blockers, Cibersegurança's verdict, deploy or publish requests, final delivery) in one to three lines starting with project and source role, catch up from `events` and `history` when woken, never repeat an update, and never send terminal output or secrets.
+- The Orquestrador asks the Mensageiro for a short update at each milestone, waking it with `send submit=true` when its prompt is idle.
+
 # Boterm 0.5.1 — build 38, 2026-11-25
 
 - Cibersegurança, tenth Development role (Claude by default), right after Testes and opened by default, also when a team choice was saved before it existed. It works as the team's red and blue team: it attacks what the team builds the way an adversary would, proves each flaw with a local test and says how to detect and fix it.

@@ -46,8 +46,8 @@ enum BotermMCP {
             "history": "Without arguments: read the project's .boterm/HISTORY.md (summary of earlier sessions). Orquestrador only, with title and text: record a finished activity; older entries roll into HISTORY-archive.md automatically.",
             "compact": "Compact an agent's context with its CLI's own command (/compact or /compress). Boterm sends it once the terminal is idle; target may be your own session. text is an optional focus for Claude.",
             "permissions": "List permissions the owner granted permanently (global). Check before asking again.",
-            "notify": "Mensageiro only: send an update to the owner over the verified Telegram chat.",
-            "ask": "Mensageiro only: ask the owner over Telegram with Yes once / Yes always / No buttons. With scope, Yes always is recorded permanently; an already granted scope returns status granted without asking. Poll answer with the returned id.",
+            "notify": "Mensageiro only: send an update to the owner: the paired Boterm phone app (with a push) and the verified Telegram chat when paired. Returns via, the channels that got it.",
+            "ask": "Mensageiro only: ask the owner on the paired phone app and Telegram with Yes once / Yes always / No buttons. With scope, Yes always is recorded permanently; an already granted scope returns status granted without asking. Poll answer with the returned id.",
             "answer": "Mensageiro only: status of an ask by id (pending or answered, choice once|always|no|text, reply).",
             "grant": "Mensageiro only: record a permanent permission the owner gave over WhatsApp or email. text is the owner's exact reply."]
         var properties: [String: Any] = [:], required: [String] = []

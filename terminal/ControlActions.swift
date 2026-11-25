@@ -303,7 +303,7 @@ enum RoleProfiles {
                 let text = request["text"] as? String ?? ""
                 switch command {
                 case "notify":
-                    try await telegram.notify(text); value = ["sent": true]
+                    try await telegram.notify(text); value = ["sent": true, "via": telegram.channels]
                 case "ask":
                     let scope = try (request["scope"] as? String).flatMap { $0.isEmpty ? nil : try PermissionStore.scope($0) }
                     if let scope, let grant = PermissionStore.granted(scope) { value = ["status": "granted", "grant": PermissionStore.dictionary(grant)] }

@@ -104,6 +104,8 @@ enum TelegramKeychain {
     var mobileNote: ((String) -> Void)?
     var mobilePaired: () -> Bool = { false }
 
+    var channels: [String] { (mobilePaired() ? ["celular"] : []) + (owner != nil ? ["telegram"] : []) }
+
     func notify(_ text: String) async throws {
         guard !text.isEmpty, text.utf8.count <= 4000 else { throw ControlError.invalid("Mensagem vazia ou acima de 4000 bytes") }
         if mobilePaired() { mobileNote?(text) }

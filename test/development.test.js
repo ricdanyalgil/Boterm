@@ -9,11 +9,11 @@ test('development roles have distinct responsibilities and coordinator dispatche
   assert.equal(new Set(roles.map(r => r.name)).size, 10);
   const lead = prompt('orquestrador', 'Corrigir o software sem publicar');
   assert.match(lead, /Corrigir o software sem publicar/);
-  for (const rule of [/BOTERM_PLAN.md/, /send submit=true/, /Mensagens não ativam um modelo parado/, /pelo Mensageiro/, /revisão desse ciclo/, /leia o histórico do projeto/, /registre-a com history/, /compact nos colegas/, /nunca compacte no meio de uma atividade/]) assert.match(lead, rule);
+  for (const rule of [/BOTERM_PLAN.md/, /send submit=true/, /Mensagens não ativam um modelo parado/, /pelo Mensageiro/, /revisão desse ciclo/, /leia o histórico do projeto/, /registre-a com history/, /compact nos colegas/, /chega ao celular do Ricardo/, /nunca compacte no meio de uma atividade/]) assert.match(lead, rule);
   assert.ok(Buffer.byteLength(lead) < 15000);
   assert.equal(roles.at(-1).id, 'mensageiro');
   const messenger = prompt('mensageiro');
-  for (const rule of [/Sim, sempre/, /🤖 Boterm:/, /Nunca use cmd\+↑/, /destinatario:<canal>:<contato>/, /permissions/, /Nunca envie segredos/]) assert.match(messenger, rule);
+  for (const rule of [/Sim, sempre/, /🤖 Boterm:/, /Nunca use cmd\+↑/, /destinatario:<canal>:<contato>/, /permissions/, /Nunca envie segredos/, /celular/, /a cada marco/, /nunca repita o mesmo aviso/]) assert.match(messenger, rule);
   for (const role of roles.slice(1, 7)) {
     assert.match(prompt(role.id), /atribuição explícita/);
     assert.match(prompt(role.id), /Não implemente o objetivo inteiro/);
