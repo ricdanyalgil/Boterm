@@ -97,7 +97,7 @@ Um clique (⌘ na barra superior) abre dez funções, cada uma no seu terminal c
 | **UX e design** | Interface e interação |
 | **Engenharia de loop** | Mantém o ciclo de desenvolvimento andando |
 | **Resposta e entrega** | Fecha e entrega |
-| **Qualidade** | Revisa cada ciclo concluído e mantém as regras aprendidas em `.boterm/ROLES.md` |
+| **Qualidade** | Depois de cada atividade concluída, revisa o ciclo, avalia cada função que participou e melhora as instruções e skills dela em `.boterm/ROLES.md`, enviando logo as regras novas a cada colega |
 | **Mensageiro** | O único canal com você fora do Boterm: Telegram (token no Keychain), WhatsApp ou email |
 
 O Mensageiro espera a sua resposta e registra permissões permanentes, listadas e revogáveis em Ajustes. Nenhuma outra função fala com você fora do app.
