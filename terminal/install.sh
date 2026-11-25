@@ -31,6 +31,9 @@ $LS -dump 2>/dev/null | awk -v id="$ID" '
   echo "unregistered: $stale"
 done
 
+touch /Applications/Boterm.app
 $LS -f /Applications/Boterm.app
+# The Dock keeps its own icon cache, which can hold the old icon even after LaunchServices is fixed.
+rm -f "$(getconf DARWIN_USER_CACHE_DIR)com.apple.dock.iconcache"
 killall Dock 2>/dev/null || true
 echo "Installed build $(defaults read /Applications/Boterm.app/Contents/Info CFBundleVersion)"
