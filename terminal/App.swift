@@ -368,6 +368,7 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
             delegate.terminals.forEach { delegate.sendMessengerState(to: $0) }
         case "telegramSetup": (NSApp.delegate as? AppDelegate)?.setupTelegram(for: self)
         case "pairPhone": (NSApp.delegate as? AppDelegate)?.pairPhone()
+        case "cancelPairing": (NSApp.delegate as? AppDelegate)?.cancelShownPairing()
         case "managePhones": (NSApp.delegate as? AppDelegate)?.managePhones()
         case "closeWorkspace":
             if let id = body["workspace"] as? String, UUID(uuidString: id) != nil { closeWorkspace(id) }

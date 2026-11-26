@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {builtinRoles, channelRule, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile} = require('../terminal/web/development');
+const {builtinRoles, channelRule, pairingSVG, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile} = require('../terminal/web/development');
 const roles = effectiveRoles(), byId = id => roles.find(r => r.id === id);
 const prompt = (id, objective = '', notes = '', team = roles) => developmentPrompt(byId(id), objective, notes, team);
 
@@ -132,4 +132,13 @@ test('the chosen Mensageiro channel reaches only the Mensageiro prompt', () => {
   assert.match(developmentPrompt(byId('mensageiro'), '', '', [byId('mensageiro')], 'whatsapp'), /Canal escolhido.*WhatsApp do Mac/);
   assert.doesNotMatch(developmentPrompt(byId('orquestrador'), '', '', team, 'celular'), /Canal escolhido/);
   assert.equal(channelRule('sms'), '');
+});
+
+test('the pairing QR keeps every data module outside the finders and the centre mark', () => {
+  const size = 29, bits = '1'.repeat(size * size), svg = pairingSVG(size, bits);
+  const cells = (svg.match(/width="\.86"/g) || []).length;
+  // all dark minus 3 finders (49 each) minus the 13×13 mark, plus the mark's 8 glyph cells and the orange cursor
+  assert.equal(cells, size * size - 3 * 49 - 169 + 9);
+  assert.match(svg, /fill="#ff4d2e"/);
+  assert.match(svg, /viewBox="0 0 42 42"/);
 });

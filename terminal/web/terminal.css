@@ -388,3 +388,24 @@ tr.state-ended { opacity: .5; }
 :root[data-world="set"] #terminal:is(.split, .mosaic) .terminal-pane.active > .pane-title .chip { outline: 0; }
 :root[data-world="set"] .terminal-pane.needs-attention { border-color: var(--attention); box-shadow: none; }
 :root[data-world="set"] .cell-bar i { border-radius: 1px; }
+
+/* Conectar celular: one centred column; the QR is built module by module on the construction grid. */
+#pair-dialog { width: min(408px, calc(100vw - 32px)); padding: 32px 40px 22px; text-align: center; }
+#pair-dialog h2 { margin: 0 0 6px; }
+#pair-lead { margin: 0; color: var(--text-2); }
+.pair-code { margin: 22px auto 12px; width: 328px; max-width: 100%; }
+#pair-qr { display: block; width: 100%; height: auto; }
+.pair-meta { margin: 0; color: var(--text-3); font: 12px/1.4 var(--display); font-variant-numeric: tabular-nums; }
+.pair-meta time { color: var(--text-2); }
+.pair-meta.expiring time { color: var(--attention); }
+.pair-more { margin: 18px auto 0; max-width: 300px; font-size: 12px; color: var(--text-3); }
+.pair-more summary { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; color: var(--text-2); cursor: pointer; list-style: none; }
+.pair-more summary::-webkit-details-marker { display: none; }
+.pair-more summary::after { content: ""; width: 5px; height: 5px; border: solid currentColor; border-width: 0 1px 1px 0; transform: translateY(-2px) rotate(45deg); transition: transform 150ms ease-out; }
+.pair-more[open] summary::after { transform: translateY(1px) rotate(-135deg); }
+.pair-more summary:hover { color: var(--text); }
+.pair-more p { margin: 8px 0 0; line-height: 1.55; text-align: left; }
+.pair-actions { margin-top: 18px; }
+.pair-actions button { min-width: 112px; border: 1px solid var(--rule-strong); }
+@media (prefers-reduced-motion: reduce) { .pair-more summary::after { transition: none; } }
+#pair-title:focus { outline: none; }

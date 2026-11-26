@@ -283,7 +283,66 @@ function saveEditor() {
   changeProfile(editing.scope, id, 'save', {name, instructions, skills: $('role-skills').value, custom});
   closeEditor(id);
 }
+/**
+ * The pairing QR as SVG in module units: a chalk plate with a 4-module quiet zone, faint construction lines on the module
+ * pitch, modules as cells with a hairline gap, solid finder squares (scanners lock onto them) and, in the middle, the
+ * Boterm mark built from the same cells with its orange cursor. Level Q absorbs the covered modules.
+ */
+function pairingSVG(size, bits) {
+  const quiet = 4, plate = size + quiet * 2, crop = 2.5, view = plate + crop * 2, o = crop + quiet;
+  const dark = (x, y) => bits[y * size + x] === '1';
+  const finders = [[0, 0], [size - 7, 0], [0, size - 7]];
+  const inFinder = (x, y) => finders.some(([fx, fy]) => x >= fx && x < fx + 7 && y >= fy && y < fy + 7);
+  // A 13×13 cleared square holds an 11×11 dark tile: the app icon, chalk >_ on near-black with the orange cursor.
+  const mark = 13, m0 = Math.floor((size - mark) / 2);
+  const inMark = (x, y) => x >= m0 && x < m0 + mark && y >= m0 && y < m0 + mark;
+  const cell = (x, y, fill = '#0c0d10') => `<rect x="${o + x + .07}" y="${o + y + .07}" width=".86" height=".86" fill="${fill}"/>`;
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${view} ${view}" shape-rendering="crispEdges">`;
+  out += `<rect x="${crop}" y="${crop}" width="${plate}" height="${plate}" fill="#e8e9ec"/>`;
+  let lines = '';
+  for (let i = 0; i <= plate; i++) lines += `M${crop + i} ${crop}v${plate}M${crop} ${crop + i}h${plate}`;
+  out += `<path d="${lines}" stroke="#2e54c4" stroke-opacity=".16" stroke-width=".05" fill="none"/>`;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (dark(x, y) && !inFinder(x, y) && !inMark(x, y)) out += cell(x, y);
+  for (const [fx, fy] of finders) {
+    const x = o + fx, y = o + fy;
+    out += `<path d="M${x} ${y}h7v7h-7zM${x + 1} ${y + 1}v5h5v-5z" fill="#0c0d10" fill-rule="evenodd"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="#0c0d10"/>`;
+  }
+  out += `<rect x="${o + m0 + 1}" y="${o + m0 + 1}" width="11" height="11" fill="#0c0d10"/>`;
+  const glyph = [[0, 0], [1, 1], [2, 2], [1, 3], [0, 4], [3, 4], [4, 4], [5, 4]];
+  for (const [gx, gy] of glyph) out += cell(m0 + 3 + gx, m0 + 4 + gy, '#e8e9ec');
+  out += cell(m0 + 3 + 6, m0 + 4 + 4, '#ff4d2e');
+  // Crop marks: the plate is a specimen on the construction grid.
+  const c = crop, e = crop + plate, len = 1.6, gap = .6;
+  const marks = [[c, c, -1, -1], [e, c, 1, -1], [c, e, -1, 1], [e, e, 1, 1]].map(([x, y, dx, dy]) =>
+    `M${x + dx * gap} ${y}h${dx * len}M${x} ${y + dy * gap}v${dy * len}`).join('');
+  out += `<path d="${marks}" stroke="#466ee6" stroke-width=".18" fill="none"/>`;
+  return out + '</svg>';
+}
+let pairTimer = 0;
+function showPairing(data) {
+  const size = Number(data?.size), bits = String(data?.bits || '');
+  if (!Number.isInteger(size) || size < 21 || size > 177 || bits.length !== size * size || /[^01]/.test(bits)) return;
+  const dialog = $('pair-dialog'), qr = $('pair-qr');
+  const svg = new DOMParser().parseFromString(pairingSVG(size, bits), 'image/svg+xml').documentElement;
+  qr.setAttribute('viewBox', svg.getAttribute('viewBox')); qr.setAttribute('shape-rendering', 'crispEdges');
+  qr.replaceChildren(...[...svg.childNodes].map(n => document.importNode(n, true)));
+  const end = Date.now() + Math.max(1, Number(data.seconds) || 180) * 1000;
+  const tick = () => {
+    const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    $('pair-timer').textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    $('pair-timer').parentElement.classList.toggle('expiring', left <= 30);
+  };
+  clearInterval(pairTimer); tick(); pairTimer = setInterval(tick, 1000);
+  dialog.querySelector('.pair-more').open = false;
+  if (!dialog.open) dialog.showModal();
+}
+function closePairing() { if ($('pair-dialog').open) $('pair-dialog').close(); }
 if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
+  // Only the person cancels (Escape, ×, Cancelar); the Mac closing it after the scan or on expiry sends nothing back.
+  const pairDialog = $('pair-dialog'), cancelPairing = () => send({type: 'cancelPairing'});
+  pairDialog.addEventListener('cancel', cancelPairing);
+  for (const form of pairDialog.querySelectorAll('form')) form.addEventListener('submit', cancelPairing);
+  pairDialog.addEventListener('close', () => clearInterval(pairTimer));
   const actions = $('action-menu');
   actions.addEventListener('pointerenter', event => { if (event.pointerType === 'mouse') actions.open = true; });
   actions.addEventListener('pointerleave', () => { if (!actions.contains(document.activeElement)) actions.open = false; });
@@ -303,6 +362,8 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
   $('development-choose-directory').onclick = () => send({type: 'chooseDevelopmentDirectory', directory: $('development-directory').value.trim()});
   $('development-directory').addEventListener('change', requestProfiles);
   Object.assign(window.voz, {
+    pairing: showPairing,
+    pairingClose: closePairing,
     developmentChoice(choice) { if (choice && typeof choice === 'object' && !Array.isArray(choice)) { roleChoice = {...choice}; renderRoles(); } },
     roleProfiles(data) {
       profileFiles.global = parseProfiles(data?.global); profileFiles.project = parseProfiles(data?.project); profileFiles.directory = data?.directory || '';
@@ -329,4 +390,4 @@ if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded
     send({type: 'development', directory: $('development-directory').value.trim(), objective: $('development-objective').value.trim(), providers});
   };
 });
-if (typeof module !== 'undefined') module.exports = {builtinRoles, channelRule, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile};
+if (typeof module !== 'undefined') module.exports = {builtinRoles, channelRule, pairingSVG, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile};

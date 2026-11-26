@@ -84,6 +84,12 @@
 <dt>Celular</dt><dd><button id="phone-pair-settings" type="button">Conectar celular…</button> <button id="phone-manage" type="button">Celulares conectados…</button></dd>
 <dt>Permissões gravadas</dt><dd><p id="permissions-empty">Nenhuma permissão gravada.</p><ul id="permission-list"></ul></dd>
 <dt>Desenvolvimento</dt><dd>Use o símbolo ⌘ no canto superior direito para configurar a equipe e escolher Codex, Claude ou Gemini (Antigravity) por função. Logins e aprovações continuam nos respectivos CLIs.</dd></dl></dialog>
+<dialog id="pair-dialog" aria-labelledby="pair-title" aria-describedby="pair-lead"><form method="dialog"><button class="dialog-close" aria-label="Cancelar e fechar"><svg class="icon"><use href="#i-close"/></svg></button></form>
+<h2 id="pair-title" tabindex="-1" autofocus>Conectar celular</h2><p id="pair-lead">Abra o Boterm no celular e leia o código.</p>
+<figure class="pair-code"><svg id="pair-qr" role="img" aria-label="Código QR de emparelhamento"></svg></figure>
+<p class="pair-meta">Vale <time id="pair-timer">3:00</time> · uma só vez</p>
+<details class="pair-more"><summary>O que o celular poderá fazer</summary><p>Ver os terminais, escrever neles e responder aos pedidos do Mensageiro. Tudo vai cifrado de ponta a ponta; o relé só passa o que não consegue ler. Antes de conectar, este Mac pede que você confira um código de 6 dígitos.</p><p>Não mostre este código em chamadas ou gravações de tela.</p></details>
+<form method="dialog" class="pair-actions"><button>Cancelar</button></form></dialog>
 <dialog id="development-dialog" aria-labelledby="development-title"><form method="dialog"><button class="dialog-close" aria-label="Fechar preset"><svg class="icon"><use href="#i-close"/></svg></button></form>
 <h2 id="development-title">Desenvolvimento</h2><p class="team-intro">Uma equipe para planejar, implementar, testar e revisar o software.</p>
 <form id="development-form"><label for="development-directory">Pasta do projeto</label>

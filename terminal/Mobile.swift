@@ -260,6 +260,8 @@ enum MobileStore {
     private(set) var links: [MobileLink] = []
     private var lastState = "", attention: Set<String> = [], pendingAsks: Set<String> = []
     var notes: [[String: Any]] = []
+    /// The pairing whose QR is on screen.
+    var showing: MobileLink?
     /// Notes since the phone last synced; with the pending approvals it is the app icon's count.
     var unseen = 0
     var request: (@MainActor (MobileDevice, [String: Any]) async -> [String: Any]?)?
@@ -325,13 +327,20 @@ enum MobileStore {
         for link in only.map({ [$0] }) ?? links where link.isReady { link.send(state) }
     }
 
-    static func qr(_ text: String) -> NSImage? {
+    /// The QR's modules, row by row ("1" dark), without the quiet zone; the page draws them. Level Q leaves room for the mark in the middle.
+    static func qrModules(_ text: String) -> (size: Int, bits: String)? {
         guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
-        filter.setValue(Data(text.utf8), forKey: "inputMessage"); filter.setValue("M", forKey: "inputCorrectionLevel")
-        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 8, y: 8)) else { return nil }
-        let rep = NSCIImageRep(ciImage: output)
-        let image = NSImage(size: rep.size); image.addRepresentation(rep)
-        return image
+        filter.setValue(Data(text.utf8), forKey: "inputMessage"); filter.setValue("Q", forKey: "inputCorrectionLevel")
+        guard let output = filter.outputImage, let cg = CIContext().createCGImage(output, from: output.extent) else { return nil }
+        let rep = NSBitmapImageRep(cgImage: cg)
+        let dark = { (x: Int, y: Int) in (rep.colorAt(x: x, y: y)?.usingColorSpace(.deviceGray)?.whiteComponent ?? 1) < 0.5 }
+        // The generator adds a quiet zone; the first dark pixel on the diagonal is the finder's corner.
+        guard let edge = (0..<min(rep.pixelsWide, rep.pixelsHigh)).first(where: { dark($0, $0) }) else { return nil }
+        let size = rep.pixelsWide - 2 * edge
+        guard size >= 21 else { return nil }
+        var bits = ""; bits.reserveCapacity(size * size)
+        for y in 0..<size { for x in 0..<size { bits.append(dark(x + edge, y + edge) ? "1" : "0") } }
+        return (size, bits)
     }
 }
 
@@ -458,20 +467,20 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
         }
     }
 
+    /// The QR shows in the page's own dialog (drawn on the construction grid); the 6-digit check stays a native sheet.
     @objc func pairPhone() {
-        guard let window = focused?.window ?? terminals.first?.window, window.attachedSheet == nil else { return }
+        guard let terminal = focused ?? terminals.first, terminal.window.attachedSheet == nil else { return }
+        let window = terminal.window
+        if let open = mobile.showing { mobile.cancelPairing(open) }
         let link: MobileLink, url: String
         do { (link, url) = try mobile.beginPairing() } catch { NSAlert(error: error).beginSheetModal(for: window); return }
-        let alert = NSAlert()
-        alert.messageText = "Conectar celular"
-        alert.informativeText = "Abra o app Boterm no celular e leia este código. Ele vale 3 minutos e uma só vez. Não mostre este código em chamadas ou gravações de tela.\n\nO celular poderá ver os terminais, escrever neles e responder aos pedidos do Mensageiro. Tudo vai cifrado de ponta a ponta; o relé só passa dados que não consegue ler. Antes de conectar, este Mac vai pedir que você confira um código de 6 dígitos."
-        let image = NSImageView(image: MobileBridge.qr(url) ?? NSImage())
-        image.frame = NSRect(x: 0, y: 0, width: 264, height: 264); image.imageScaling = .scaleProportionallyUpOrDown
-        alert.accessoryView = image
-        alert.addButton(withTitle: "Cancelar")
-        link.confirm = { [weak self, weak window, weak alert] device, code in
+        guard let qr = MobileBridge.qrModules(url) else { mobile.cancelPairing(link); return }
+        mobile.showing = link
+        terminal.js("window.voz.pairing(\(TerminalWindow.json(["size": qr.size, "bits": qr.bits, "seconds": Int(MobileBridge.pairingLifetime)])))")
+        link.confirm = { [weak self, weak window, weak terminal] device, code in
             guard let self, let window else { return }
-            if let sheet = alert?.window, window.attachedSheet === sheet { window.endSheet(sheet, returnCode: .alertSecondButtonReturn) }
+            if self.mobile.showing === link { self.mobile.showing = nil }
+            terminal?.js("window.voz.pairingClose()")
             let ask = NSAlert()
             ask.messageText = "Conectar “\(device.name)”?"
             ask.informativeText = "Confira que o celular mostra este código:\n\n\(code.prefix(3)) \(code.suffix(3))\n\nSe o código for diferente, ou se não foi você que leu o QR agora, clique em Recusar."
@@ -489,14 +498,18 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
             done.informativeText = "Para desconectar: Boterm → Celulares conectados…"
             if let window { done.beginSheetModal(for: window) }
         }
-        alert.beginSheetModal(for: window) { [weak self] response in
-            if response == .alertFirstButtonReturn { self?.mobile.cancelPairing(link) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + MobileBridge.pairingLifetime) { [weak self, weak terminal] in
+            guard let self, link.device == nil, self.mobile.showing === link else { return }
+            self.mobile.showing = nil; self.mobile.cancelPairing(link)
+            terminal?.js("window.voz.pairingClose()")
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + MobileBridge.pairingLifetime) { [weak self, weak window, weak alert] in
-            guard link.device == nil else { return }
-            if let window, let sheet = alert?.window, window.attachedSheet === sheet { window.endSheet(sheet, returnCode: .alertFirstButtonReturn) }
-            else if link.isPairingCandidatePending == false { self?.mobile.cancelPairing(link) }
-        }
+    }
+
+    /// The page closed the QR (Cancelar, Escape or ×).
+    func cancelShownPairing() {
+        guard let link = mobile.showing else { return }
+        mobile.showing = nil
+        if !link.isPairingCandidatePending { mobile.cancelPairing(link) }
     }
 
     @objc func managePhones() {
