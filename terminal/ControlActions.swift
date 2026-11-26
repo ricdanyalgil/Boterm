@@ -303,7 +303,7 @@ enum RoleProfiles {
                 let text = request["text"] as? String ?? ""
                 switch command {
                 case "notify":
-                    try await telegram.notify(text); value = ["sent": true, "via": telegram.channels]
+                    value = ["sent": true, "via": try await telegram.notify(text)]
                 case "ask":
                     let scope = try (request["scope"] as? String).flatMap { $0.isEmpty ? nil : try PermissionStore.scope($0) }
                     if let scope, let grant = PermissionStore.granted(scope) { value = ["status": "granted", "grant": PermissionStore.dictionary(grant)] }
@@ -392,7 +392,8 @@ enum RoleProfiles {
         telegram.start()
     }
     func sendMessengerState(to terminal: TerminalWindow) {
-        let state: [String: Any] = ["telegram": telegram.state, "code": telegram.pairingCode ?? "", "grants": PermissionStore.all().map(PermissionStore.dictionary)]
+        let state: [String: Any] = ["telegram": telegram.state, "code": telegram.pairingCode ?? "", "grants": PermissionStore.all().map(PermissionStore.dictionary),
+                                     "channel": telegram.channel ?? "", "phone": !MobileStore.all().isEmpty]
         terminal.js("window.voz.messengerState(\(TerminalWindow.json(state)))")
     }
     /// Follows the approved secret pattern: the token goes from the clipboard to the Keychain unseen, then the clipboard is cleared.

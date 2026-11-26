@@ -93,7 +93,10 @@
 <fieldset id="development-team" aria-labelledby="development-team-title"><div class="team-head"><span id="development-team-title">Agentes a abrir</span><span class="team-quick"><button id="development-all" type="button">Todos</button><button id="development-none" type="button">Nenhum</button></span></div>
 <div id="development-roles"></div><button id="role-new" type="button" class="role-new"><svg class="icon"><use href="#i-plus"/></svg>Nova função</button>
 <details id="development-deleted" hidden><summary></summary><div></div></details>
-<p class="team-hint">Sem nenhum agente abre só um terminal na pasta. A escolha fica guardada.</p></fieldset><div class="dialog-foot"><p id="development-error" role="alert"></p><button id="development-submit" type="submit" class="primary-action">Criar equipe</button></div></form>
+<p class="team-hint">Sem nenhum agente abre só um terminal na pasta. A escolha fica guardada.</p></fieldset>
+<fieldset id="messenger-channel" aria-labelledby="messenger-channel-title"><div class="team-head"><span id="messenger-channel-title">Canal do Mensageiro</span></div>
+<div class="channel-choice" role="radiogroup" aria-labelledby="messenger-channel-title"><label><input type="radio" name="messenger-channel" value="celular"> Celular (app Boterm)</label><label><input type="radio" name="messenger-channel" value="telegram"> Telegram</label><label><input type="radio" name="messenger-channel" value="whatsapp"> WhatsApp</label><label><input type="radio" name="messenger-channel" value="email"> Email</label></div>
+<p class="team-hint"><span id="channel-status"></span> <button id="channel-setup" type="button" hidden></button></p></fieldset><div class="dialog-foot"><p id="development-error" role="alert"></p><button id="development-submit" type="submit" class="primary-action">Criar equipe</button></div></form>
 <section id="role-editor" aria-labelledby="role-editor-title">
 <button id="role-back" type="button" class="role-back"><svg class="icon"><use href="#i-chevron"/></svg>Equipe</button>
 <h2 id="role-editor-title">Função</h2>

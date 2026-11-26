@@ -104,13 +104,33 @@ enum TelegramKeychain {
     var mobileNote: ((String) -> Void)?
     var mobilePaired: () -> Bool = { false }
 
-    var channels: [String] { (mobilePaired() ? ["celular"] : []) + (owner != nil ? ["telegram"] : []) }
+    static let channelValues = ["celular", "telegram", "whatsapp", "email"]
+    /// The channel the owner picked when creating the team; nil keeps the old behaviour (phone and Telegram, whichever is paired).
+    var channel: String? {
+        get { UserDefaults.standard.string(forKey: "messengerChannel").flatMap { Self.channelValues.contains($0) ? $0 : nil } }
+        set { UserDefaults.standard.set(newValue, forKey: "messengerChannel") }
+    }
 
-    func notify(_ text: String) async throws {
+    /// Where notify and ask go. The chosen channel alone when it is verified; otherwise whichever verified one exists.
+    /// WhatsApp and email are sent by the Mensageiro itself, so the Boterm tools refuse and say so.
+    func targets() throws -> (phone: Bool, telegram: Bool) { try Self.targets(channel: channel, phone: mobilePaired(), paired: owner != nil) }
+    static func targets(channel: String?, phone: Bool, paired: Bool) throws -> (phone: Bool, telegram: Bool) {
+        switch channel {
+        case "celular" where phone: return (true, false)
+        case "telegram" where paired: return (false, true)
+        case "whatsapp", "email":
+            throw ControlError.invalid("O Ricardo escolheu \(channel == "email" ? "email" : "WhatsApp") como canal do Mensageiro: envie por lá, como nas regras, e grave as permissões concedidas com grant.")
+        default: return (phone, paired || !phone)
+        }
+    }
+
+    /// Returns the channels that got the message.
+    func notify(_ text: String) async throws -> [String] {
         guard !text.isEmpty, text.utf8.count <= 4000 else { throw ControlError.invalid("Mensagem vazia ou acima de 4000 bytes") }
-        if mobilePaired() { mobileNote?(text) }
-        if owner != nil { _ = try await send(text) }
-        else if !mobilePaired() { _ = try await send(text) }
+        let to = try targets()
+        if to.phone { mobileNote?(text) }
+        if to.telegram { _ = try await send(text) }
+        return (to.phone ? ["celular"] : []) + (to.telegram ? ["telegram"] : [])
     }
 
     func ask(_ text: String, scope: String?, session: String) async throws -> Ask {
@@ -121,7 +141,7 @@ enum TelegramKeychain {
         let body = scope.map { "\(text)\n\nPermissão: \($0)" } ?? text
         guard !text.isEmpty, text.utf8.count <= 4000 else { throw ControlError.invalid("Mensagem vazia ou acima de 4000 bytes") }
         var ask = Ask(id: id, session: session, text: text, scope: scope)
-        if owner != nil || !mobilePaired() { ask.messageID = try await send(body, keyboard: [buttons]) }
+        if try targets().telegram { ask.messageID = try await send(body, keyboard: [buttons]) }
         asks[id] = ask; askOrder.append(id)
         if askOrder.count > 100 { asks.removeValue(forKey: askOrder.removeFirst()) }
         changed?()

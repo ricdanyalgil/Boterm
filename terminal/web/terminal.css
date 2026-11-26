@@ -243,9 +243,9 @@ dialog a { color: var(--focus); text-underline-offset: 3px; }
 #development-recents { margin-top: 10px; }
 #development-recents p { margin: 0 0 6px; font-size: 12px; }
 #development-recents button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin: 0 6px 6px 0; border: 1px solid var(--rule); }
-#development-team { margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
+#development-team, #messenger-channel { margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
 .team-head { display: flex; align-items: center; justify-content: space-between; }
-#development-team-title { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+#development-team-title, #messenger-channel-title { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 .team-quick { display: flex; gap: 2px; }
 .team-quick button { min-height: 20px; padding: 0 8px; line-height: 20px; color: var(--text-2); font-size: 12px; }
 .team-quick button:hover { color: var(--text); background: var(--rule); }
@@ -281,7 +281,10 @@ dialog a { color: var(--focus); text-underline-offset: 3px; }
 .role-back { display: flex; align-items: center; gap: 6px; margin: -8px 0 10px -10px; color: var(--text-3); font-size: 12px; }
 .role-back .icon { transform: rotate(180deg); }
 .role-back:hover { color: var(--text); }
-.role-scope { display: flex; gap: 18px; flex-wrap: wrap; }
+.role-scope, .channel-choice { display: flex; gap: 18px; flex-wrap: wrap; }
+.channel-choice { padding: 6px 0 0; }
+.channel-choice label { display: flex; align-items: center; gap: 6px; color: var(--text); cursor: pointer; }
+#development-form .channel-choice input { width: auto; margin: 0; accent-color: var(--focus); }
 .role-scope label { display: flex; align-items: center; gap: 6px; color: var(--text); cursor: pointer; }
 .role-scope input { accent-color: var(--focus); }
 .role-scope label:has(input:disabled) { color: var(--text-3); cursor: default; }

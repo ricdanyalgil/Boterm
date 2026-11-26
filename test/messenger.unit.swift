@@ -20,6 +20,14 @@ struct MessengerTests {
         let cases: [(String, Bool, String)] = [("Sim, sempre", true, "always"), ("sim sempre", true, "always"), ("Sim, sempre", false, "once"),
             ("ok", true, "once"), ("Pode", true, "once"), ("Não", true, "no"), ("nao agora", true, "no"), ("simples demais", true, "text"), ("Depois vejo", true, "text")]
         for (text, scoped, expected) in cases { precondition(TelegramBridge.choice(for: text, scoped: scoped) == expected, "\(text) → \(expected)") }
+        // The team's chosen channel decides where notify/ask go; WhatsApp and email are the Mensageiro's own job.
+        let route = { (channel: String?, phone: Bool, paired: Bool) in try? TelegramBridge.targets(channel: channel, phone: phone, paired: paired) }
+        precondition(route("celular", true, true).map { $0 == (true, false) } == true, "celular must not copy to Telegram")
+        precondition(route("telegram", true, true).map { $0 == (false, true) } == true, "telegram must not copy to the phone")
+        precondition(route("celular", false, true).map { $0 == (false, true) } == true, "unpaired phone falls back to Telegram")
+        precondition(route("telegram", true, false).map { $0 == (true, false) } == true, "unpaired Telegram falls back to the phone")
+        precondition(route(nil, true, true).map { $0 == (true, true) } == true, "no choice keeps both")
+        precondition(route("whatsapp", true, true) == nil && route("email", true, true) == nil, "WhatsApp/email must refuse")
         let project = FileManager.default.temporaryDirectory.appendingPathComponent("boterm-history-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: project, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: project) }
@@ -60,11 +68,11 @@ struct MessengerTests {
         bridge.mobilePaired = { true }; bridge.mobileNote = { notes.append($0) }
         if bridge.owner == nil {
             _ = Task { @MainActor in
-                try await bridge.notify("site · Testes: 12/12")
-                precondition(notes == ["site · Testes: 12/12"] && bridge.channels == ["celular"], "paired phone must get the update")
+                let via = try await bridge.notify("site · Testes: 12/12")
+                precondition(notes == ["site · Testes: 12/12"] && via == ["celular"], "paired phone must get the update")
                 bridge.mobilePaired = { false }
-                do { try await bridge.notify("x"); preconditionFailure("no channel must fail") } catch {}
-                precondition(bridge.channels.isEmpty && notes.count == 1)
+                do { _ = try await bridge.notify("x"); preconditionFailure("no channel must fail") } catch {}
+                precondition(notes.count == 1)
                 print("PASS: notify goes to the paired phone and reports via; fails with no channel")
                 exit(0)
             }

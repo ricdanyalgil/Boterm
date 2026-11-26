@@ -33,7 +33,9 @@ enum MobileKeychain {
 }
 
 /// pub: phone X25519 static key; sign: phone Ed25519 key (only the public half ever reaches the Mac); nonce: room derivation.
-struct MobileDevice: Codable { var id: String; var room: String; var nonce: String; var pub: String; var sign: String; var name: String; var push: String; var created: String; var platform: String? }
+struct MobileDevice: Codable { var id: String; var room: String; var nonce: String; var pub: String; var sign: String; var name: String; var push: String; var created: String; var platform: String?
+    /// Push kinds the owner left on in the phone app; nil (older apps) means all.
+    var kinds: [String]? }
 
 enum MobileStore {
     static var file: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Boterm/mobile.json") }
@@ -221,10 +223,13 @@ enum MobileStore {
         write(["k": "msg", "c": c])
     }
 
-    /// Asks the relay to wake the phone. Only a kind travels; the relay holds the APNs/FCM credentials and the fixed wording.
-    func wake(_ kind: String) {
-        guard !peerUp, let device, !device.push.isEmpty, let platform = device.platform else { return }
-        write(["relay": "push", "platform": platform, "token": device.push, "kind": kind])
+    /// Asks the relay to wake the phone. Only a kind and a count travel; the relay holds the APNs/FCM credentials and the fixed wording.
+    /// Mensageiro messages and approvals always push, because a connected socket does not mean the owner is looking
+    /// (iOS keeps it open for a while after the app leaves the screen); terminal attention only while the phone is away.
+    func wake(_ kind: String, badge: Int) {
+        guard kind != "attention" || !peerUp, let device, !device.push.isEmpty, let platform = device.platform,
+              device.kinds?.contains(kind) ?? true else { return }
+        write(["relay": "push", "platform": platform, "token": device.push, "kind": kind, "badge": min(max(badge, 0), 999)])
     }
 
     private func write(_ frame: [String: Any]) {
@@ -255,6 +260,8 @@ enum MobileStore {
     private(set) var links: [MobileLink] = []
     private var lastState = "", attention: Set<String> = [], pendingAsks: Set<String> = []
     var notes: [[String: Any]] = []
+    /// Notes since the phone last synced; with the pending approvals it is the app icon's count.
+    var unseen = 0
     var request: (@MainActor (MobileDevice, [String: Any]) async -> [String: Any]?)?
     var state: (@MainActor () async -> [String: Any])?
     var macName: String { Host.current().localizedName ?? "Mac" }
@@ -298,7 +305,8 @@ enum MobileStore {
     func note(_ text: String) {
         notes.append(["text": String(text.prefix(4000)), "time": ISO8601DateFormatter().string(from: Date())])
         if notes.count > 50 { notes.removeFirst() }
-        links.forEach { $0.wake("note") }
+        unseen += 1
+        links.forEach { $0.wake("note", badge: unseen + pendingAsks.count) }
         Task { await publish() }
     }
 
@@ -308,8 +316,8 @@ enum MobileStore {
         let sessions = state["sessions"] as? [[String: Any]] ?? [], asks = state["asks"] as? [[String: Any]] ?? []
         let nowAttention = Set(sessions.compactMap { ($0["attention"] as? String ?? "").isEmpty ? nil : $0["id"] as? String })
         let nowAsks = Set(asks.compactMap { $0["id"] as? String })
-        if !nowAsks.subtracting(pendingAsks).isEmpty { links.forEach { $0.wake("approval") } }
-        else if !nowAttention.subtracting(attention).isEmpty { links.forEach { $0.wake("attention") } }
+        if !nowAsks.subtracting(pendingAsks).isEmpty { links.forEach { $0.wake("approval", badge: unseen + nowAsks.count) } }
+        else if !nowAttention.subtracting(attention).isEmpty { links.forEach { $0.wake("attention", badge: unseen + nowAsks.count) } }
         attention = nowAttention; pendingAsks = nowAsks
         let text = (try? JSONSerialization.data(withJSONObject: state, options: [.sortedKeys])).map { String(decoding: $0, as: UTF8.self) } ?? ""
         guard force || text != lastState else { return }
@@ -389,7 +397,7 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
             }
             var result: [String: Any] = [:]
             switch body["type"] as? String {
-            case "sync": return nil
+            case "sync": mobile.unseen = 0; return nil
             case "screen":
                 let (terminal, _) = try mobileSession(body["id"] as? String)
                 result = ["text": try await mobileScreen(terminal, body["id"] as! String)]
@@ -433,6 +441,11 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
                 let pattern = platform == "ios" ? #"^[0-9a-f]{64,200}\z"# : platform == "android" ? #"^[A-Za-z0-9_:\-]{20,400}\z"# : #"^\z"#
                 guard let token = body["token"] as? String, !token.isEmpty, token.range(of: pattern, options: .regularExpression) != nil,
                       var updated = mobile.links.first(where: { $0.device?.id == device.id })?.device else { throw ControlError.invalid("Token inválido") }
+                // Optional: the kinds the owner left on in the app's settings.
+                if let kinds = body["kinds"] as? [String] {
+                    guard kinds.count <= 3, Set(kinds).isSubset(of: ["attention", "approval", "note"]) else { throw ControlError.invalid("Tipos de aviso inválidos") }
+                    updated.kinds = kinds
+                }
                 updated.push = token; updated.platform = platform; mobile.links.first { $0.device?.id == device.id }?.device = updated; mobile.save(updated)
             case "unpair":
                 mobile.remove(device.id); return nil
@@ -471,6 +484,7 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
         link.paired = { [weak self, weak window] device in
             guard let self else { return }
             self.mobile.save(device)
+            self.terminals.forEach { self.sendMessengerState(to: $0) }
             let done = NSAlert(); done.messageText = "Celular conectado: \(device.name)"
             done.informativeText = "Para desconectar: Boterm → Celulares conectados…"
             if let window { done.beginSheetModal(for: window) }

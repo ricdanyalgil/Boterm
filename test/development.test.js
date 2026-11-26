@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {builtinRoles, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile} = require('../terminal/web/development');
+const {builtinRoles, channelRule, developmentPrompt, projectRoleNotes, parseProfiles, effectiveRoles, editProfile} = require('../terminal/web/development');
 const roles = effectiveRoles(), byId = id => roles.find(r => r.id === id);
 const prompt = (id, objective = '', notes = '', team = roles) => developmentPrompt(byId(id), objective, notes, team);
 
@@ -124,4 +124,12 @@ test('malformed or oversized profile files are reduced to safe fields', () => {
   assert.deepEqual(bad.roles.ok.history, []);
   const many = {roles: {}}; for (let i = 0; i < 80; i++) many.roles[`r${i}`] = {custom: true, current: {name: `R${i}`, instructions: 'x'}};
   assert.equal(Object.keys(parseProfiles(JSON.stringify(many)).roles).length, 40);
+});
+
+test('the chosen Mensageiro channel reaches only the Mensageiro prompt', () => {
+  const team = roles;
+  assert.match(developmentPrompt(byId('mensageiro'), '', '', team, 'celular'), /Canal escolhido pelo Ricardo para esta equipe: o app Boterm no celular/);
+  assert.match(developmentPrompt(byId('mensageiro'), '', '', [byId('mensageiro')], 'whatsapp'), /Canal escolhido.*WhatsApp do Mac/);
+  assert.doesNotMatch(developmentPrompt(byId('orquestrador'), '', '', team, 'celular'), /Canal escolhido/);
+  assert.equal(channelRule('sms'), '');
 });

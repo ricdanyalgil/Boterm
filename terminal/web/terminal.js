@@ -79,6 +79,7 @@ window.voz = {
     const labels = {paired: 'Telegram conectado.', pairing: `Telegram: envie ao seu bot a mensagem ${state.code || ''} para concluir.`, token: 'Telegram: token gravado, falta emparelhar.', off: 'Telegram não configurado.'};
     document.getElementById('telegram-state').textContent = labels[state.telegram] || labels.off;
     document.getElementById('telegram-setup').textContent = state.telegram === 'paired' ? 'Reconfigurar Telegram…' : 'Configurar Telegram…';
+    renderChannel(state);
     const list = document.getElementById('permission-list'), grants = state.grants || [];
     document.getElementById('permissions-empty').hidden = grants.length > 0;
     list.replaceChildren(...grants.map(g => {

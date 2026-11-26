@@ -362,6 +362,10 @@ final class TerminalWindow: NSObject, WKScriptMessageHandler, WKNavigationDelega
         case "deleteLayout":
             if let name = body["name"] as? String { deleteLayout(name) }
         case "messengerState": (NSApp.delegate as? AppDelegate)?.sendMessengerState(to: self)
+        case "messengerChannel":
+            guard let delegate = NSApp.delegate as? AppDelegate, let channel = body["channel"] as? String, TelegramBridge.channelValues.contains(channel) else { return }
+            delegate.telegram.channel = channel
+            delegate.terminals.forEach { delegate.sendMessengerState(to: $0) }
         case "telegramSetup": (NSApp.delegate as? AppDelegate)?.setupTelegram(for: self)
         case "pairPhone": (NSApp.delegate as? AppDelegate)?.pairPhone()
         case "managePhones": (NSApp.delegate as? AppDelegate)?.managePhones()
