@@ -1,3 +1,9 @@
+# Boterm 0.5.6 — build 43, 2026-11-26
+
+- Phone messages delivered to the Mensageiro now appear in the shared conversation history, marked as sent by the owner. They do not trigger a push or increase the unread count.
+- The iPhone and Android companions add explicit controls to return to Terminais and dismiss the keyboard while keeping the draft. The history still holds the latest 50 messages in memory.
+- Verified native history bounds and unread counts, iOS unit/protocol tests and the iPhone simulator keyboard/navigation flow, and Android compilation and unit/protocol tests.
+
 # Boterm 0.5.3 — build 40, 2026-11-25
 
 - Qualidade now reviews every finished activity, not only the end of the work, and evaluates each role that took part: it reads that role's terminal and the cycle's events, notes what it repeated, got wrong or was corrected on, and what check or tool it lacked, then updates that role's section in `.boterm/ROLES.md` with instructions and skills (step-by-step procedures, this project's verification commands, pitfalls found).

@@ -3,6 +3,13 @@ import Foundation
 @main
 struct MessengerTests {
     @MainActor static func main() throws {
+        let mobile = MobileBridge()
+        mobile.note("Resposta")
+        mobile.note("Pergunta", fromOwner: true)
+        precondition(mobile.notes.count == 2 && mobile.notes[1]["from"] as? String == "owner")
+        precondition(mobile.notes[0]["from"] as? String == "messenger" && mobile.unseen == 1, "own messages must not count as unread")
+        for i in 0..<60 { mobile.note("Mensagem \(i)", fromOwner: true) }
+        precondition(mobile.notes.count == 50 && mobile.notes.last?["text"] as? String == "Mensagem 59" && mobile.unseen == 1)
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("boterm-permissions-\(UUID().uuidString)/permissions.json")
         defer { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }
         precondition(PermissionStore.all(at: file).isEmpty)

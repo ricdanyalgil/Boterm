@@ -304,11 +304,13 @@ enum MobileStore {
         MobileStore.save(MobileStore.all().filter { $0.id != id })
     }
 
-    func note(_ text: String) {
-        notes.append(["text": String(text.prefix(4000)), "time": ISO8601DateFormatter().string(from: Date())])
+    func note(_ text: String, fromOwner: Bool = false) {
+        notes.append(["text": String(text.prefix(4000)), "time": ISO8601DateFormatter().string(from: Date()), "from": fromOwner ? "owner" : "messenger"])
         if notes.count > 50 { notes.removeFirst() }
-        unseen += 1
-        links.forEach { $0.wake("note", badge: unseen + pendingAsks.count) }
+        if !fromOwner {
+            unseen += 1
+            links.forEach { $0.wake("note", badge: unseen + pendingAsks.count) }
+        }
         Task { await publish() }
     }
 
@@ -445,6 +447,7 @@ func mobileHidden(_ c: Unicode.Scalar) -> Bool {
                     for (id, record) in terminal.records where record.role == "Mensageiro" { terminal.postOwnerMessage(to: id, text: text, sender: "Celular · \(device.name)"); delivered = true }
                 }
                 guard delivered else { throw ControlError.invalid("Nenhum Mensageiro aberto no Mac") }
+                mobile.note(text, fromOwner: true)
             case "push":
                 let platform = body["platform"] as? String ?? ""
                 let pattern = platform == "ios" ? #"^[0-9a-f]{64,200}\z"# : platform == "android" ? #"^[A-Za-z0-9_:\-]{20,400}\z"# : #"^\z"#
